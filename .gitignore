@@ -24,3 +24,10 @@ yarn-error.log*
 # * IDE-related
 .vscode
 .idea
+
+# Virtual Environments
+venv
+env
+
+# Local SQLite DB
+db.sqlite3

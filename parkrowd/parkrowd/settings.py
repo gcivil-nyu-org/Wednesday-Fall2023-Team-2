@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    "users" #app folder for custom user (extend from Django)
 ]
 
 MIDDLEWARE = [
@@ -79,6 +81,10 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+#Custom User Model for Authorization
+
+AUTH_USER_MODEL = "users.User"
 
 
 # Password validation
