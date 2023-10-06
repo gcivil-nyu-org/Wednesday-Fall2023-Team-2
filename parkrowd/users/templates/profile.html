@@ -1,0 +1,14 @@
+{% extends "main.html" %}
+
+{% block content %}
+<li class="nav-item">
+    <a class="nav-link" href="#" 
+        onClick="document.getElementById('logout-form').submit()">
+        Logout
+    </a>
+</li>
+<form id="logout-form" method="POST" action="{% url 'users:logout' %}">
+    {% csrf_token %}
+    <input type="hidden">
+</form>
+{% endblock %}

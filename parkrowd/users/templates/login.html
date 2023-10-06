@@ -3,18 +3,27 @@
 {% block content %}
 <h3 class="display-10">Login Page - SAMPLE</h3>
 <form method="post">
-    {% csrf_token %}
+    {% csrf_token %} 
+    {{ form.errors }} 
+    {{ form.non_field_errors }}
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
     <div class="form-group">
-        <label for="username">Username or email address</label>
+        <label for="id_username">Username or email address</label>
         {{ form.username }}
     </div>
     <div class="form-group">
-        <label for="password">Password</label>
+        <label for="id_password">Password</label>
         {{ form.password }}
     </div>
     <div class="form-check">
-        <input type="checkbox" class="form-check-input" id="remember-me">
-        <label class="form-check-label" for="remember-me">Remember Me</label>
+        <label class="form-check-label" for="id_remember_me">Remember Me</label>
+        {{ form.remember_me }}
     </div>
     <button type="submit" class="btn btn-primary">Sign In</button>
 </form>
