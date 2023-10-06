@@ -21,8 +21,8 @@ class EmailorUsernameAuthenticationBackend(object):
         return None
 
     @staticmethod
-    """Helper function for authenticate method above"""
     def get_user_by_username_or_email(field):
+        """Helper function for authenticate method above"""
         try:
             user = User.objects.get( Q(username=username) | Q(email=username) )
         except User.DoesNotExist:
