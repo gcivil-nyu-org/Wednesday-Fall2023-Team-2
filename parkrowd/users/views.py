@@ -32,7 +32,6 @@ class UserRegisterView(View):
     def post(self, request):
         form = self.form_class(request.POST)
         if form.is_valid():
-            print("worked")
             user = form.save(commit=False)
             user.username = user.username.lower()
             user.email = request.POST.get('email')
@@ -41,5 +40,4 @@ class UserRegisterView(View):
             messages.success(request, 'Success')
             return redirect("/login")
         else:
-            print("no work")
             return render(request, self.template_name, {'form': form})
