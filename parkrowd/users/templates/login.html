@@ -7,8 +7,6 @@
             <h3 class="display-4">Login Page - SAMPLE</h3>
             <form method="post">
                 {% csrf_token %} 
-                {{ form.errors }} 
-                {{ form.non_field_errors }}
                 <div class="form-group">
                     <label for="id_username">Username or email address</label>
                     {{ form.username }}
