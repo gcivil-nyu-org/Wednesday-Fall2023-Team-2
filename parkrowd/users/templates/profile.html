@@ -1,14 +1,32 @@
 {% extends "main.html" %}
 
 {% block content %}
-<li class="nav-item">
-    <a class="nav-link" href="#" 
-        onClick="document.getElementById('logout-form').submit()">
-        Logout
-    </a>
-</li>
-<form id="logout-form" method="POST" action="{% url 'users:logout' %}">
-    {% csrf_token %}
-    <input type="hidden">
-</form>
+{% if request.user.is_authenticated %}
+    <div class="d-flex justify-content-end">
+        <a class="nav-link" href="#" 
+            onClick="document.getElementById('logout-form').submit()">
+            Logout
+        </a>
+        <form id="logout-form" method="POST" action="{% url 'users:logout' %}">
+            {% csrf_token %}
+            <input type="hidden">
+        </form>
+    </div>
+{% endif %}
+
+<div class="container-md">
+    <div class="row">
+        <h3 class="display-4">Profile Info</h3>
+    </div>
+    <div class="row">
+        <div class="col">Email</div>
+        <div class="col">{{ user.email }}</div>
+    </div>
+    <div class="row">
+        <div class="col">Username</div>
+        <div class="col">{{ user.username }}</div>
+    </div>
+</div>
+
+    
 {% endblock %}

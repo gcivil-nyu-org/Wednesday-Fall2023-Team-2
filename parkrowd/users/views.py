@@ -25,7 +25,6 @@ class UserLoginView(View):
         return render( request, self.template_name, { 'form': form } )
 
     def post(self, request):
-        print("Logging in")
         form                        = self.form_class(request.POST)    
 
         username                    = request.POST.get('username')
@@ -66,7 +65,7 @@ class UserProfileView(View):
 
     def get(self, request, username):
         user                = get_object_or_404(User, username=username)
-        return render( request, self.template_name )
+        return render( request, self.template_name, {'user': user})
 
     def post(self, request, username):
         user                = get_object_or_404(User, username=username)
