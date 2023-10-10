@@ -31,8 +31,8 @@ class UserRegisterView(View):
             user.email = request.POST.get('email')
             user.set_password(request.POST.get('password1'))
             user.save()
-            messages.success(request, 'Success')
-            return redirect("/login")
+            #messages.success(request, 'Success')
+            return redirect("/welcome")
         else:
             return render(request, self.template_name, {'form': form})
 
@@ -78,6 +78,12 @@ class UserLogoutView(View):
     def post(self, request):
         auth.logout(request)
         return redirect('/login')
+    
+class UserWelcomeView(View):
+    template_name           = 'welcome.html'
+    
+    def get(self, request):
+        return render(request, self.template_name )
 
 
 
