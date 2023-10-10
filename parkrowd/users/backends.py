@@ -4,7 +4,7 @@ from django.db.models import Q
 
 User = get_user_model()
 
-class EmailorUsernameAuthenticationBackend(object):
+class EmailOrUsernameAuthenticationBackend(object):
     @staticmethod
     def authenticate(request, username=None, password=None):
         """
@@ -13,8 +13,7 @@ class EmailorUsernameAuthenticationBackend(object):
             2.  password match
         Else None
         """
-        user = EmailorUsernameAuthenticationBackend.get_user_by_username_or_email(username)
-        
+        user = EmailOrUsernameAuthenticationBackend.get_user_by_username_or_email(username)
         if user and check_password(password, user.password):
             return user
 
@@ -24,7 +23,7 @@ class EmailorUsernameAuthenticationBackend(object):
     def get_user_by_username_or_email(field):
         """Helper function for authenticate method above"""
         try:
-            user = User.objects.get( Q(username=username) | Q(email=username) )
+            return User.objects.get( Q(username=field) | Q(email=field) )
         except User.DoesNotExist:
             return None
 

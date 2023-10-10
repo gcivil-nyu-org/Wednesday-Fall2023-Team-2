@@ -88,8 +88,14 @@ DATABASES = {
 AUTH_USER_MODEL = "users.User"
 
 AUTHENTICATION_BACKENDS = [
-    'accounts.backends.EmailOrUsernameAuthenticationBackend'
+    'users.backends.EmailOrUsernameAuthenticationBackend'
 ]
+
+LOGOUT_REDIRECT_URL = "/login"
+
+# Changes messages to be based on SessionStorage, not CookieStorage
+# To fix bug with messages still appearing on screen, after logging out
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 
 # Password validation
