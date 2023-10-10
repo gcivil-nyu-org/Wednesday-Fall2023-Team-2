@@ -26,7 +26,7 @@ class UserLoginForm(AuthenticationForm):
 
     def confirm_login_allowed(self, user):
         if not user.is_active:
-            raise ValidationError(
+            raise forms.ValidationError(
                 _("This account is inactive."),
                 code="inactive",
             )
