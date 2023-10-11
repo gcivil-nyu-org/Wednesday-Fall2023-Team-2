@@ -20,10 +20,11 @@ SECRET_KEY = "django-insecure-fwhre62z62nwjg@ft0(-6^pt6@aaa$p+ha0xdsl$qpk5j0sc#n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
 ALLOWED_HOSTS = [
-    "parkrowd-env.eba-vc3njerm.us-west-2.elasticbeanstalk.com"
+    "parkrowd-env.eba-ay9wskgr.us-west-2.elasticbeanstalk.com"
     if os.getenv("PROD") != "false"
-    else "127.0.0.1"
+    else "127.0.0.1",
 ]
 
 

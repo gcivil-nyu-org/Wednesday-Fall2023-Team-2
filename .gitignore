@@ -43,3 +43,6 @@ db.sqlite3
 
 # .env
 **/.env
+
+# .pylintrc
+**/.pylintrc
