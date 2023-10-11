@@ -1,29 +1,31 @@
+"""user views
+"""
+from django.views import View
+from django.contrib import auth
+from django.contrib import messages
 from django.shortcuts import get_object_or_404, render, redirect
 from .backends import EmailOrUsernameAuthenticationBackend as EoU
 
-from django.contrib import messages
-from django.contrib import auth
-from django.contrib.auth.forms import AuthenticationForm
-
-from django.views import View
-from .forms import UserRegisterForm, UserLoginForm
-
 from .models import User
+from .forms import UserRegisterForm, UserLoginForm
 
 SESSION_COOKIE_EXPIRATION = 86400
 
-
-# Create your views here.
-
 class UserRegisterView(View):
-    form_class              = UserRegisterForm
-    template_name           = 'register.html'
+    """user register view
+    """
+    form_class = UserRegisterForm
+    template_name = 'register.html'
 
     def get(self, request):
+        """get for user register view
+        """
         form = self.form_class()
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
+        """post to handle user registration
+        """
         form = self.form_class(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
