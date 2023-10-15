@@ -101,3 +101,26 @@ class UserProfileView(View):
         user                = get_object_or_404(User, username=username)
         return render( request, self.template_name )
     
+class UserProfileEditView(View):
+    model = User
+    #form_class = UserProfileForm
+    template_name = 'profile_edit.html'
+    username = None
+
+    def get(self, request, username):
+        self.username = username
+        user = get_object_or_404(User, username=username)
+        return render( request, self.template_name, {'user': user})
+
+    def post(self, request, username):
+       
+        new_username = request.POST.get('input-username')
+        new_email = request.POST.get('input-email')
+        user = get_object_or_404(User, username=username)
+        user.username = new_username
+        user.email = new_email
+
+        user.save()
+
+        return redirect('/profile/' + user.username)
+    
