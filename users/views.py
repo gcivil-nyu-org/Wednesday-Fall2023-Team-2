@@ -113,12 +113,18 @@ class UserProfileEditView(View):
         return render( request, self.template_name, {'user': user})
 
     def post(self, request, username):
+        exists = False
        
         new_username = request.POST.get('input-username')
         new_email = request.POST.get('input-email')
+        new_description = request.POST.get('input-description')
         user = get_object_or_404(User, username=username)
+        if User.objects.filter(username = new_username).exists() and user.username != new_username:
+            exists = True
+            return render( request, self.template_name, {'user': user, 'new_username':new_username, 'exists': exists})
         user.username = new_username
         user.email = new_email
+        user.description = new_description
 
         user.save()
 

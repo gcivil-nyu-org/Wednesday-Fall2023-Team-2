@@ -22,15 +22,25 @@
         </div>
         <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" class="form-control" name="input-username" value="{{ user.username }}">
+            
+            {% if exists %}
+                <input type="text" class="form-control" name="input-username" value="{{ new_username }}">
+                <div style="color: red;">Username already exists</div>
+            {% else %}
+                <input type="text" class="form-control" name="input-username" value="{{ user.username }}">
+            {% endif %}
         </div>
         <div class="form-group">
             <label for="email">Email</label>
             <input type="email" class="form-control" name="input-email" value="{{ user.email }}">
         </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <input type="text" class="form-control" name="input-description" value="{{ user.description }}">
+        </div>
 </div>
 
 <button type="submit" class="btn btn-primary">Save</button> 
-<button type="submit" class="btn btn-primary">Cancel</button> 
+<a href="/profile/{{ user.username }}"><button type="button" class="btn btn-primary">Cancel</button></a> 
 </form>
 {% endblock %}
