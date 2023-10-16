@@ -26,7 +26,16 @@
         <div class="col">Username</div>
         <div class="col">{{ user.username }}</div>
     </div>
+    <div class="row">
+        <div class="col">Description</div>
+        <div class="col">{{ user.description }}</div>
+    </div>
 </div>
+
+
+<!--Edit Profile-->
+<a href="/profile-edit/{{ user.username }}"><button type="button" class="btn btn-primary">Edit</button></a>   
+<!--END Edit Profile-->
 
 
 <!--Delete Account-->
@@ -75,5 +84,5 @@
     </div>
 {% endif %}
 <!--END Delete Account-->
-
+ 
 {% endblock %}
