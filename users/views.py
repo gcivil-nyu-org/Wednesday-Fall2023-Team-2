@@ -103,7 +103,6 @@ class UserProfileView(View):
     
 class UserProfileEditView(View):
     model = User
-    #form_class = UserProfileForm
     template_name = 'profile_edit.html'
     username = None
 
