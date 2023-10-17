@@ -32,5 +32,57 @@
     </div>
 </div>
 
-<a href="/profile-edit/{{ user.username }}"><button type="button" class="btn btn-primary">Edit</button></a>    
+
+<!--Edit Profile-->
+<a href="/profile-edit/{{ user.username }}"><button type="button" class="btn btn-primary">Edit</button></a>   
+<!--END Edit Profile-->
+
+
+<!--Delete Account-->
+{% if request.user.is_authenticated and is_user_owner_of_profile %}
+    <div class="container-md">
+        <!-- Delete Button to Trigger Modal -->
+        <div class="row">
+            <div class="col-sm d-flex justify-content-end">
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                    Delete Account
+                </button>
+            </div>
+        </div>
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+        
+        <!-- Delete Account Modal -->
+        <div class="modal fade" id="deleteAccountModal" tabindex="-1" role="dialog" aria-labelledby="deleteAccount" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteAccountTitle">Delete Account</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete your account?
+                    </div>
+                    <div class="modal-footer">
+                        <form action="{% url 'users:profile' request.user.username %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" name="delete_profile" class="btn btn-danger">Yes</button>
+                        </form>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+<!--END Delete Account-->
+ 
 {% endblock %}

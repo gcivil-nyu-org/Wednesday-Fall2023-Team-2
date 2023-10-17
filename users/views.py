@@ -81,6 +81,7 @@ class UserLogoutView(View):
         auth.logout(request)
         return redirect('/login')
     
+
 class UserWelcomeView(View):
     template_name           = 'welcome.html'
     
@@ -90,16 +91,45 @@ class UserWelcomeView(View):
 
 
 class UserProfileView(View):
-    model                   = User
-    template_name           = 'profile.html'
+    """user profile view
+    """
+    model                        = User
+    template_name                = 'profile.html'
 
     def get(self, request, username):
-        user                = get_object_or_404(User, username=username)
-        return render( request, self.template_name, {'user': user})
+        user                     = get_object_or_404(User, username=username)
+
+        #For Conditionally rendering "Delete Account" button
+        #only if user is viewing their own profile
+        is_user_owner_of_profile = request.user.username == username
+
+        payload = {
+            'user': user, 
+            'is_user_owner_of_profile': is_user_owner_of_profile
+        }
+
+        return render( request, self.template_name, payload )
 
     def post(self, request, username):
-        user                = get_object_or_404(User, username=username)
+        if "delete_profile" in request.POST:
+            username             = request.user.username
+
+            try:
+                user = User.objects.get(username=username)
+                user.delete()
+                return redirect('/profile-delete')            
+
+            except User.DoesNotExist:
+                messages.error(request, "User does not exist")    
+                return render(request, self.template_name)
+
+            except Exception as e: 
+                messages.error(request, "An error has occurred.  Please try again.")
+                return render(request, self.template_name)
+
         return render( request, self.template_name )
+
+      
     
 class UserProfileEditView(View):
     model = User
@@ -129,3 +159,15 @@ class UserProfileEditView(View):
 
         return redirect('/profile/' + user.username)
     
+    
+
+class UserProfileDeleteView(View):
+    """user profile deleted view
+
+        renders after successful deletion of account
+        using the "Delete Account" button
+    """
+    template_name           = 'profile_delete.html'
+
+    def get(self, request):
+        return render( request, self.template_name )
