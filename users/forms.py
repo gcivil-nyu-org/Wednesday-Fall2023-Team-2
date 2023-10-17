@@ -65,6 +65,14 @@ class UserRegisterForm(UserCreationForm):
             attrs={"class": "form-control", "placeholder": "Enter email"}
         )
     )
+    
+    """
+    avatar = forms.ImageField(
+        widget = forms.ClearableFileInput(
+            attrs={"class": "form-control"}
+        )
+    )
+    """
 
     password1 = forms.CharField(
         widget=forms.PasswordInput(

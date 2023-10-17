@@ -14,6 +14,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(verbose_name="email", max_length=60, unique=True)
     username = models.CharField(max_length=30, unique=True)
     date_joined = models.DateTimeField(verbose_name="Date Joined", default=timezone.now)
+    # Save an avatar image for a user in path avatars/<username>_avatar
+    avatar = models.ImageField(upload_to="avatars/", height_field=None, width_field=None, max_length=101, default='avatars/ParKrowdDefaultAvatar.jpg')
 
     description = models.TextField()
 

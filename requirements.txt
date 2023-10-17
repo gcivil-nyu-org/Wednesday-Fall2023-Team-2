@@ -30,3 +30,4 @@ urllib3==1.26.16
 virtualenv==20.24.5
 wcwidth==0.1.9
 websocket-client==0.59.0
+Pillow==10.1.0
