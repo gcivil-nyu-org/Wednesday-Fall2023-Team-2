@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404, render, redirect
 from .backends import EmailOrUsernameAuthenticationBackend as EoU
 
-from .models import User
+from .models import User, Post
 from .forms import UserRegisterForm, UserLoginForm
 
 SESSION_COOKIE_EXPIRATION = 86400
@@ -98,6 +98,7 @@ class UserProfileView(View):
 
     def get(self, request, username):
         user                     = get_object_or_404(User, username=username)
+        user_posts = Post.objects.filter(author=user)
 
         #For Conditionally rendering "Delete Account" button
         #only if user is viewing their own profile
@@ -105,7 +106,8 @@ class UserProfileView(View):
 
         payload = {
             'user': user, 
-            'is_user_owner_of_profile': is_user_owner_of_profile
+            'is_user_owner_of_profile': is_user_owner_of_profile,
+            'user_posts': user_posts
         }
 
         return render( request, self.template_name, payload )

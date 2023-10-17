@@ -10,7 +10,7 @@ https://stackoverflow.com/questions/5481713/whats-the-difference-between-django-
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
-from .models import User
+from .models import User, Post
 
 
 class UserLoginForm(AuthenticationForm):
@@ -83,3 +83,8 @@ class UserRegisterForm(UserCreationForm):
 
         model = User
         fields = ["username", "email", "password1", "password2"]
+
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ['title', 'post', "created_at"]

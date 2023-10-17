@@ -43,3 +43,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     def has_module_perms(app_label, **kwargs):
         """TODO: why overriding the original implementation here"""
         return True
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    post = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(verbose_name="Date Created", default=timezone.now)
+
+    def __str__(self):
+        return self.title
