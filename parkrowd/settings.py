@@ -18,8 +18,7 @@ load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"), verbose=False)
 SECRET_KEY = "django-insecure-fwhre62z62nwjg@ft0(-6^pt6@aaa$p+ha0xdsl$qpk5j0sc#n"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("PROD") == "false"
-
+DEBUG = True # os.getenv("PROD") == "false"
 
 # * for AWS Health Check
 def is_ec2_linux():
@@ -54,6 +53,7 @@ ALLOWED_HOSTS = [
     if os.getenv("PROD") != "false"
     else "127.0.0.1"
 ]
+
 # ElasticBeanstalk healthcheck sends requests with host header = internal ip
 # So we detect if we are in elastic beanstalk,
 # and add the instances private ip address
@@ -107,7 +107,6 @@ WSGI_APPLICATION = "parkrowd.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
 DATABASES = {
     "default": {
         "PORT": os.getenv("RDS_PORT"),
@@ -165,7 +164,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+# Image File Setup
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL= '/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
