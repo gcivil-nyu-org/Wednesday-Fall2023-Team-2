@@ -1,36 +1,58 @@
-{% extends "main.html" %}
-
-{% block content %}
+{% extends "main.html" %} {% block content %} 
 {% if request.user.is_authenticated %}
-    <div class="d-flex justify-content-end">
-        <a class="nav-link" href="#" 
-            onClick="document.getElementById('logout-form').submit()">
-            Logout
-        </a>
-        <form id="logout-form" method="POST" action="{% url 'users:logout' %}">
-            {% csrf_token %}
-            <input type="hidden">
-        </form>
-    </div>
+<div class="d-flex justify-content-end">
+  <a
+    class="nav-link"
+    href="#"
+    onClick="document.getElementById('logout-form').submit()"
+  >
+    Logout
+  </a>
+  <form id="logout-form" method="POST" action="{% url 'users:logout' %}">
+    {% csrf_token %}
+    <input type="hidden" />
+  </form>
+</div>
 {% endif %}
 
 <div class="container-md">
-    <div class="row">
-        <h3 class="display-4">Profile Info</h3>
-    </div>
-    <div class="row">
-        <div class="col">Email</div>
-        <div class="col">{{ user.email }}</div>
-    </div>
-    <div class="row">
-        <div class="col">Username</div>
-        <div class="col">{{ user.username }}</div>
-    </div>
-    <div class="row">
-        <div class="col">Description</div>
-        <div class="col">{{ user.description }}</div>
-    </div>
+  <div class="row">
+    <h3 class="display-4">Profile Info</h3>
+  </div>
+  <div class="row">
+    <div class="col">Email</div>
+    <div class="col">{{ user.email }}</div>
+  </div>
+  <div class="row">
+    <div class="col">Username</div>
+    <div class="col">{{ user.username }}</div>
+  </div>
+  <div class="row">
+    <div class="col">Description</div>
+    <div class="col">{{ user.description }}</div>
+  </div>
 </div>
 
-<a href="/profile-edit/{{ user.username }}"><button type="button" class="btn btn-primary">Edit</button></a>    
+<a href="/profile-edit/{{ user.username }}"
+  ><button type="button" class="btn btn-primary">Edit</button></a
+>
+
+<div class="container-md">
+  <div class="row">
+      <h3 class="display-4">User's Posts</h3>
+  </div>
+  <div class="row">
+      <div class="d-flex flex-wrap">
+          {% for post in user_posts %}
+          <div class="post-box border rounded p-3 m-2">
+              <h3>{{ post.title }}</h3>
+              <p>{{ post.post }}</p>
+              <p>Posted on {{ post.created_at }}</p>
+          </div>
+          {% empty %}
+          <p>No posts found for this user.</p>
+          {% endfor %}
+      </div>
+  </div>
+</div>
 {% endblock %}

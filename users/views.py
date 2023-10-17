@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404, render, redirect
 from .backends import EmailOrUsernameAuthenticationBackend as EoU
 
-from .models import User
+from .models import User, Post
 from .forms import UserRegisterForm, UserLoginForm
 
 SESSION_COOKIE_EXPIRATION = 86400
@@ -95,7 +95,8 @@ class UserProfileView(View):
 
     def get(self, request, username):
         user                = get_object_or_404(User, username=username)
-        return render( request, self.template_name, {'user': user})
+        user_posts = Post.objects.filter(author=user)
+        return render( request, self.template_name, {'user': user, 'user_posts': user_posts})
 
     def post(self, request, username):
         user                = get_object_or_404(User, username=username)
