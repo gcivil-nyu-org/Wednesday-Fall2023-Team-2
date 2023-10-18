@@ -1,6 +1,7 @@
 """user views
 """
 from django.views import View
+from django.urls import reverse
 from django.contrib import auth
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
@@ -48,7 +49,7 @@ class UserRegisterView(View):
             user.email = request.POST.get("email")
             user.set_password(request.POST.get("password1"))
             user.save()
-            return redirect("/welcome")
+            return redirect(reverse("users:welcome"))
         return render(request, self.template_name, {"form": form})
 
 
@@ -99,7 +100,9 @@ class UserLoginView(View):
             if remember_me:
                 request.session.set_expiry(SESSION_COOKIE_EXPIRATION)
 
-            return redirect("/profile/" + user.username)
+            return redirect(
+                reverse("users:profile", kwargs={"username": user.username})
+            )
 
         return render(request, self.template_name, {"form": form})
 
@@ -117,7 +120,7 @@ class UserLogoutView(View):
             HttpResponse: redirect user to login page
         """
         auth.logout(request)
-        return redirect("/login")
+        return redirect(reverse("users:login"))
 
 
 class UserWelcomeView(View):
@@ -220,7 +223,7 @@ class UserProfileEditView(View):
         user.description = new_description
         user.save()
 
-        return redirect("/profile/" + user.username)
+        return redirect(reverse("users:profile", kwargs={"username": user.username}))
 
 
 class UserProfileDeleteView(View):

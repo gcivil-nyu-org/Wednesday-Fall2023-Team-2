@@ -26,7 +26,7 @@
                 </div>
             </form>
             {% if messages %}
-            <ul class="messages">
+            <ul class="messages" style="color: red">
                 {% for message in messages %}
                 {% if message.tags == 'error' %}
                 <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>

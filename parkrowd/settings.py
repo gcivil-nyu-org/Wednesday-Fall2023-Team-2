@@ -4,7 +4,10 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from django.urls import reverse_lazy
+
 from utils.aws_utils import get_linux_ec2_private_ip
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -94,7 +97,7 @@ AUTHENTICATION_BACKENDS = [
     "users.backends.EmailOrUsernameAuthenticationBackend",
 ]
 
-LOGOUT_REDIRECT_URL = "/login"
+LOGOUT_REDIRECT_URL = reverse_lazy("users:login")
 
 # session expiry default setting
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
