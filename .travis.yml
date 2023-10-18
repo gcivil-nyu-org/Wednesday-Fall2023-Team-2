@@ -27,9 +27,9 @@ install:
 script:
 - black --check .
 - flake8 .
-- coverage run manage.py test
+- python -m coverage run manage.py test
 after_success:
-- coveralls
+- python -m coveralls
 deploy:
   provider: elasticbeanstalk
   access_key_id: "$AWS_ACCESS_KEY_ID"
