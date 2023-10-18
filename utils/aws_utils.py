@@ -2,6 +2,7 @@
 """
 import os
 
+
 # * for AWS health check
 def is_ec2_linux():
     """Detect if we are running on an EC2 Linux Instance
@@ -23,7 +24,7 @@ def get_linux_ec2_private_ip():
     try:
         response = urlopen("http://169.254.169.254/latest/meta-data/local-ipv4")
         return response.read().decode("utf-8")
-    except:
+    except Exception:
         return None
     finally:
         if response:

@@ -14,8 +14,7 @@ from .models import User, Post
 
 
 class UserLoginForm(AuthenticationForm):
-    """login form
-    """
+    """login form"""
 
     username = forms.CharField(
         widget=forms.TextInput(
@@ -48,8 +47,7 @@ class UserLoginForm(AuthenticationForm):
 
 
 class UserRegisterForm(UserCreationForm):
-    """user registration form
-    """
+    """user registration form"""
 
     username = forms.CharField(
         widget=forms.TextInput(
@@ -62,7 +60,7 @@ class UserRegisterForm(UserCreationForm):
             attrs={"class": "form-control", "placeholder": "Enter email"}
         )
     )
-    
+
     """
     avatar = forms.ImageField(
         widget = forms.ClearableFileInput(
@@ -87,7 +85,8 @@ class UserRegisterForm(UserCreationForm):
         model = User
         fields = ["username", "email", "password1", "password2"]
 
+
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'post', "created_at"]
+        fields = ["title", "post", "created_at"]

@@ -4,7 +4,6 @@ from typing import Optional
 from django.db.models import Q
 from django.http import HttpRequest
 from django.contrib.auth import get_user_model
-from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.hashers import check_password
 
 ActiveUserModel = get_user_model()

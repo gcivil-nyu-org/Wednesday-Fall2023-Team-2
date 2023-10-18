@@ -10,7 +10,9 @@ class UserManager(BaseUserManager):
     and email to be unique identifiers for authentication
     """
 
-    def create_user(self, email: str, username: str, password: str, **extra_fields: dict[str, any]):
+    def create_user(
+        self, email: str, username: str, password: str, **extra_fields: dict[str, any]
+    ):
         """method to create a normal user
 
         Returns:
@@ -52,6 +54,8 @@ class UserManager(BaseUserManager):
         if extra_fields.get("is_superuser") is not True:
             raise ValueError(_("Superuser must have is_superuser set to True"))
 
-        user = self.create_user(email=email, username=username, password=password, **extra_fields)
+        user = self.create_user(
+            email=email, username=username, password=password, **extra_fields
+        )
 
         return user

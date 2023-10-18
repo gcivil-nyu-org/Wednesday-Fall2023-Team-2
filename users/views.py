@@ -89,7 +89,9 @@ class UserLoginView(View):
             request, username=username, password=password
         )
         if not user:
-            messages.error(request, "The credentials you provided do not match any user.")
+            messages.error(
+                request, "The credentials you provided do not match any user."
+            )
         else:
             auth.login(request, user)
             messages.success(request, "You have successfully logged in!")
@@ -203,7 +205,10 @@ class UserProfileEditView(View):
         new_description = request.POST.get("input-description")
         user = get_object_or_404(User, username=username)
         # * if username is already taken
-        if User.objects.filter(username=new_username).exists() and user.username != new_username:
+        if (
+            User.objects.filter(username=new_username).exists()
+            and user.username != new_username
+        ):
             return render(
                 request,
                 self.template_name,
@@ -253,7 +258,7 @@ class UserProfileDeleteView(View):
                 messages.error(request, "User does not exist")
                 return render(request, self.template_name)
 
-            except Exception as e:
+            except Exception:
                 messages.error(request, "An error has occurred.  Please try again.")
                 return render(request, self.template_name)
 
