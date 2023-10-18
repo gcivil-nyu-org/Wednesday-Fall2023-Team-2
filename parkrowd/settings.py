@@ -20,7 +20,7 @@ DEBUG = os.getenv("PROD") == "false"
 
 # allowed hosts settings
 ALLOWED_HOSTS = [
-    "parkrowd-env.eba-ay9wskgr.us-west-2.elasticbeanstalk.com"
+    "Parkrowd-env.eba-spjjw3yh.us-west-2.elasticbeanstalk.com"
     if os.getenv("PROD") != "false"
     else "127.0.0.1"
 ]
