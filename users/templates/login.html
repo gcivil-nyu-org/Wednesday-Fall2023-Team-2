@@ -19,9 +19,14 @@
                     <label class="form-check-label" for="id_remember_me">Remember Me</label>
                     {{ form.remember_me }}
                 </div>
-                <div class="row py-4 justify-content-center">
+                <div class="row py-3 justify-content-center">
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary">Sign In</button>
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-md-4">
+                        Consider joining? Register <a href="{% url 'users:register' %}">here</a>.
                     </div>
                 </div>
             </form>

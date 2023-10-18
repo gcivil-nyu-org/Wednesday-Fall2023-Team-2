@@ -236,7 +236,7 @@ class UserProfileDeleteView(View):
 
     template_name = "profile_delete.html"
 
-    def get(self, request: HttpRequest) -> HttpResponse:
+    def get(self, request: HttpRequest, username: str) -> HttpResponse:
         return render(request, self.template_name)
 
     def post(self, request: HttpRequest, username: str) -> HttpResponse:
@@ -256,7 +256,7 @@ class UserProfileDeleteView(View):
                 user = User.objects.get(username=username)
                 user.delete()
                 auth.logout(request)
-                return redirect("users:profile-delete")
+                return redirect("users:register")
 
             except User.DoesNotExist:
                 messages.error(request, "User does not exist")
