@@ -148,7 +148,7 @@ class UserProfileEditView(View):
        
         new_username = request.POST.get('input-username')
         new_email = request.POST.get('input-email')
-        new_avatar = request.FILES['input-avatar']
+        new_avatar = request.FILES.get('input-avatar', request.user.avater)
         new_description = request.POST.get('input-description')
         user = get_object_or_404(User, username=username)
         if User.objects.filter(username = new_username).exists() and user.username != new_username:
