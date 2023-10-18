@@ -45,7 +45,7 @@
                 <button type="submit" class="btn btn-primary mx-4">Save</button>
             </div>
             <div class="col-md-1">
-                <a href="/profile/{{ user.username }}" class="btn btn-secondary">Cancel</a>
+                <a href="{% url 'users:profile' request.user.username %}" class="btn btn-secondary">Cancel</a>
             </div>
         </div>
     </form>
