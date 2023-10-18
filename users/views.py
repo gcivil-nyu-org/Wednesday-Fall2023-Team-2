@@ -204,7 +204,7 @@ class UserProfileEditView(View):
 
         new_username = request.POST.get("input-username")
         new_email = request.POST.get("input-email")
-        new_avatar = request.FILES["input-avatar"]
+        new_avatar = request.FILES.get("input-avatar", None)
         new_description = request.POST.get("input-description")
         user = get_object_or_404(User, username=username)
         # * if username is already taken
@@ -219,7 +219,8 @@ class UserProfileEditView(View):
             )
         user.username = new_username
         user.email = new_email
-        user.avatar = new_avatar
+        if new_avatar:
+            user.avatar = new_avatar
         user.description = new_description
         user.save()
 
