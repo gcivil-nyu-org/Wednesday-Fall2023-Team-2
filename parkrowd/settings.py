@@ -139,6 +139,7 @@ TIME_ZONE = "America/New_York"
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "/static/"
+STATIC_ROOT = "static"
 # Image File Setup
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
