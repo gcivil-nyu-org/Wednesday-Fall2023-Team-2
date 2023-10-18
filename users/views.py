@@ -46,7 +46,7 @@ class UserRegisterView(View):
             user = form.save(commit=False)
             user.username = user.username.lower()
             user.email = request.POST.get("email")
-            user.set_password(request.POST.get("password"))
+            user.set_password(request.POST.get("password1"))
             user.save()
             return redirect("/welcome")
         return render(request, self.template_name, {"form": form})
@@ -196,7 +196,6 @@ class UserProfileEditView(View):
         Returns:
             HttpResponse: redirect back to profile page
         """
-        exists = False
 
         new_username = request.POST.get("input-username")
         new_email = request.POST.get("input-email")
@@ -247,7 +246,8 @@ class UserProfileDeleteView(View):
             try:
                 user = User.objects.get(username=username)
                 user.delete()
-                return redirect("/profile-delete")
+                auth.logout(request)
+                return redirect("users:profile-delete")
 
             except User.DoesNotExist:
                 messages.error(request, "User does not exist")

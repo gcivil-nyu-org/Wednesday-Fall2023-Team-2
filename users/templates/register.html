@@ -1,45 +1,37 @@
 {% extends "main.html" %}
+
 {% block content %}
 <div class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <h3 class="display-4">Register Page - SAMPLE</h3>
+  <div class="row justify-content-center py-4">
+    <div class="col-md-9">
+      <h3 class="text-center">Register</h3>
       <form method="post">
         {% csrf_token %}
-        <div class="form-group">
+        <div class="form-group py-1">
           <label for="username">Username</label>
           {{ form.username }}
         </div>
-        <div class="form-group">
+        <div class="form-group py-1">
           <label for="email">Email</label>
           {{ form.email }}
         </div>
-        <div class="form-group">
+        <div class="form-group py-1">
           <label for="password">Password</label>
-          {{ form.password }}
+          {{ form.password1 }}
         </div>
-        <div class="form-group">
+        <div class="form-group py-1">
           <label for="password">Confirm Password</label>
-          {{ form.password_confirm }}
+          {{ form.password2 }}
         </div>
-        <button type="submit" class="btn btn-primary" value="register">Sign Up</button>
+        <div class="row py-4 justify-content-center">
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-primary" value="register">Sign Up</button>
+          </div>
+        </div>
       </form>
-      {{ form.errors.non_field_errors }}
-      <ul class="list-unstyled">
-        {% for field, error_list in form.errors.items %}
-          {% for error in error_list %}
-            <li class="text-danger">{{ error }}</li>
-          {% endfor %}
-        {% endfor %}
-      </ul>
+      <div style="color: red">{{ form.errors }}</div>
     </div>
   </div>
 </div>
 </div>
 {% endblock %}
-
-<style>
-  ul.list-unstyled {
-    margin-top: 10px;
-  }
-</style>

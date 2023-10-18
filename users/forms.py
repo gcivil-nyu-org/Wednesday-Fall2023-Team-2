@@ -32,7 +32,7 @@ class UserLoginForm(AuthenticationForm):
     remember_me = forms.BooleanField(
         required=False,
         widget=forms.CheckboxInput(
-            attrs={"class": "form-control form-check-input", "type": "checkbox"}
+            attrs={"class": "form-check-input", "type": "checkbox"}
         ),
     )
 
@@ -71,13 +71,13 @@ class UserRegisterForm(UserCreationForm):
     )
     """
 
-    password = forms.CharField(
+    password1 = forms.CharField(
         widget=forms.PasswordInput(
             attrs={"class": "form-control", "placeholder": "Enter Password"}
         )
     )
 
-    password_confirm = forms.CharField(
+    password2 = forms.CharField(
         widget=forms.PasswordInput(
             attrs={"class": "form-control", "placeholder": "Confirm Password"}
         )
@@ -85,7 +85,7 @@ class UserRegisterForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ["username", "email", "password", "password_confirm"]
+        fields = ["username", "email", "password1", "password2"]
 
 class PostForm(forms.ModelForm):
     class Meta:

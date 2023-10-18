@@ -2,32 +2,30 @@
 
 {% block content %}
 {% if request.user.is_authenticated %}
-    <div class="d-flex justify-content-end">
-        <a class="nav-link" href="#" 
-            onClick="document.getElementById('logout-form').submit()">
-            Logout
-        </a>
-        <form id="logout-form" method="POST" action="{% url 'users:logout' %}">
-            {% csrf_token %}
-            <input type="hidden">
-        </form>
-    </div>
+<div class="d-flex justify-content-end py-2 px-2">
+    <a href="#" class="btn btn-outline-secondary" onClick="document.getElementById('logout-form').submit()">
+        Logout
+    </a>
+    <form id="logout-form" method="POST" action="{% url 'users:logout' %}">
+        {% csrf_token %}
+        <input type="hidden" />
+    </form>
+</div>
 {% endif %}
-
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %} 
-    <div class="container-md">
-        <div class="row">
-            <h3 class="display-4">Profile Info</h3>
-        </div>
+<div class="container-lg">
+    <div class="row">
+        <h2>Profile Info</h2>
+    </div>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
         <div class="form-group">
             <label for="username">Username</label>
-            
+
             {% if exists %}
-                <input type="text" class="form-control" name="input-username" value="{{ new_username }}">
-                <div style="color: red;">Username already exists</div>
+            <input type="text" class="form-control" name="input-username" value="{{ new_username }}">
+            <div style="color: red;">Username already exists</div>
             {% else %}
-                <input type="text" class="form-control" name="input-username" value="{{ user.username }}">
+            <input type="text" class="form-control" name="input-username" value="{{ user.username }}">
             {% endif %}
         </div>
         <div class="form-group">
@@ -42,9 +40,14 @@
             <label for="description">Description</label>
             <input type="text" class="form-control" name="input-description" value="{{ user.description }}">
         </div>
+        <div class="row justify-content-end py-4">
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary mx-4">Save</button>
+            </div>
+            <div class="col-md-1">
+                <a href="/profile/{{ user.username }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </div>
+    </form>
 </div>
-
-<button type="submit" class="btn btn-primary">Save</button> 
-<a href="/profile/{{ user.username }}"><button type="button" class="btn btn-primary">Cancel</button></a> 
-</form>
 {% endblock %}
