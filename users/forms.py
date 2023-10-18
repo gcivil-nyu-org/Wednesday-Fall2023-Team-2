@@ -48,10 +48,7 @@ class UserLoginForm(AuthenticationForm):
 
 
 class UserRegisterForm(UserCreationForm):
-    """_summary_
-
-    Args:
-        UserCreationForm (_type_): _description_
+    """user registration form
     """
 
     username = forms.CharField(
@@ -74,23 +71,21 @@ class UserRegisterForm(UserCreationForm):
     )
     """
 
-    password1 = forms.CharField(
+    password = forms.CharField(
         widget=forms.PasswordInput(
             attrs={"class": "form-control", "placeholder": "Enter Password"}
         )
     )
 
-    password2 = forms.CharField(
+    password_confirm = forms.CharField(
         widget=forms.PasswordInput(
             attrs={"class": "form-control", "placeholder": "Confirm Password"}
         )
     )
 
     class Meta:
-        """_summary_"""
-
         model = User
-        fields = ["username", "email", "password1", "password2"]
+        fields = ["username", "email", "password", "password_confirm"]
 
 class PostForm(forms.ModelForm):
     class Meta:

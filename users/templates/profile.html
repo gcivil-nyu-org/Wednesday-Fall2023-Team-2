@@ -103,7 +103,7 @@
                         Are you sure you want to delete your account?
                     </div>
                     <div class="modal-footer">
-                        <form action="{% url 'users:profile' request.user.username %}" method="POST">
+                        <form action="{% url 'users:profile_delete' request.user.username %}" method="POST">
                             {% csrf_token %}
                             <button type="submit" name="delete_profile" class="btn btn-danger">Yes</button>
                         </form>

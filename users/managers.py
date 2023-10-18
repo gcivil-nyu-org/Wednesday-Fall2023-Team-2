@@ -23,14 +23,14 @@ class UserManager(BaseUserManager):
         if not password:
             raise ValueError(_("A Password is required"))
 
-        # From Django's Docs:
-        # Normalize the email address by lowercasing the domain part of it.
+        # * From Django's Docs:
+        # * Normalize the email address by lowercasing the domain part of it.
         email = self.normalize_email(email)
 
         user = self.model(email=email, username=username, **extra_fields)
         user.set_password(password)
 
-        # self._db is the default DB under DATABASES in settings.py
+        # * self._db is the default DB under DATABASES in settings.py
         user.save(using=self._db)
 
         return user
