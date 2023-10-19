@@ -112,6 +112,14 @@ STATIC_ROOT = "static"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
 
+# * Email functionality
+EMAIL_USE_TLS = True
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587 if EMAIL_USE_TLS else 465
+EMAIL_HOST_USER = os.getenv("GOOGLE_SMTP_USERNAME")
+EMAIL_HOST_PASSWORD = os.getenv("GOOGLE_SMTP_PASSWORD")
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
 # * Application definition
 INSTALLED_APPS = [
     "django.contrib.auth",
