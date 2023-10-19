@@ -1,10 +1,10 @@
 """user views
 """
 from django.views import View
-from django.urls import reverse
 from django.contrib import auth
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render, redirect
 
 from .models import User, Post
@@ -49,7 +49,7 @@ class UserRegisterView(View):
             user.email = request.POST.get("email")
             user.set_password(request.POST.get("password1"))
             user.save()
-            return redirect(reverse("users:welcome"))
+            return redirect("users:welcome")
         return render(request, self.template_name, {"form": form})
 
 
@@ -100,14 +100,15 @@ class UserLoginView(View):
             if remember_me:
                 request.session.set_expiry(SESSION_COOKIE_EXPIRATION)
 
-            return redirect(
-                reverse("users:profile", kwargs={"username": user.username})
-            )
+            return redirect("users:profile", username=user.username)
 
         return render(request, self.template_name, {"form": form})
 
 
-class UserLogoutView(View):
+class UserLogoutView(
+    LoginRequiredMixin,
+    View,
+):
     """user logout view"""
 
     def post(self, request: HttpRequest) -> HttpResponse:
@@ -120,7 +121,7 @@ class UserLogoutView(View):
             HttpResponse: redirect user to login page
         """
         auth.logout(request)
-        return redirect(reverse("users:login"))
+        return redirect("users:login")
 
 
 class UserWelcomeView(View):
@@ -172,7 +173,10 @@ class UserProfileView(View):
         return render(request, self.template_name, context)
 
 
-class UserProfileEditView(View):
+class UserProfileEditView(
+    LoginRequiredMixin,
+    View,
+):
     """user profile edit view"""
 
     model = User
@@ -224,16 +228,17 @@ class UserProfileEditView(View):
         user.description = new_description
         user.save()
 
-        return redirect(reverse("users:profile", kwargs={"username": user.username}))
+        return redirect("users:profile", username=user.username)
 
 
-class UserProfileDeleteView(View):
+class UserProfileDeleteView(LoginRequiredMixin, View):
     """user profile deleted view
 
     renders after successful deletion of account
     using the "Delete Account" button
     """
 
+    # TODO: get method and tempalte is no longer in use
     template_name = "profile_delete.html"
 
     def get(self, request: HttpRequest, username: str) -> HttpResponse:

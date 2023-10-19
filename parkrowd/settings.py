@@ -97,7 +97,7 @@ AUTHENTICATION_BACKENDS = [
     "users.backends.EmailOrUsernameAuthenticationBackend",
 ]
 
-LOGOUT_REDIRECT_URL = reverse_lazy("users:login")
+LOGIN_URL = LOGOUT_REDIRECT_URL = reverse_lazy("users:login")
 
 # session expiry default setting
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

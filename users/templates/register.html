@@ -28,6 +28,11 @@
             <button type="submit" class="btn btn-primary" value="register">Sign Up</button>
           </div>
         </div>
+        <div class="row justify-content-center">
+          <div class="col-md-4">
+            Already have an account? Login <a href="{% url 'users:login' %}">here</a>.
+          </div>
+        </div>
       </form>
       <div style="color: red">{{ form.errors }}</div>
     </div>
