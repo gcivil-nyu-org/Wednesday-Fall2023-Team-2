@@ -2,41 +2,50 @@ os: linux
 dist: focal
 language: python
 python:
-- 3.11
+    - 3.11
 env:
-  global:
-  - PGPORT=5432
-  - PGUSER=travis
-  - secure: bQJF3/1Ofv/eGT8HMiS0F/d2vQC1fAUlRUOjVIFj0WtOXjlOLeYXSNt5+61PMUFC3JCC8QDncNSGOcYyichNId4DvqPWNDsIUKbAiBSWgxCjRcwdzDGWC5riSfczerwPIAdArJW+edpkttq4XdlZQwnyunC67mQLL4Ak+Cg/H9Vgd3kuXVGwOr+XkE78cZQr6yLVBUInnzdmHJZI0f1LOWIt26P828FkYBpWmBzlUcynphoo/y/pnHBKmlxfZuivV04pNurqdAjGvzkjVAJg+4my2sJUosYZVTqU+dIDfs1GXYuvnB6GXjdF/C3uBJN5gfNoliskK6f9CdSdzK0R98veHHilo90yxW0w1aEG1GPmlvvYqEuxOJXDooJ2a5koBaV80YmvesmLeOr2blNLcSqKxiKc+Kdv/a86qDv678kyTHSJPrtztOWEGDBPbvoSlDd93o9IcQRuozX08qVecMq6EgpO7PoNCDqomDa2uprqLeVxyryPiVzDZ39o1SU/xHDvY6vzxAHI06IRKOp7CnuwtIhk1FqzJaGfR/eju2gPBz4KybBc6K7sGxvtjweRRfu5Y6op/qNDAFffKsBgKF+QOjVl7reHnXmw1fBrlpb/8LBXutrR1yooByhDoyXaq5rbrtBG7c9RDlvRFx6WsGxSGbBQBPrnX7+jlqG9W0E=
-  - secure: gJfDd54nohDLeLYnDTtam5yjufVJV2nhg0eWTg/8J8YU5NsDBM0j3/M0mDIS5eybxj01JDYEVQL0CQ2+Go0Zzch9qeYGj2qLk+CNBnz7hQ3YeP+yIX34I6hiaElyFC6WBtz3MYfZDJ0KUQLBtrXEqVotMCwNiapCTIavvqibeCLYTYGNoDmxy+eh/u1DPM0e1n53lIdiqCRWJVFTm6Im6xHfldb5Fil1C88qbi8Vw7uMMKyzgf/bClJYFwvRArDopJPVoOHTLUX5dUL635BF6qXxyFcora9BEBc0PUk/L7O4LTewJfHikXWe/YKGZee4Slu28e7lRJpL+mGsBEy7BRv26p7sAlH8ETAoHqst7Ooy92zlCpHYw7yHORrRSdUSE56wsSelF0MsURQzf07AM3j9HYcMuM1+bEPOMQDR8E2+KCRgT2eEvrCY5Xab+Cak5h0lqlOAjBgdU3YUZXLhbyrkJjYNw+9k0c4PLqCFX1skuPeHYPssKY5Q/Ix9oO+fLMcITePWLcs0LQEndh6XYLRjJU0WacWVZLXD+sGC1QQQzE2LMR+vIVTxcUeBEXCI6y4a9/HSHeVDfCCXLfSNWrYJ0lhQlO/twDJ/Lsys9DeGykonrMNehaIRrSpVPwDDaImBkiiLM0Q3YQZw10eHbWbEZhnyhc2AXCjWkTSx7OI=
+    global:
+        - PGPORT=5432
+        - PGUSER=travis
+        - secure: bQJF3/1Ofv/eGT8HMiS0F/d2vQC1fAUlRUOjVIFj0WtOXjlOLeYXSNt5+61PMUFC3JCC8QDncNSGOcYyichNId4DvqPWNDsIUKbAiBSWgxCjRcwdzDGWC5riSfczerwPIAdArJW+edpkttq4XdlZQwnyunC67mQLL4Ak+Cg/H9Vgd3kuXVGwOr+XkE78cZQr6yLVBUInnzdmHJZI0f1LOWIt26P828FkYBpWmBzlUcynphoo/y/pnHBKmlxfZuivV04pNurqdAjGvzkjVAJg+4my2sJUosYZVTqU+dIDfs1GXYuvnB6GXjdF/C3uBJN5gfNoliskK6f9CdSdzK0R98veHHilo90yxW0w1aEG1GPmlvvYqEuxOJXDooJ2a5koBaV80YmvesmLeOr2blNLcSqKxiKc+Kdv/a86qDv678kyTHSJPrtztOWEGDBPbvoSlDd93o9IcQRuozX08qVecMq6EgpO7PoNCDqomDa2uprqLeVxyryPiVzDZ39o1SU/xHDvY6vzxAHI06IRKOp7CnuwtIhk1FqzJaGfR/eju2gPBz4KybBc6K7sGxvtjweRRfu5Y6op/qNDAFffKsBgKF+QOjVl7reHnXmw1fBrlpb/8LBXutrR1yooByhDoyXaq5rbrtBG7c9RDlvRFx6WsGxSGbBQBPrnX7+jlqG9W0E=
+        - secure: gJfDd54nohDLeLYnDTtam5yjufVJV2nhg0eWTg/8J8YU5NsDBM0j3/M0mDIS5eybxj01JDYEVQL0CQ2+Go0Zzch9qeYGj2qLk+CNBnz7hQ3YeP+yIX34I6hiaElyFC6WBtz3MYfZDJ0KUQLBtrXEqVotMCwNiapCTIavvqibeCLYTYGNoDmxy+eh/u1DPM0e1n53lIdiqCRWJVFTm6Im6xHfldb5Fil1C88qbi8Vw7uMMKyzgf/bClJYFwvRArDopJPVoOHTLUX5dUL635BF6qXxyFcora9BEBc0PUk/L7O4LTewJfHikXWe/YKGZee4Slu28e7lRJpL+mGsBEy7BRv26p7sAlH8ETAoHqst7Ooy92zlCpHYw7yHORrRSdUSE56wsSelF0MsURQzf07AM3j9HYcMuM1+bEPOMQDR8E2+KCRgT2eEvrCY5Xab+Cak5h0lqlOAjBgdU3YUZXLhbyrkJjYNw+9k0c4PLqCFX1skuPeHYPssKY5Q/Ix9oO+fLMcITePWLcs0LQEndh6XYLRjJU0WacWVZLXD+sGC1QQQzE2LMR+vIVTxcUeBEXCI6y4a9/HSHeVDfCCXLfSNWrYJ0lhQlO/twDJ/Lsys9DeGykonrMNehaIRrSpVPwDDaImBkiiLM0Q3YQZw10eHbWbEZhnyhc2AXCjWkTSx7OI=
 services:
-- postgresql
+    - postgresql
 addons:
-  postgresql: '13'
+    postgresql: "13"
 before_script:
-- psql -V
-- sudo systemctl start postgresql
-- pg_lsclusters
-- psql -c "CREATE DATABASE $RDS_DB_NAME;" -U $PGUSER
-- psql -c "CREATE USER $RDS_USERNAME WITH ENCRYPTED PASSWORD '$RDS_PASSWORD';"
-- psql -c "ALTER DATABASE $RDS_DB_NAME OWNER TO $RDS_USERNAME;"
-- psql -c "ALTER USER $RDS_USERNAME CREATEDB;"
-- python manage.py migrate
+    - psql -V
+    - sudo systemctl start postgresql
+    - pg_lsclusters
+    - psql -c "CREATE DATABASE $RDS_DB_NAME;" -U $PGUSER
+    - psql -c "CREATE USER $RDS_USERNAME WITH ENCRYPTED PASSWORD '$RDS_PASSWORD';"
+    - psql -c "ALTER DATABASE $RDS_DB_NAME OWNER TO $RDS_USERNAME;"
+    - psql -c "ALTER USER $RDS_USERNAME CREATEDB;"
+    - python manage.py migrate
 install:
-- pip install -r requirements.txt
+    - pip install -r requirements.txt
 script:
-- black --check .
-- flake8 .
-- python -m coverage run manage.py test
+    - black --check .
+    - flake8 .
+    - python -m coverage run manage.py test
 after_success:
-- python -m coveralls
+    - python -m coveralls
 deploy:
-  provider: elasticbeanstalk
-  access_key_id: "$AWS_ACCESS_KEY_ID"
-  secret_access_key: "$AWS_ACCESS_SECRET_KEY"
-  region: us-west-2
-  app: parkrowd
-  env: Parkrowd-env
-  bucket_name: "$S3_BUCKET_NAME"
-  on:
-    all_branches: true
+    - provider: elasticbeanstalk
+      access_key_id: "$AWS_ACCESS_KEY_ID"
+      secret_access_key: "$AWS_ACCESS_SECRET_KEY"
+      region: us-west-2
+      app: parkrowd
+      env: Parkrowd-env
+      bucket_name: "$S3_BUCKET_NAME"
+      on:
+          branch: master
+    - provider: elasticbeanstalk
+      access_key_id: "$AWS_ACCESS_KEY_ID"
+      secret_access_key: "$AWS_ACCESS_SECRET_KEY"
+      region: us-west-2
+      app: parkrowd
+      env: Parkrowd-env
+      bucket_name: "$S3_BUCKET_NAME"
+      on:
+          branch: develop
