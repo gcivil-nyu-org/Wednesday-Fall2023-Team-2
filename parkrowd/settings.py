@@ -118,7 +118,12 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587 if EMAIL_USE_TLS else 465
 EMAIL_HOST_USER = os.getenv("GOOGLE_SMTP_USERNAME")
 EMAIL_HOST_PASSWORD = os.getenv("GOOGLE_SMTP_PASSWORD")
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_FILE_PATH = BASE_DIR / os.getenv("DEV_EMAIL_STORE_RELATIVE_PATH")
+EMAIL_BACKEND = (
+    "django.core.mail.backends.filebased.EmailBackend"
+    if os.getenv("PROD") == "false"
+    else "django.core.mail.backends.smtp.EmailBackend"
+)
 
 # * Application definition
 INSTALLED_APPS = [
