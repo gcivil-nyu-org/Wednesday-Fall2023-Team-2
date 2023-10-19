@@ -14,8 +14,7 @@ from .models import User, Post
 
 
 class UserLoginForm(AuthenticationForm):
-    """login form
-    """
+    """login form"""
 
     username = forms.CharField(
         widget=forms.TextInput(
@@ -32,7 +31,7 @@ class UserLoginForm(AuthenticationForm):
     remember_me = forms.BooleanField(
         required=False,
         widget=forms.CheckboxInput(
-            attrs={"class": "form-control form-check-input", "type": "checkbox"}
+            attrs={"class": "form-check-input", "type": "checkbox"}
         ),
     )
 
@@ -48,11 +47,7 @@ class UserLoginForm(AuthenticationForm):
 
 
 class UserRegisterForm(UserCreationForm):
-    """_summary_
-
-    Args:
-        UserCreationForm (_type_): _description_
-    """
+    """user registration form"""
 
     username = forms.CharField(
         widget=forms.TextInput(
@@ -65,7 +60,7 @@ class UserRegisterForm(UserCreationForm):
             attrs={"class": "form-control", "placeholder": "Enter email"}
         )
     )
-    
+
     """
     avatar = forms.ImageField(
         widget = forms.ClearableFileInput(
@@ -87,12 +82,11 @@ class UserRegisterForm(UserCreationForm):
     )
 
     class Meta:
-        """_summary_"""
-
         model = User
         fields = ["username", "email", "password1", "password2"]
+
 
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'post', "created_at"]
+        fields = ["title", "post", "created_at"]

@@ -2,41 +2,50 @@
 
 {% block content %}
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h3 class="display-4">Login Page - SAMPLE</h3>
+    <div class="row justify-content-center py-4">
+        <div class="col-md-9">
+            <h3 class="text-center">Login</h3>
             <form method="post">
-                {% csrf_token %} 
-                <div class="form-group">
+                {% csrf_token %}
+                <div class="form-group py-1">
                     <label for="id_username">Username or email address</label>
                     {{ form.username }}
                 </div>
-                <div class="form-group">
+                <div class="form-group py-1">
                     <label for="id_password">Password</label>
                     {{ form.password }}
                 </div>
-                <div class="form-check">
+                <div class="form-check py-1">
                     <label class="form-check-label" for="id_remember_me">Remember Me</label>
                     {{ form.remember_me }}
                 </div>
-                <button type="submit" class="btn btn-primary">Sign In</button>
+                <div class="row py-3 justify-content-center">
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary">Sign In</button>
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-md-4">
+                        Consider joining? Register <a href="{% url 'users:register' %}">here</a>.
+                    </div>
+                </div>
             </form>
             {% if messages %}
-                <ul class="messages">
-                    {% for message in messages %}
-                        {% if message.tags == 'error' %}
-                            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                        {% endif %}
+            <ul class="messages" style="color: red">
+                {% for message in messages %}
+                {% if message.tags == 'error' %}
+                <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
+                    {% endif %}
                     {% endfor %}
-                </ul>
+            </ul>
             {% endif %}
             {{ form.errors.non_field_errors }}
             <ul class="list-unstyled">
-            {% for field, error_list in form.errors.items %}
+                {% for field, error_list in form.errors.items %}
                 {% for error in error_list %}
-                    <li class="text-danger">{{ error }}</li>
+                <li class="text-danger">{{ error }}</li>
                 {% endfor %}
-            {% endfor %}
+                {% endfor %}
             </ul>
         </div>
     </div>

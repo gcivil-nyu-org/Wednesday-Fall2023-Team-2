@@ -1,0 +1,9 @@
+[tool.black]
+line-length = 88
+target-version = ['py311'] # Customize the target Python versions if desired
+exclude = '''
+/migrations/,
+/static/,
+/templates/,
+.pyproject.toml,
+'''
