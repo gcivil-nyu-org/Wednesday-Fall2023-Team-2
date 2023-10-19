@@ -1,0 +1,44 @@
+{% extends "main.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h3 class="display-4">Login Page - SAMPLE</h3>
+            <form method="post">
+                {% csrf_token %} 
+                <div class="form-group">
+                    <label for="id_username">Username or email address</label>
+                    {{ form.username }}
+                </div>
+                <div class="form-group">
+                    <label for="id_password">Password</label>
+                    {{ form.password }}
+                </div>
+                <div class="form-check">
+                    <label class="form-check-label" for="id_remember_me">Remember Me</label>
+                    {{ form.remember_me }}
+                </div>
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        {% if message.tags == 'error' %}
+                            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            {{ form.errors.non_field_errors }}
+            <ul class="list-unstyled">
+            {% for field, error_list in form.errors.items %}
+                {% for error in error_list %}
+                    <li class="text-danger">{{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

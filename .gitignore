@@ -1,0 +1,48 @@
+# * dependencies
+**/node_modules
+**/.pnp
+*.pnp.js
+
+# * testing
+/coverage
+
+# * production
+/build
+
+# * misc
+.DS_Store
+.env.local
+**/.DS_Store
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+#Python Projects
+__pycache__/
+*.py[cod]
+
+# * IDE-related
+.vscode
+.idea
+
+# Virtual Environments
+venv
+env
+
+# Local SQLite DB
+db.sqlite3
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+# .env
+**/.env
+
+# .pylintrc
+**/.pylintrc
