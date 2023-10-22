@@ -91,6 +91,7 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = ["title", "post", "created_at"]
 
+
 class UserVerificationForm(forms.ModelForm):
     business_name = forms.CharField(max_length=200)
     business_type = forms.CharField(max_length=200)

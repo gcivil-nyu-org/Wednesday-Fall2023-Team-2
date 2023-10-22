@@ -64,7 +64,8 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
-    
+
+
 class UserVerification(models.Model):
     username = models.ForeignKey(User, on_delete=models.CASCADE)
     business_name = models.CharField(max_length=200)

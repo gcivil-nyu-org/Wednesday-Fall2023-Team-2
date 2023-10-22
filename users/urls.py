@@ -22,5 +22,9 @@ urlpatterns = [
         views.UserProfileDeleteView.as_view(),
         name="profile_delete",
     ),
-    path("verification/<str:username>", views.UserVerificationView.as_view(), name="verification"),
+    path(
+        "verification/<str:username>",
+        views.UserVerificationView.as_view(),
+        name="verification",
+    ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

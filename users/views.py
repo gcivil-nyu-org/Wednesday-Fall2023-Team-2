@@ -274,10 +274,9 @@ class UserProfileDeleteView(LoginRequiredMixin, View):
         return render(request, self.template_name)
 
 
-
 class UserVerificationView(View):
-    """user verification request view
-    """
+    """user verification request view"""
+
     form_class = UserVerificationForm
     template_name = "verification.html"
 
@@ -293,7 +292,7 @@ class UserVerificationView(View):
         """
         context = {"user": get_object_or_404(User, username=username)}
         return render(request, self.template_name, context)
-   
+
     def post(self, request: HttpRequest, username: str) -> HttpResponse:
         """handle user verification post request
         Args:
@@ -309,18 +308,10 @@ class UserVerificationView(View):
             verification = form.save(commit=False)
             verification.username = get_object_or_404(User, username=username)
             verification.business_name = request.POST.get("business_name")
-            verification.business_type =request.POST.get("business_type")
+            verification.business_type = request.POST.get("business_type")
             verification.business_address = request.POST.get("business_address")
             verification.save()
             return redirect("users:profile", username=username)
         else:
             print(form.errors)
         return redirect("users:welcome")
-        
-
-
-
-
-
-
-
