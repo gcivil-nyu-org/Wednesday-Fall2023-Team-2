@@ -10,7 +10,7 @@ https://stackoverflow.com/questions/5481713/whats-the-difference-between-django-
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
-from .models import User, Post
+from .models import User, Post, UserVerification
 
 
 class UserLoginForm(AuthenticationForm):
@@ -90,3 +90,13 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ["title", "post", "created_at"]
+
+
+class UserVerificationForm(forms.ModelForm):
+    business_name = forms.CharField(max_length=200)
+    business_type = forms.CharField(max_length=200)
+    business_address = forms.CharField(max_length=200)
+
+    class Meta:
+        model = UserVerification
+        fields = ["business_name", "business_type", "business_address"]
