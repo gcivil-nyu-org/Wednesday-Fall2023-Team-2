@@ -23,7 +23,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         default="avatars/ParKrowdDefaultAvatar.jpg",
     )
 
-    description = models.TextField()
+    description = models.TextField(blank=True)
 
     # * is_superuser : User can create, edit, and delete ANY object (models)
     is_superuser = models.BooleanField(default=False)
@@ -33,6 +33,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     # * Admins can be customized to have certain permissions.
     is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+
+    # * is_verified: To indicate whether the user has been verified by Admin
+    is_verified = models.BooleanField(default=False)
 
     objects = UserManager()
 
@@ -61,3 +64,9 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+    
+class UserVerification(models.Model):
+    username = models.ForeignKey(User, on_delete=models.CASCADE)
+    business_name = models.CharField(max_length=200)
+    business_type = models.CharField(max_length=200)
+    business_address = models.CharField(max_length=200)
