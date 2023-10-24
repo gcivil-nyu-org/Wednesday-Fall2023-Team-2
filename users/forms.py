@@ -8,7 +8,13 @@ https://stackoverflow.com/questions/5481713/whats-the-difference-between-django-
 """
 
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import password_validation
+from django.contrib.auth.forms import (
+    UserCreationForm,
+    AuthenticationForm,
+    PasswordResetForm,
+    SetPasswordForm,
+)
 
 from .models import User, Post, UserVerification
 
@@ -48,7 +54,8 @@ class UserLoginForm(AuthenticationForm):
         fields = ["username", "password"]
 
 
-class UserRegisterForm(UserCreationForm):
+# TODO: why inherit SetPasswordForm instead of UserCreationForm
+class UserRegisterForm(SetPasswordForm):
     """user registration form"""
 
     username = forms.CharField(
@@ -117,3 +124,42 @@ class UserVerificationForm(forms.ModelForm):
         if not uploaded_file:
             raise forms.ValidationError("You must upload a file.")
         return uploaded_file
+
+
+class UserPasswordResetForm(PasswordResetForm):
+    email = forms.EmailField(
+        widget=forms.TextInput(
+            attrs={
+                "type": "email",
+                "class": "form-control",
+                "placeholder": "name@example.com",
+            }
+        )
+    )
+
+    email_template_name = "users/password_reset_email.html"
+    subject_template_name = "users/password_reset_email_subject.txt"
+
+    class Meta:
+        fields = ["email"]
+
+
+class UserPasswordResetConfirmForm(SetPasswordForm):
+    new_password1 = forms.CharField(
+        strip=False,
+        label="New password",
+        help_text=password_validation.password_validators_help_text_html(),
+        widget=forms.PasswordInput(
+            attrs={"class": "form-control", "placeholder": "Enter Password"}
+        ),
+    )
+    new_password2 = forms.CharField(
+        strip=False,
+        label="New password confirmation",
+        widget=forms.PasswordInput(
+            attrs={"class": "form-control", "placeholder": "Confirm Password"}
+        ),
+    )
+
+    class Meta:
+        fields = ["new_password1", "new_password2"]

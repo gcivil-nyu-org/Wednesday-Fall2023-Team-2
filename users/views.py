@@ -4,13 +4,24 @@ from django.views import View
 from django.contrib import auth
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
+from django.core.exceptions import ValidationError
+from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.contrib.auth.views import INTERNAL_RESET_SESSION_TOKEN
 
-from .models import User, Post, UserVerification
+from .models import User, Post
 from .forms import UserRegisterForm, UserLoginForm, UserVerificationForm
 from .backends import EmailOrUsernameAuthenticationBackend
+from .forms import (
+    UserRegisterForm,
+    UserLoginForm,
+    UserPasswordResetForm,
+    UserPasswordResetConfirmForm,
+)
 
+UserModel = auth.get_user_model()
 # * Expiration is 1 week
 SESSION_COOKIE_EXPIRATION = 604800
 emailOrUsernameAuthenticationBackend = EmailOrUsernameAuthenticationBackend()
@@ -138,6 +149,163 @@ class UserWelcomeView(View):
 
         Returns:
             HttpResponse: rendered user welcome view
+        """
+        return render(request, self.template_name)
+
+
+class UserPasswordResetView(View):
+    """user login view"""
+
+    form_class = UserPasswordResetForm
+    template_name = "users/password_reset.html"
+    extra_email_context = {"site_name": "Parkrowd"}
+
+    def get(self, request: HttpRequest) -> HttpResponse:
+        """return user password reset page
+
+        Args:
+            request (HttpRequest): http request object
+
+        Returns:
+            HttpResponse: rendered user password reset page response
+        """
+        context = {"form": self.form_class()}
+        return render(request, self.template_name, context)
+
+    def post(self, request: HttpRequest) -> HttpResponse:
+        """handle user password reset req
+
+        Args:
+            request (HttpRequest): http request object
+
+        Returns:
+            HttpResponse: redirect to login or return password reset page with errors
+        """
+        form = self.form_class(request.POST)
+        if not form.is_valid():
+            return render(request, self.template_name, {"form": form})
+        opts = {
+            "request": request,
+            "use_https": self.request.is_secure(),
+            "extra_email_context": self.extra_email_context,
+            "email_template_name": form.email_template_name,
+            "subject_template_name": form.subject_template_name,
+        }
+        form.save(**opts)
+        return redirect("users:password-reset-email-sent")
+
+
+class UserPasswordResetEmailSentView(View):
+    """user password reset email sent view"""
+
+    template_name = "users/password_reset_email_sent.html"
+
+    def get(self, request: HttpRequest) -> HttpResponse:
+        """return user password reset email sent page
+
+        Args:
+            request (HttpRequest): http request object
+
+        Returns:
+            HttpResponse: rendered user password reset email sent page response
+        """
+        return render(request, self.template_name)
+
+
+class UserPasswordResetConfirmView(View):
+    """user password reset confirm view"""
+
+    form_class = UserPasswordResetConfirmForm
+    token_generator = PasswordResetTokenGenerator()
+    template_name = "users/password_reset_confirm.html"
+    reset_url_token = "reset-password"
+
+    def get_user(self, uidb64):
+        try:
+            # urlsafe_base64_decode() decodes to bytestring
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = UserModel._default_manager.get(pk=uid)
+        except (
+            TypeError,
+            ValueError,
+            OverflowError,
+            UserModel.DoesNotExist,
+            ValidationError,
+        ):
+            user = None
+        return user
+
+    def get(self, request: HttpRequest, uidb64, token) -> HttpResponse:
+        """return user password reset confirmation page
+
+        Args:
+            request (HttpRequest): http request object
+
+        Returns:
+            HttpResponse: rendered user password reset confirmation page
+        """
+        user = self.get_user(uidb64)
+        context = {"uidb64": uidb64, "token": token, "form": self.form_class(user)}
+        if not user:
+            messages.error(
+                request,
+                "User not found. Please contact site admin if you believe this is an error.",
+            )
+            return render(request, self.template_name, context)
+
+        if token != self.reset_url_token:
+            if self.token_generator.check_token(user, token):
+                self.request.session[INTERNAL_RESET_SESSION_TOKEN] = token
+                redirect_url = request.path.replace(token, self.reset_url_token)
+                return redirect(redirect_url)
+            messages.error(
+                request, "Your reset passsword URL is invalid or has expired"
+            )
+            return render(request, self.template_name, context)
+
+        return render(request, self.template_name, context)
+
+    def post(self, request: HttpRequest, uidb64, token) -> HttpResponse:
+        user = self.get_user(uidb64)
+        form = self.form_class(user, request.POST)
+        context = {"uidb64": uidb64, "token": token, "form": form}
+        if not user:
+            messages.error(
+                request,
+                "User not found. Please contact site admin if you believe this is an error.",
+            )
+            return render(request, self.template_name, context)
+
+        if self.token_generator.check_token(
+            user, request.session.get(INTERNAL_RESET_SESSION_TOKEN)
+        ):
+            if not form.is_valid():
+                return render(request, self.template_name, context)
+            try:
+                form.clean_new_password2()
+            except ValidationError as validationError:
+                messages.error(request, validationError)
+                return render(request, self.template_name, context)
+            form.save()
+            return redirect("users:password-reset-success")
+
+        messages.error(request, "Your reset password URL is invalid or has expired")
+        return render(request, self.template_name, context)
+
+
+class UserPasswordResetSuccessView(View):
+    """user password reset success view"""
+
+    template_name = "users/password_reset_success.html"
+
+    def get(self, request: HttpRequest) -> HttpResponse:
+        """return user password reset success page
+
+        Args:
+            request (HttpRequest): http request object
+
+        Returns:
+            HttpResponse: rendered user password reset success page response
         """
         return render(request, self.template_name)
 

@@ -74,7 +74,7 @@
 
     <div class="col-md-1">
       <!--Edit Profile-->
-      <a href="{% url 'users:profile_edit' request.user.username %}" class="btn btn-primary mx-4">Edit</a>
+      <a href="{% url 'users:profile-edit' request.user.username %}" class="btn btn-primary mx-4">Edit</a>
       <!--END Edit Profile-->
     </div>
     <div class="col-md-2">
@@ -100,7 +100,7 @@
             Are you sure you want to delete your account?
           </div>
           <div class="modal-footer">
-            <form action="{% url 'users:profile_delete' request.user.username %}" method="POST">
+            <form action="{% url 'users:profile-delete' request.user.username %}" method="POST">
               {% csrf_token %}
               <button type="submit" name="delete_profile" class="btn btn-danger">Yes</button>
             </form>

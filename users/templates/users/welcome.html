@@ -1,14 +1,13 @@
-<link
-    rel="stylesheet"
-    href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-/>
+{% extends "parkrowd/main.html" %}
+{% block content %}
 <div class="container mt-5">
     <div class="text-center">
-        <h1>Welcome to the ParKrowd family!</h1>
+        <h2 class="mb-4">Welcome to the ParKrowd family!</h2>
         <p>
-            You have successfully created an account! Please click the below to
+            You have successfully created an account! Please click the button below to
             login and start parking!
         </p>
         <a href="{% url 'users:login' %}" class="btn btn-primary">Login</a>
     </div>
 </div>
+{% endblock %}
