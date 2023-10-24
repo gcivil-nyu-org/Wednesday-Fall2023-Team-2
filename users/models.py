@@ -71,3 +71,4 @@ class UserVerification(models.Model):
     business_name = models.CharField(max_length=200)
     business_type = models.CharField(max_length=200)
     business_address = models.CharField(max_length=200)
+    uploaded_file = models.FileField(upload_to='verification_files/')
