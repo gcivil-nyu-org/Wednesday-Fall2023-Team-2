@@ -99,9 +99,9 @@ class UserVerificationForm(forms.ModelForm):
     business_type = forms.CharField(max_length=200)
     business_address = forms.CharField(max_length=200)
     uploaded_file = forms.FileField(
-        label='Choose a file',
+        label="Choose a file",
         required=True,
-        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx'])]
+        validators=[FileExtensionValidator(allowed_extensions=["pdf", "doc", "docx"])],
     )
 
     class Meta:
@@ -109,7 +109,7 @@ class UserVerificationForm(forms.ModelForm):
         fields = ["business_name", "business_type", "business_address", "uploaded_file"]
 
     def clean_uploaded_file(self):
-        uploaded_file = self.cleaned_data['uploaded_file']
+        uploaded_file = self.cleaned_data["uploaded_file"]
         if not uploaded_file:
             raise forms.ValidationError("You must upload a file.")
         return uploaded_file
