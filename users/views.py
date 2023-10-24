@@ -12,11 +12,11 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth.views import INTERNAL_RESET_SESSION_TOKEN
 
 from .models import User, Post
-from .forms import UserRegisterForm, UserLoginForm, UserVerificationForm
 from .backends import EmailOrUsernameAuthenticationBackend
 from .forms import (
-    UserRegisterForm,
     UserLoginForm,
+    UserRegisterForm,
+    UserVerificationForm,
     UserPasswordResetForm,
     UserPasswordResetConfirmForm,
 )
@@ -42,7 +42,7 @@ class UserRegisterView(View):
         Returns:
             HttpResponse: rendered user register view response
         """
-        context = {"form": self.form_class()}
+        context = {"form": self.form_class(None)}
         return render(request, self.template_name, context)
 
     def post(self, request: HttpRequest) -> HttpResponse:
@@ -54,7 +54,7 @@ class UserRegisterView(View):
         Returns:
             HttpResponse: redirect or register view with error hints
         """
-        form = self.form_class(request.POST)
+        form = self.form_class(None, request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.username = user.username.lower()

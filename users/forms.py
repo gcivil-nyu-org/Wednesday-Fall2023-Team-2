@@ -10,10 +10,10 @@ https://stackoverflow.com/questions/5481713/whats-the-difference-between-django-
 from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import (
-    UserCreationForm,
-    AuthenticationForm,
-    PasswordResetForm,
     SetPasswordForm,
+    UserCreationForm,
+    PasswordResetForm,
+    AuthenticationForm,
 )
 
 from .models import User, Post, UserVerification
@@ -54,8 +54,7 @@ class UserLoginForm(AuthenticationForm):
         fields = ["username", "password"]
 
 
-# TODO: why inherit SetPasswordForm instead of UserCreationForm
-class UserRegisterForm(SetPasswordForm):
+class UserRegisterForm(UserCreationForm):
     """user registration form"""
 
     username = forms.CharField(
