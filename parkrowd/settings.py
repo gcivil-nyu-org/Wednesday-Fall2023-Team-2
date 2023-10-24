@@ -120,7 +120,9 @@ EMAIL_HOST_USER = os.getenv("GOOGLE_SMTP_USERNAME")
 DEFAULT_FROM_EMAIL = os.getenv("GOOGLE_SMTP_USERNAME")
 EMAIL_HOST_PASSWORD = os.getenv("GOOGLE_SMTP_PASSWORD")
 EMAIL_FILE_PATH = (
-    BASE_DIR / os.getenv("DEV_EMAIL_STORE_RELATIVE_PATH") if os.getenv("PROD") == "false" else None
+    BASE_DIR / os.getenv("DEV_EMAIL_STORE_RELATIVE_PATH")
+    if os.getenv("PROD") == "false"
+    else None
 )
 EMAIL_BACKEND = (
     "django.core.mail.backends.filebased.EmailBackend"
