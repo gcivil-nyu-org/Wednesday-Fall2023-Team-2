@@ -12,6 +12,8 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 from .models import User, Post, UserVerification
 
+from django.core.validators import FileExtensionValidator
+
 
 class UserLoginForm(AuthenticationForm):
     """login form"""
@@ -96,7 +98,18 @@ class UserVerificationForm(forms.ModelForm):
     business_name = forms.CharField(max_length=200)
     business_type = forms.CharField(max_length=200)
     business_address = forms.CharField(max_length=200)
+    uploaded_file = forms.FileField(
+        label="Choose a file",
+        required=True,
+        validators=[FileExtensionValidator(allowed_extensions=["pdf", "doc", "docx"])],
+    )
 
     class Meta:
         model = UserVerification
-        fields = ["business_name", "business_type", "business_address"]
+        fields = ["business_name", "business_type", "business_address", "uploaded_file"]
+
+    def clean_uploaded_file(self):
+        uploaded_file = self.cleaned_data["uploaded_file"]
+        if not uploaded_file:
+            raise forms.ValidationError("You must upload a file.")
+        return uploaded_file
