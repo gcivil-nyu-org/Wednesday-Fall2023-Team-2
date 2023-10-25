@@ -101,7 +101,7 @@ class UserVerificationForm(forms.ModelForm):
     uploaded_file = forms.FileField(
         label="Choose a file",
         required=True,
-        validators=[FileExtensionValidator(allowed_extensions=["pdf", "doc", "docx"])],
+        validators=[FileExtensionValidator(allowed_extensions=["pdf", "doc", "docx", "png", "jpg", "jpeg"])],
     )
 
     class Meta:

@@ -2,6 +2,7 @@
 <div class="container-lg">
   <div class="row">
     <h2>Submit verification</h2>
+    <h3>Please fill out ALL feilds</h3>
   </div>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
@@ -43,7 +44,10 @@
       />
     </div>
     <div class="form-group">
-      <label for="uploaded_file">Upload Documentation</label>
+      <label for="uploaded_file"
+        >Upload Documentation(Supported file types: "pdf", "doc", "docx", "png",
+        "jpg", "jpeg")</label
+      >
       <input id="uploaded_file" type="file" name="uploaded_file" />
     </div>
     <div class="row justify-content-end py-4">
