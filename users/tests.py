@@ -96,6 +96,7 @@ class ProfileTests(TestCase):
         # TODO: Change to redirect to map view.  Currently will go to register
         self.assertRedirects(response, reverse(REGISTER_PATH_NAME))
 
+
 class LoginTests(TestCase):
     def setUp(self):
         """creates user with sample credentials"""
