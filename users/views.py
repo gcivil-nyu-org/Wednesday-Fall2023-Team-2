@@ -11,7 +11,8 @@ from .models import User, Post, UserVerification
 from .forms import UserRegisterForm, UserLoginForm, UserVerificationForm
 from .backends import EmailOrUsernameAuthenticationBackend
 
-SESSION_COOKIE_EXPIRATION = 86400
+# * Expiration is 1 week
+SESSION_COOKIE_EXPIRATION = 604800
 emailOrUsernameAuthenticationBackend = EmailOrUsernameAuthenticationBackend()
 
 
@@ -303,13 +304,14 @@ class UserVerificationView(View):
             HttpResponse: rendered user profile view with error messages or redirect to profile-delete page
         """
 
-        form = self.form_class(request.POST)
+        form = self.form_class(request.POST, request.FILES)
         if form.is_valid():
             verification = form.save(commit=False)
             verification.username = get_object_or_404(User, username=username)
             verification.business_name = request.POST.get("business_name")
             verification.business_type = request.POST.get("business_type")
             verification.business_address = request.POST.get("business_address")
+            verification.uploaded_file = form.cleaned_data.get("uploaded_file")
             verification.save()
             return redirect("users:profile", username=username)
         else:
