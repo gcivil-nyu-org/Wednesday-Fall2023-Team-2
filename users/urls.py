@@ -15,12 +15,32 @@ urlpatterns = [
     path(
         "profile-edit/<str:username>/",
         views.UserProfileEditView.as_view(),
-        name="profile_edit",
+        name="profile-edit",
     ),
     path(
         "profile-delete/<str:username>",
         views.UserProfileDeleteView.as_view(),
-        name="profile_delete",
+        name="profile-delete",
+    ),
+    path(
+        "password-reset",
+        views.UserPasswordResetView.as_view(),
+        name="password-reset",
+    ),
+    path(
+        "password-reset-email-sent",
+        views.UserPasswordResetEmailSentView.as_view(),
+        name="password-reset-email-sent",
+    ),
+    path(
+        "password-reset-confirm/<uidb64>/<token>",
+        views.UserPasswordResetConfirmView.as_view(),
+        name="password-reset-confirm",
+    ),
+    path(
+        "password-reset-success",
+        views.UserPasswordResetSuccessView.as_view(),
+        name="password-reset-success",
     ),
     path(
         "verification/<str:username>",
