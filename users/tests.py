@@ -29,26 +29,28 @@ WELCOME_PATH_NAME = "users:welcome"
 PROFILE_PATH_NAME = "users:profile"
 LOGOUT_PATH_NAME = "users:logout"
 PROFILE_DELETE_PATH_NAME = "users:profile_delete"
+VERIFICATION_PATH_NAME = "users:verification"
 
-LOGIN_TEMPLATE = "login.html"
-REGISTER_TEMPLATE = "register.html"
-WELCOME_TEMPLATE = "welcome.html"
-PROFILE_TEMPLATE = "profile.html"
+LOGIN_TEMPLATE = "users/login.html"
+REGISTER_TEMPLATE = "users/register.html"
+WELCOME_TEMPLATE = "users/welcome.html"
+PROFILE_TEMPLATE = "users/profile.html"
+VERIFICATION_TEMPLATE = "users/verification.html"
 
 
 class UserVerificationViewTest(TestCase):
     def setUp(self):
         # Create a test user
         self.test_user = User.objects.create_user(
-            username="testuser", email="test@email.com", password="testpassword"
+            username=USERNAME, email=EMAIL, password=PASSWORD
         )
 
     def test_get_request(self):
         # Test GET request to the view
-        response = self.client.get(reverse("users:verification", args=["testuser"]))
+        response = self.client.get(reverse(VERIFICATION_PATH_NAME, args=[USERNAME]))
         self.assertEqual(response.status_code, 200)  # Ensure the response is OK
         self.assertTemplateUsed(
-            response, "verification.html"
+            response, VERIFICATION_TEMPLATE
         )  # Ensure the correct template is used
         self.assertEqual(
             response.context["user"], self.test_user
@@ -63,11 +65,11 @@ class UserVerificationViewTest(TestCase):
             "uploaded_file": SimpleUploadedFile("testfile.pdf", b"Test file content"),
         }
         response = self.client.post(
-            reverse("users:verification", args=["testuser"]), data, follow=True
+            reverse(VERIFICATION_PATH_NAME, args=[USERNAME]), data, follow=True
         )
         self.assertEqual(response.status_code, 200)  # Ensure the response is OK
         self.assertRedirects(
-            response, reverse("users:profile", args=["testuser"])
+            response, reverse(PROFILE_PATH_NAME, args=[USERNAME])
         )  # Ensure redirection
 
         # Ensure that the verification object is created
@@ -83,11 +85,11 @@ class UserVerificationViewTest(TestCase):
             # Missing 'business_address' and 'uploaded_file'
         }
         response = self.client.post(
-            reverse("users:verification", args=["testuser"]), data, follow=True
+            reverse(VERIFICATION_PATH_NAME, args=[USERNAME]), data, follow=True
         )
         self.assertEqual(response.status_code, 200)  # Ensure the response is OK
         self.assertRedirects(
-            response, reverse("users:profile", args=["testuser"])
+            response, reverse(PROFILE_PATH_NAME, args=[USERNAME])
         )  # Ensure redirection
         messages = list(response.context["messages"])
         self.assertTrue(messages)  # Ensure there are messages
