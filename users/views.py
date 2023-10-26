@@ -20,7 +20,7 @@ class UserRegisterView(View):
     """user register view"""
 
     form_class = UserRegisterForm
-    template_name = "register.html"
+    template_name = "users/register.html"
 
     def get(self, request: HttpRequest) -> HttpResponse:
         """return user register view page
@@ -58,7 +58,7 @@ class UserLoginView(View):
     """user login view"""
 
     form_class = UserLoginForm
-    template_name = "login.html"
+    template_name = "users/login.html"
 
     def get(self, request: HttpRequest) -> HttpResponse:
         """return user login page
@@ -128,7 +128,7 @@ class UserLogoutView(
 class UserWelcomeView(View):
     """user welcome view"""
 
-    template_name = "welcome.html"
+    template_name = "users/welcome.html"
 
     def get(self, request: HttpRequest) -> HttpResponse:
         """return user welcome view
@@ -146,7 +146,7 @@ class UserProfileView(View):
     """user profile view"""
 
     model = User
-    template_name = "profile.html"
+    template_name = "users/profile.html"
 
     def get(self, request: HttpRequest, username: str) -> HttpResponse:
         """return user profile view
@@ -181,7 +181,7 @@ class UserProfileEditView(
     """user profile edit view"""
 
     model = User
-    template_name = "profile_edit.html"
+    template_name = "users/profile_edit.html"
 
     def get(self, request: HttpRequest, username: str) -> HttpResponse:
         """return user profile edit page
@@ -240,7 +240,7 @@ class UserProfileDeleteView(LoginRequiredMixin, View):
     """
 
     # TODO: get method and tempalte is no longer in use
-    template_name = "profile_delete.html"
+    template_name = "users/profile_delete.html"
 
     def get(self, request: HttpRequest, username: str) -> HttpResponse:
         return render(request, self.template_name)
@@ -279,7 +279,7 @@ class UserVerificationView(View):
     """user verification request view"""
 
     form_class = UserVerificationForm
-    template_name = "verification.html"
+    template_name = "users/verification.html"
 
     def get(self, request: HttpRequest, username: str) -> HttpResponse:
         """return user profile edit page
