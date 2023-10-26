@@ -315,5 +315,7 @@ class UserVerificationView(View):
             verification.save()
             return redirect("users:profile", username=username)
         else:
-            print(form.errors)
-        return redirect("users:welcome")
+            messages.error(
+                request, "Please resubmit the application with all necessary fields."
+            )
+            return redirect("users:profile", username=username)
