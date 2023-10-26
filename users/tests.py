@@ -7,6 +7,33 @@ from .forms import UserVerificationForm
 from users.models import User
 
 # Create your tests here.
+from django.contrib.auth.forms import AuthenticationForm
+
+import dateutil.parser
+
+from django.utils import timezone
+from datetime import timedelta
+
+from .views import SESSION_COOKIE_EXPIRATION
+
+
+USERNAME = "parkrowd"
+EMAIL = "parkrowd@gmail.com"
+PASSWORD = "iLikeParking123!"
+DUMMY_PASSWORD = "noParkingForYou"
+
+LOGIN_PATH_NAME = "users:login"
+
+REGISTER_PATH_NAME = "users:register"
+WELCOME_PATH_NAME = "users:welcome"
+PROFILE_PATH_NAME = "users:profile"
+LOGOUT_PATH_NAME = "users:logout"
+PROFILE_DELETE_PATH_NAME = "users:profile_delete"
+
+LOGIN_TEMPLATE = "login.html"
+REGISTER_TEMPLATE = "register.html"
+WELCOME_TEMPLATE = "welcome.html"
+PROFILE_TEMPLATE = "profile.html"
 
 
 class UserVerificationViewTest(TestCase):
@@ -88,36 +115,7 @@ class UserVerificationViewTest(TestCase):
         # Ensure that the verification object is created
         self.assertTrue(
             UserVerification.objects.filter(username=self.test_user).exists()
-
-from django.contrib.auth.forms import AuthenticationForm
-
-import dateutil.parser
-
-from django.utils import timezone
-from datetime import timedelta
-
-from .models import User
-from .views import SESSION_COOKIE_EXPIRATION
-
-
-USERNAME = "parkrowd"
-EMAIL = "parkrowd@gmail.com"
-PASSWORD = "iLikeParking123!"
-DUMMY_PASSWORD = "noParkingForYou"
-
-LOGIN_PATH_NAME = "users:login"
-
-REGISTER_PATH_NAME = "users:register"
-WELCOME_PATH_NAME = "users:welcome"
-PROFILE_PATH_NAME = "users:profile"
-LOGOUT_PATH_NAME = "users:logout"
-PROFILE_DELETE_PATH_NAME = "users:profile_delete"
-
-
-LOGIN_TEMPLATE = "login.html"
-REGISTER_TEMPLATE = "register.html"
-WELCOME_TEMPLATE = "welcome.html"
-PROFILE_TEMPLATE = "profile.html"
+        )
 
 
 class RegisterTests(TestCase):
