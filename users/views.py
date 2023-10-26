@@ -184,6 +184,15 @@ class UserPasswordResetView(View):
         form = self.form_class(request.POST)
         if not form.is_valid():
             return render(request, self.template_name, {"form": form})
+
+        # * check to make sure the email corresponds to a user
+        users = list(form.get_users(request.POST.get("email")))
+        if len(users) == 0:
+            messages.error(
+                request,
+                "This email does not match any of our records, please check for any typos",
+            )
+            return render(request, self.template_name, {"form": form})
         opts = {
             "request": request,
             "use_https": self.request.is_secure(),

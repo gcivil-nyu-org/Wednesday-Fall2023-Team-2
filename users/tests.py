@@ -1,21 +1,24 @@
-from django.test import TestCase
-from django.urls import reverse
-
-from django.core.files.uploadedfile import SimpleUploadedFile
-from .models import UserVerification
-from .forms import UserVerificationForm
-from users.models import User
-
-# Create your tests here.
-from django.contrib.auth.forms import AuthenticationForm
-
 import dateutil.parser
-
-from django.utils import timezone
+from django.core import mail
 from datetime import timedelta
+from django.urls import reverse
+from django.test import TestCase
+from django.utils import timezone
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.contrib.auth.forms import AuthenticationForm
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.contrib.auth.tokens import default_token_generator
 
-from .views import SESSION_COOKIE_EXPIRATION
-
+from users.models import User
+from .models import UserVerification
+from parkrowd.settings import EMAIL_HOST_USER
+from .views import UserPasswordResetConfirmView
+from .forms import (
+    UserVerificationForm,
+    UserPasswordResetForm,
+    UserPasswordResetConfirmForm,
+)
 
 USERNAME = "parkrowd"
 EMAIL = "parkrowd@gmail.com"
@@ -24,18 +27,26 @@ DUMMY_PASSWORD = "noParkingForYou"
 
 LOGIN_PATH_NAME = "users:login"
 
-REGISTER_PATH_NAME = "users:register"
+LOGOUT_PATH_NAME = "users:logout"
 WELCOME_PATH_NAME = "users:welcome"
 PROFILE_PATH_NAME = "users:profile"
-LOGOUT_PATH_NAME = "users:logout"
-PROFILE_DELETE_PATH_NAME = "users:profile-delete"
+REGISTER_PATH_NAME = "users:register"
 VERIFICATION_PATH_NAME = "users:verification"
+PROFILE_DELETE_PATH_NAME = "users:profile-delete"
+PASSWORD_RESET_PATH_NAME = "users:password-reset"
+PASSWORD_RESET_CONFIRM_PATH_NAME = "users:password-reset-confirm"
+PASSWORD_RESET_SUCCESS_PATH_NAME = "users:password-reset-success"
+PASSWORD_RESET_EMAIL_SENT_PATH_NAME = "users:password-reset-email-sent"
 
 LOGIN_TEMPLATE = "users/login.html"
-REGISTER_TEMPLATE = "users/register.html"
 WELCOME_TEMPLATE = "users/welcome.html"
 PROFILE_TEMPLATE = "users/profile.html"
+REGISTER_TEMPLATE = "users/register.html"
 VERIFICATION_TEMPLATE = "users/verification.html"
+PASSWORD_RESET_TEMPLATE = "users/password_reset.html"
+PASSWORD_RESET_CONFIRM_TEMPLATE = "users/password_reset_confirm.html"
+PASSWORD_RESET_SUCCESS_TEMPLATE = "users/password_reset_success.html"
+PASSWORD_RESET_EMAIL_SENT_TEMPLATE = "users/password_reset_email_sent.html"
 
 
 class UserVerificationViewTest(TestCase):
@@ -328,3 +339,172 @@ class LoginTests(TestCase):
         self.assertContains(
             response, "The credentials you provided do not match any user."
         )
+
+
+class PasswordResetTests(TestCase):
+    def setUp(self):
+        """creates user with sample credentials"""
+        self.user = User.objects.create_user(
+            username=USERNAME, email=EMAIL, password=PASSWORD
+        )
+
+    def test_password_reset_view(self):
+        """checks if password reset page returns a 200 Status Code
+        and the template 'users/password_reset.html' is used
+        """
+        response = self.client.get(reverse(PASSWORD_RESET_PATH_NAME))
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        self.assertIsInstance(form, UserPasswordResetForm)
+        self.assertTemplateUsed(response, PASSWORD_RESET_TEMPLATE)
+
+    def test_invalid_email(self):
+        """checks if we can detect invalid emails, and ask the user to try again"""
+        response = self.client.post(
+            reverse(PASSWORD_RESET_PATH_NAME), {"email": "invalid@email"}
+        )
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        self.assertIsInstance(form, UserPasswordResetForm)
+        self.assertTemplateUsed(response, PASSWORD_RESET_TEMPLATE)
+        self.assertContains(response, "Enter a valid email address")
+
+    def test_non_existent_email(self):
+        """checks if we can detect emails that do not exist in database, and ask the user to try again"""
+        response = self.client.post(
+            reverse(PASSWORD_RESET_PATH_NAME), {"email": f"nonexisistent.{EMAIL}"}
+        )
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        self.assertIsInstance(form, UserPasswordResetForm)
+        self.assertTemplateUsed(response, PASSWORD_RESET_TEMPLATE)
+        self.assertContains(
+            response,
+            "This email does not match any of our records, please check for any typos",
+        )
+
+    def test_password_reset_redirect(self):
+        """checks if redirect the user to password reset email sent page if everything goes as planned"""
+        response = self.client.post(reverse(PASSWORD_RESET_PATH_NAME), {"email": EMAIL})
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response, reverse(PASSWORD_RESET_EMAIL_SENT_PATH_NAME)
+        )  # Ensure redirection
+
+
+class PasswordResetEmailSentTests(TestCase):
+    def test_password_reset_email_sent_view(self):
+        """checks if password reset email sent page returns a 200 Status Code
+        and the template 'users/password_reset_email_sent.html' is used
+        """
+        response = self.client.get(reverse(PASSWORD_RESET_EMAIL_SENT_PATH_NAME))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, PASSWORD_RESET_EMAIL_SENT_TEMPLATE)
+
+
+class PasswordResetConfirmTests(TestCase):
+    def setUp(self):
+        """creates user with sample credentials"""
+        self.user = User.objects.create_user(
+            username=USERNAME, email=EMAIL, password=PASSWORD
+        )
+
+    def __get_user(self) -> User:
+        """helper method that returns the user created"""
+        return User.objects.get(username=USERNAME, email=EMAIL)
+
+    def test_non_exisistent_user_uidb64(self):
+        """check if we detects uidb64 that does not correspond to any user"""
+        response = self.client.get(
+            reverse(
+                PASSWORD_RESET_CONFIRM_PATH_NAME,
+                args=[
+                    urlsafe_base64_encode(force_bytes(self.__get_user().pk + 100)),
+                    "FAKETOKEN",
+                ],
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        self.assertIsInstance(form, UserPasswordResetConfirmForm)
+        self.assertTemplateUsed(response, PASSWORD_RESET_CONFIRM_TEMPLATE)
+        self.assertContains(
+            response,
+            "User not found. Please contact site admin if you believe this is an error.",
+        )
+
+    def test_fake_or_expired_token(self):
+        """checks if we detect invalid or expired token"""
+        response = self.client.get(
+            reverse(
+                PASSWORD_RESET_CONFIRM_PATH_NAME,
+                args=[
+                    urlsafe_base64_encode(force_bytes(self.__get_user().pk)),
+                    "FAKETOKEN",
+                ],
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        self.assertIsInstance(form, UserPasswordResetConfirmForm)
+        self.assertTemplateUsed(response, PASSWORD_RESET_CONFIRM_TEMPLATE)
+        self.assertContains(
+            response, "Your reset passsword URL is invalid or has expired"
+        )
+
+    def test_valid_reset_url(self):
+        """checks if we recognize valid reset urls and redirect"""
+        user = self.__get_user()
+        response = self.client.get(
+            reverse(
+                PASSWORD_RESET_CONFIRM_PATH_NAME,
+                args=[
+                    urlsafe_base64_encode(force_bytes(user.pk)),
+                    default_token_generator.make_token(user),
+                ],
+            ),
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertRedirects(
+            response,
+            reverse(
+                PASSWORD_RESET_CONFIRM_PATH_NAME,
+                args=[
+                    urlsafe_base64_encode(force_bytes(user.pk)),
+                    UserPasswordResetConfirmView.reset_url_token,
+                ],
+            ),
+        )
+        form = response.context["form"]
+        self.assertIsInstance(form, UserPasswordResetConfirmForm)
+        self.assertTemplateUsed(response, PASSWORD_RESET_CONFIRM_TEMPLATE)
+
+
+class PasswordResetSuccessTest(TestCase):
+    def test_password_reset_success_view(self):
+        """checks if password reset success page returns a 200 Status Code
+        and the template 'users/password_reset_success.html' is used
+        """
+        response = self.client.get(reverse(PASSWORD_RESET_SUCCESS_PATH_NAME))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, PASSWORD_RESET_SUCCESS_TEMPLATE)
+
+
+class EmailTest(TestCase):
+    def test_send_email(self):
+        test_subject = "Test Subject"
+        test_message = "Test message"
+        to_email = "to@test.com"
+        mail.send_mail(
+            test_subject,
+            test_message,
+            from_email=None,
+            recipient_list=[to_email],
+            fail_silently=False,
+        )
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to[0], to_email)
+        self.assertEqual(mail.outbox[0].body, test_message)
+        self.assertEqual(mail.outbox[0].subject, test_subject)
+        self.assertEqual(mail.outbox[0].from_email, EMAIL_HOST_USER)
