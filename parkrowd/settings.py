@@ -20,7 +20,7 @@ load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"), verbose=False)
 # load secret key from OS env to keep it secret
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
-# GOOGLE MAPS API Key : 
+# GOOGLE MAPS API Key :
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 
 # use OS env to control this
