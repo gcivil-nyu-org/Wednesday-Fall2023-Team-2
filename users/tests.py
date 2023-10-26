@@ -92,7 +92,7 @@ class RegisterTests(TestCase):
         self.assertFormError(response, "form", "password1", "This field is required.")
         self.assertFormError(response, "form", "password2", "This field is required.")
 
-        
+
 class ProfileTests(TestCase):
     def setUp(self):
         self.user1 = User.objects.create_user(
@@ -241,4 +241,3 @@ class LoginTests(TestCase):
         self.assertContains(
             response, "The credentials you provided do not match any user."
         )
-
