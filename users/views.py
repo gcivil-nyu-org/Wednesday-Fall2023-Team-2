@@ -11,7 +11,8 @@ from .models import User, Post, UserVerification
 from .forms import UserRegisterForm, UserLoginForm, UserVerificationForm
 from .backends import EmailOrUsernameAuthenticationBackend
 
-SESSION_COOKIE_EXPIRATION = 86400
+# * Expiration is 1 week
+SESSION_COOKIE_EXPIRATION = 604800
 emailOrUsernameAuthenticationBackend = EmailOrUsernameAuthenticationBackend()
 
 
