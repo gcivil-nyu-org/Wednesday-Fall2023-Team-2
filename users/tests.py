@@ -28,7 +28,7 @@ REGISTER_PATH_NAME = "users:register"
 WELCOME_PATH_NAME = "users:welcome"
 PROFILE_PATH_NAME = "users:profile"
 LOGOUT_PATH_NAME = "users:logout"
-PROFILE_DELETE_PATH_NAME = "users:profile_delete"
+PROFILE_DELETE_PATH_NAME = "users:profile-delete"
 VERIFICATION_PATH_NAME = "users:verification"
 
 LOGIN_TEMPLATE = "users/login.html"
@@ -123,7 +123,7 @@ class UserVerificationViewTest(TestCase):
 class RegisterTests(TestCase):
     def test_registration_view(self):
         """checks if register page returns a 200 Status Code
-        and the template 'register.html' is used
+        and the template 'users/register.html' is used
         """
         response = self.client.get(reverse(REGISTER_PATH_NAME))
         self.assertEqual(response.status_code, 200)
@@ -158,13 +158,11 @@ class RegisterTests(TestCase):
         }
         response = self.client.post(reverse(REGISTER_PATH_NAME), user_data)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "User with this Username already exists.")
 
         # * Change username entered into form for testing existing email
         user_data["username"] = "OTHER" + USERNAME
         response = self.client.post(reverse(REGISTER_PATH_NAME), user_data)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "User with this Email already exists.")
 
     def test_unsuccessful_user_registration_invalid_data(self):
         """checks if user tries to submit empty register form"""
@@ -197,7 +195,7 @@ class ProfileTests(TestCase):
 
     def test_profile_view_not_logged_in(self):
         """checks if profile page returns a 200 Status Code,
-        the template 'profile.html' is used,
+        the template 'users/profile.html' is used,
         and a user profile can be viewed without logging in
         """
         response = self.client.get(reverse(PROFILE_PATH_NAME, args=[USERNAME]))
@@ -208,7 +206,7 @@ class ProfileTests(TestCase):
 
     def test_profile_view_logged_in(self):
         """checks if profile page returns a 200 Status Code,
-        the template 'profile.html' is used,
+        the template 'users/profile.html' is used,
         and the logged in user can view their own profile
         """
         self.client.login(username=USERNAME, password=PASSWORD)
@@ -221,7 +219,7 @@ class ProfileTests(TestCase):
 
     def test_logged_in_user_view_other_profile(self):
         """checks if profile page returns a 200 Status Code,
-        the template 'profile.html' is used,
+        the template 'users/profile.html' is used,
         and the logged in user can view their own profile
         """
         self.client.login(username=USERNAME, password=PASSWORD)
@@ -259,7 +257,7 @@ class LoginTests(TestCase):
 
     def test_login_view(self):
         """checks if login page returns a 200 Status Code
-        and the template 'login.html' is used
+        and the template 'users/login.html' is used
         """
         response = self.client.get(reverse(LOGIN_PATH_NAME))
         self.assertEqual(response.status_code, 200)

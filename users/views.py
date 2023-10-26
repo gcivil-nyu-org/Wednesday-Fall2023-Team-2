@@ -54,7 +54,7 @@ class UserRegisterView(View):
         Returns:
             HttpResponse: redirect or register view with error hints
         """
-        form = self.form_class(None, request.POST)
+        form = self.form_class(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.username = user.username.lower()
