@@ -20,6 +20,9 @@ load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"), verbose=False)
 # load secret key from OS env to keep it secret
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
+# GOOGLE MAPS API Key :
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
+
 # use OS env to control this
 DEBUG = os.getenv("PROD") == "false"
 
@@ -134,6 +137,7 @@ EMAIL_BACKEND = (
 INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.admin",
+    "map.apps.MapConfig",
     "users.apps.UsersConfig",
     "django.contrib.sessions",
     "django.contrib.messages",
