@@ -347,7 +347,7 @@ class UserProfileView(View):
             "user": user,
             "user_posts": user_posts,
             "is_user_owner_of_profile": is_user_owner_of_profile,
-            "user_verification": user_verification
+            "user_verification": user_verification,
         }
 
         return render(request, self.template_name, context)
