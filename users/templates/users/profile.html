@@ -1,4 +1,4 @@
-{% extends "main.html" %} {% block content %}
+{% extends "parkrowd/main.html" %} {% block content %}
 
 <div class="container-lg">
   {% if request.user.is_authenticated %}
@@ -17,10 +17,18 @@
   </div>
   <div class="row align-items-center justify-content-start">
     <!--Profile Avatar-->
-    <div class="media col-md-2">
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+
+    <div class="media relative col-md-2">
       <img src="{{ user.avatar.url }}" width="100" height="100"
         style="vertical-align:top;margin:20px 20px;float:left;border:5px solid black" />
+        {% if user.is_verified %}
+        <div class="absolute w-4 h-4 right-10 bottom-4 rounded-full bg-blue-400 text-white text-xs text-center leading-4">✓</div>
+        {% else %}
+        <div class="absolute w-4 h-4 right-10 bottom-4 rounded-full bg-gray-400 text-white text-xs text-center leading-4">✓</div>
+        {% endif %}
     </div>
+    
     <!--END Profile Avatar-->
     <div class="col-md-10">
       <div class="row">
@@ -66,7 +74,7 @@
 
     <div class="col-md-1">
       <!--Edit Profile-->
-      <a href="{% url 'users:profile_edit' request.user.username %}" class="btn btn-primary mx-4">Edit</a>
+      <a href="{% url 'users:profile-edit' request.user.username %}" class="btn btn-primary mx-4">Edit</a>
       <!--END Edit Profile-->
     </div>
     <div class="col-md-2">
@@ -74,6 +82,9 @@
         Delete Account
       </button>
     </div>
+    <div class="col-md-3">
+        <a href="{% url 'users:verification' request.user.username %}" class="btn btn-primary mx-4">Verify</a>
+      </div>
 
     <!-- Delete Account Modal -->
     <div class="modal fade" id="deleteAccountModal" tabindex="-1" role="dialog" aria-labelledby="deleteAccount"
@@ -89,7 +100,7 @@
             Are you sure you want to delete your account?
           </div>
           <div class="modal-footer">
-            <form action="{% url 'users:profile_delete' request.user.username %}" method="POST">
+            <form action="{% url 'users:profile-delete' request.user.username %}" method="POST">
               {% csrf_token %}
               <button type="submit" name="delete_profile" class="btn btn-danger">Yes</button>
             </form>

@@ -1,0 +1,60 @@
+{% extends "parkrowd/main.html" %} {% block content %}
+<div class="container-lg">
+  <div class="row">
+    <h2>Submit verification</h2>
+    <h3>Please fill out ALL feilds</h3>
+  </div>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input
+        id="username"
+        type="text"
+        class="form-control"
+        name="username"
+        value="{{ user.username }}"
+      />
+    </div>
+    <div class="form-group">
+      <label for="business_name">Business Name</label>
+      <input
+        id="business_name"
+        type="text"
+        class="form-control"
+        name="business_name"
+      />
+    </div>
+    <div class="form-group">
+      <label for="business_type">Business Type</label>
+      <input
+        id="business_type"
+        type="text"
+        class="form-control"
+        name="business_type"
+      />
+    </div>
+    <div class="form-group">
+      <label for="business_address">Business Address</label>
+      <input
+        id="business_address"
+        type="text"
+        class="form-control"
+        name="business_address"
+      />
+    </div>
+    <div class="form-group">
+      <label for="uploaded_file"
+        >Upload Documentation(Supported file types: "pdf", "doc", "docx", "png",
+        "jpg", "jpeg")</label
+      >
+      <input id="uploaded_file" type="file" name="uploaded_file" />
+    </div>
+    <div class="row justify-content-end py-4">
+      <div class="col-md-1">
+        <button type="submit" class="btn btn-primary mx-4">Submit</button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
