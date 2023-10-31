@@ -5,6 +5,8 @@ from django.shortcuts import render
 from django.conf import settings
 from .models import Locations
 
+import json
+
 class MapView(View):
     """main map view"""
 
@@ -19,6 +21,10 @@ class MapView(View):
         Returns:
             HttpResponse: rendered map view response
         """
-        locations = Locations.objects.all()
+        locations = json.dumps([
+            {'id': item.id, 'name': item.name, 'lat': float(item.lat), 'lon':float(item.lon)}
+            for item in Locations.objects.all()
+        ])
+        # print(locations)
         context = {"GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY, "locations":locations}
         return render(request, self.template_name, context)
