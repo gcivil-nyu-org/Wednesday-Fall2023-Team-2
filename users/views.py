@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth.views import INTERNAL_RESET_SESSION_TOKEN
 
-from .models import User, Post
+from .models import User, Post, UserVerification
 from .backends import EmailOrUsernameAuthenticationBackend
 from .forms import (
     UserLoginForm,
@@ -337,6 +337,7 @@ class UserProfileView(View):
         """
         user = get_object_or_404(User, username=username)
         user_posts = Post.objects.filter(author=user)
+        user_verification = UserVerification.objects.filter(username=user).last()
 
         # * conditionally render the delete button
         # * only if the user is logged-in and viewing his/her own profile
@@ -346,6 +347,7 @@ class UserProfileView(View):
             "user": user,
             "user_posts": user_posts,
             "is_user_owner_of_profile": is_user_owner_of_profile,
+            "user_verification": user_verification,
         }
 
         return render(request, self.template_name, context)
