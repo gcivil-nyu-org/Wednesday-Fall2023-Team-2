@@ -12,15 +12,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name="user",
-            name="avatar",
-            field=models.ImageField(
-                default="avatars/ParKrowdDefaultAvatar.jpg",
-                max_length=101,
-                upload_to="avatars/",
-            ),
-        ),
         migrations.CreateModel(
             name="Post",
             fields=[
