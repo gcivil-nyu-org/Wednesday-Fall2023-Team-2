@@ -18,7 +18,10 @@ load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"), verbose=False)
 
 # region: django default (likely remain unchanged)
 # load secret key from OS env to keep it secret
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+SECRET_KEY = os.getenv(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-fwhre62z62nwjg@ft0(-6^pt6@aaa$p+ha0xdsl$qpk5j0sc#n",
+)
 
 # GOOGLE MAPS API Key :
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
