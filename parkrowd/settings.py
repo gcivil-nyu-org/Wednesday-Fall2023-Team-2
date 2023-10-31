@@ -15,27 +15,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"), verbose=False)
 # endregion: prep
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-fwhre62z62nwjg@ft0(-6^pt6@aaa$p+ha0xdsl$qpk5j0sc#n"
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("PROD") == "false"
-
-
-# * for AWS Health Check
-def is_ec2_linux():
-    """Detect if we are running on an EC2 Linux Instance
-    See http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/identify_ec2_instances.html
-    """
-    if os.path.isfile("/sys/hypervisor/uuid"):
-        with open("/sys/hypervisor/uuid") as f:
-            uuid = f.read()
-            return uuid.startswith("ec2")
-    return False
-
 
 # region: django default (likely remain unchanged)
 # load secret key from OS env to keep it secret
@@ -43,11 +22,6 @@ SECRET_KEY = os.getenv(
     "DJANGO_SECRET_KEY",
     "django-insecure-fwhre62z62nwjg@ft0(-6^pt6@aaa$p+ha0xdsl$qpk5j0sc#n",
 )
-
-# GOOGLE MAPS API Key :
-GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
-
-# use OS env to control this
 DEBUG = os.getenv("PROD") == "false"
 
 # * Internationalization
@@ -61,19 +35,6 @@ TIME_ZONE = "America/New_York"
 # * Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-ALLOWED_HOSTS = [
-    "parkrowd-env.eba-ay9wskgr.us-west-2.elasticbeanstalk.com"
-    if os.getenv("PROD") != "false"
-    else "127.0.0.1"
-]
-
-
-# ElasticBeanstalk healthcheck sends requests with host header = internal ip
-# So we detect if we are in elastic beanstalk,
-# and add the instances private ip address
-private_ip = get_linux_ec2_private_ip()
-if private_ip:
-    ALLOWED_HOSTS += [private_ip]
 
 # * Session expiry default setting
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -98,33 +59,6 @@ TEMPLATES = [
     },
 ]
 
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-DATABASES = {
-    "default": {
-        "PORT": os.getenv("RDS_PORT"),
-        "USER": os.getenv("RDS_USERNAME"),
-        "HOST": os.getenv("RDS_HOSTNAME"),
-        "NAME": os.getenv("RDS_DB_NAME"),
-        "PASSWORD": os.getenv("RDS_PASSWORD"),
-        "ENGINE": "django.db.backends.postgresql",
-    }
-}
-
-
-# Custom User Model for Authorization
-AUTH_USER_MODEL = "users.User"
-
-AUTHENTICATION_BACKENDS = ["users.backends.EmailOrUsernameAuthenticationBackend"]
-
-LOGOUT_REDIRECT_URL = "/login"
-
-# Changes messages to be based on SessionStorage, not CookieStorage
-# To fix bug with messages still appearing on screen, after logging out
-MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
-
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
@@ -145,6 +79,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # region: production related (likely to be changed)
 ROOT_URLCONF = "parkrowd.urls"
+
+# GOOGLE MAPS API Key :
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 
 # * Allowed hosts settings
 ALLOWED_HOSTS = [
