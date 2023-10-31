@@ -24,6 +24,7 @@ SECRET_KEY = "django-insecure-fwhre62z62nwjg@ft0(-6^pt6@aaa$p+ha0xdsl$qpk5j0sc#n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("PROD") == "false"
 
+
 # * for AWS Health Check
 def is_ec2_linux():
     """Detect if we are running on an EC2 Linux Instance
@@ -96,7 +97,6 @@ TEMPLATES = [
         },
     },
 ]
-
 
 
 # Database
@@ -177,8 +177,8 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # Image File Setup
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL= '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_URL = "/media/"
 
 # * Email functionality
 EMAIL_USE_TLS = True
