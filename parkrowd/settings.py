@@ -145,6 +145,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.contenttypes",
+    "django_extensions",
 ]
 
 # * Middleware definition
