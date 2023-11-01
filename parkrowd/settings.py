@@ -22,11 +22,6 @@ SECRET_KEY = os.getenv(
     "DJANGO_SECRET_KEY",
     "django-insecure-fwhre62z62nwjg@ft0(-6^pt6@aaa$p+ha0xdsl$qpk5j0sc#n",
 )
-
-# GOOGLE MAPS API Key :
-GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
-
-# use OS env to control this
 DEBUG = os.getenv("PROD") == "false"
 
 # * Internationalization
@@ -64,8 +59,7 @@ TEMPLATES = [
     },
 ]
 
-
-# *Password validation
+# Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -85,6 +79,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # region: production related (likely to be changed)
 ROOT_URLCONF = "parkrowd.urls"
+
+# GOOGLE MAPS API Key :
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 
 # * Allowed hosts settings
 ALLOWED_HOSTS = [
@@ -112,8 +109,10 @@ MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
 
 # * Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
+
 STATIC_URL = "/static/"
-STATIC_ROOT = "static"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
 # Image File Setup
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
