@@ -1,5 +1,6 @@
 from django.db import models
 
+
 # Create your models here.
 class ParkingSpace(models.Model):
     dca_license_number = models.CharField(max_length=200)

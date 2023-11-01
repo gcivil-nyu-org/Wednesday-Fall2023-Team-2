@@ -20,7 +20,9 @@ class MapView(View):
         Returns:
             HttpResponse: rendered map view response
         """
-        parking_space = ParkingSpace.objects.filter(address_zip="11201") 
-        context = {"GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
-                   "parking_space": parking_space}
+        parking_space = ParkingSpace.objects.filter(address_zip="11201")
+        context = {
+            "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+            "parking_space": parking_space,
+        }
         return render(request, self.template_name, context)
