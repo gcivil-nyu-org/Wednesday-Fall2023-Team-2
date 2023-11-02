@@ -22,6 +22,7 @@ before_script:
     - psql -c "ALTER DATABASE $RDS_DB_NAME OWNER TO $RDS_USERNAME;"
     - psql -c "ALTER USER $RDS_USERNAME CREATEDB;"
     - python manage.py migrate
+    - psql -c "\c parkrowd;"
     - psql -c "DELETE FROM map_parkingspace;"
     - python manage.py runscript load_parking_lot_data --chdir ./map
 install:
