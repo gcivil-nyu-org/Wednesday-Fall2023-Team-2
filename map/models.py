@@ -3,7 +3,7 @@ from django.db import models
 
 # Create your models here.
 class ParkingSpace(models.Model):
-    dca_license_number = models.CharField(max_length=200)
+    dca_license_number = models.CharField(max_length=200, primary_key=True)
     address_zip = models.CharField(max_length=200)
     longitude = models.CharField(max_length=200)
     latitude = models.CharField(max_length=200)
