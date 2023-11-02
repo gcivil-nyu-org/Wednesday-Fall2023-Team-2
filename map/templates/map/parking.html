@@ -12,11 +12,11 @@
         });
         var infowindow =  new google.maps.InfoWindow({});
         var parkings = [
-            {% for obj in parking_space %}
+            {% for ps in parking_space %}
                 {
-                    name: '{{ obj.business_name }}',
-                    latitude: parseFloat({{obj.latitude}}),
-                    longitude: parseFloat({{obj.longitude}}),
+                    name: '{{ ps.business_name }}',
+                    latitude: parseFloat({{ps.latitude}}),
+                    longitude: parseFloat({{ps.longitude}}),
                     // Add more fields as needed
                 },
             {% endfor %}
