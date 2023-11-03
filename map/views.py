@@ -34,12 +34,12 @@ class PostView(View):
     model = ParkingSpace
     template_name = "map/post.html"
 
-    def get(self, request: HttpRequest, dca_license_number: str) -> HttpResponse:
+    def get(self, request: HttpRequest, parking_spot_id: str) -> HttpResponse:
         """return post view
 
         Args:
             request (HttpRequest): http request object
-            dca number (str): dca string
+            parking_spot_id (str): PK of ParkingSpace object clicked on map
 
         Returns:
             HttpResponse: rendered post view
