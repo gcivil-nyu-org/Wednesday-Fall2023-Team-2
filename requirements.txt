@@ -17,6 +17,7 @@ cryptography==41.0.4
 distlib==0.3.7
 distro==1.8.0
 Django==4.2.6
+django-extensions==3.2.3
 docopt==0.6.2
 filelock==3.12.4
 flake8==6.1.0
@@ -47,6 +48,7 @@ six==1.16.0
 sqlparse==0.4.4
 termcolor==1.1.0
 texttable==1.6.7
+tqdm==4.66.1
 urllib3==1.26.16
 virtualenv==20.24.5
 wcwidth==0.1.9

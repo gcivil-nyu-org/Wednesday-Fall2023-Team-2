@@ -10,18 +10,31 @@
             center: {lat: 40.69446042799896, lng: -73.9864403526369},
             zoom: 18
         });
-        let marker = new google.maps.Marker({
-            position: {lat: 40.69446042799896, lng: -73.9864403526369},
+        var infowindow =  new google.maps.InfoWindow({});
+        var parkings = [
+            {% for ps in parking_space %}
+                {
+                    name: '{{ ps.business_name }}',
+                    latitude: parseFloat({{ps.latitude}}),
+                    longitude: parseFloat({{ps.longitude}}),
+                    // Add more fields as needed
+                },
+            {% endfor %}
+        ];
+        var marker;
+        for (var i = 0; i < parkings.length; i++) {
+            marker = new google.maps.Marker({
+            position: {lat:parkings[i].latitude, lng:parkings[i].longitude},
             map: map,
-            title: "Tandon School of Engineering"
-        });
-        const infoWindow = new google.maps.InfoWindow({
-            content: '<div><strong>NYUs Engineering School</strong><br>Yes. The spot is in the building.</div>'
-        });
-
-        marker.addListener('click', function() {
-            infoWindow.open(map, marker);
-        });
+            title: parkings[i].name
+            });
+            google.maps.event.addListener(marker, 'click', (function (marker, i) {
+                return function () {
+                infowindow.setContent(parkings[i].name);
+                infowindow.open(map, marker);
+                }
+                })(marker, i));
+        }
     }
    
 </script>
