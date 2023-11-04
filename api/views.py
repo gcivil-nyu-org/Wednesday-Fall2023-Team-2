@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import HttpRequest, HttpResponse
 
 from map.models import ParkingSpace
 from .serializers import ParkingSpaceSerializer
@@ -12,10 +13,24 @@ from haversine import haversine, Unit
 # Create your views here.
 
 class ParkingSpaceAPIView(generics.ListAPIView):
+    """API endpoint
+    /api/spots/?lat=LATITUDE&lon=LONGITUDE
+    """
     queryset = ParkingSpace.objects.all()
     serializer_class = ParkingSpaceSerializer
 
-    def get(self, request):
+    def get(self, request: HttpRequest) -> Response:
+        """handles get requests to API endpoint above
+
+        Args:
+            request (HttpRequest): http request object
+
+        Returns:
+            Response: JSON Object with either message requesting 
+            lat and lon as query parameters OR on success
+            the parking spots within distance 
+            (specified in __is_within_dist method)
+        """
         lat = request.GET.get('lat')
         lon = request.GET.get('lon')
 
@@ -33,5 +48,10 @@ class ParkingSpaceAPIView(generics.ListAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def __is_within_dist(self, p1, p2):
+        """method to create a normal user
+
+        Returns:
+            Boolean: p1 is within max_dist of p2
+        """
         max_dist = 0.25
         return haversine(p1, p2, unit=Unit.MILES) < max_dist
