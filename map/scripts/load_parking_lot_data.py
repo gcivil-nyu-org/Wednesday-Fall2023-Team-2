@@ -5,7 +5,7 @@ from django.conf import settings
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-csv_file_path = os.path.join(BASE_DIR, "data/result.csv")
+csv_file_path = os.path.join(BASE_DIR, "data/concat_result.csv")
 
 
 def run():
@@ -14,9 +14,13 @@ def run():
         reader = csv.DictReader(file)
         for row in reader:
             ParkingSpace.objects.create(
-                dca_license_number=row["DCA License Number"],
-                address_zip=row["Address ZIP"],
-                longitude=row["Longitude"],
-                latitude=row["Latitude"],
-                business_name=row["Business Name"],
+                parking_spot_id=row["parking_spot_id"],
+                address_zip=row["address_zip"],
+                longitude=row["longitude"],
+                latitude=row["latitude"],
+                parking_spot_name=row["parking_spot_name"],
+                type=row["type"],
+                borough=row["borough"],
+                detail=row["detail"],
+                operation_hours=row["operation_hours"],
             )

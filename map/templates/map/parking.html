@@ -14,9 +14,11 @@
         var parkings = [
             {% for ps in parking_space %}
                 {
-                    name: '{{ ps.business_name }}',
+                    name: '{{ ps.parking_spot_name }}',
                     latitude: parseFloat({{ps.latitude}}),
                     longitude: parseFloat({{ps.longitude}}),
+                    type: '{{ps.type}}',
+                    detail: '{{ps.detail}}'
                     // Add more fields as needed
                 },
             {% endfor %}
@@ -30,7 +32,7 @@
             });
             google.maps.event.addListener(marker, 'click', (function (marker, i) {
                 return function () {
-                infowindow.setContent(parkings[i].name);
+                infowindow.setContent(parkings[i].name + ' '+ parkings[i].detail);
                 infowindow.open(map, marker);
                 }
                 })(marker, i));
