@@ -12,10 +12,12 @@ from haversine import haversine, Unit
 
 # Create your views here.
 
+
 class ParkingSpaceAPIView(generics.ListAPIView):
     """API endpoint
     /api/spots/?lat=LATITUDE&lon=LONGITUDE
     """
+
     queryset = ParkingSpace.objects.all()
     serializer_class = ParkingSpaceSerializer
 
@@ -26,22 +28,25 @@ class ParkingSpaceAPIView(generics.ListAPIView):
             request (HttpRequest): http request object
 
         Returns:
-            Response: JSON Object with either message requesting 
+            Response: JSON Object with either message requesting
             lat and lon as query parameters OR on success
-            the parking spots within distance 
+            the parking spots within distance
             (specified in __is_within_dist method)
         """
-        lat = request.GET.get('lat')
-        lon = request.GET.get('lon')
+        lat = request.GET.get("lat")
+        lon = request.GET.get("lon")
 
         if not (lat and lon):
-            response_data = {'message': 'Bad Request: Missing lat and lon parameters'}
+            response_data = {"message": "Bad Request: Missing lat and lon parameters"}
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
         center_point = (float(lat), float(lon))
         filtered_spots = [
-            spot for spot in self.queryset.all() 
-            if self.__is_within_dist(center_point, (float(spot.latitude), float(spot.longitude)))
+            spot
+            for spot in self.queryset.all()
+            if self.__is_within_dist(
+                center_point, (float(spot.latitude), float(spot.longitude))
+            )
         ]
         serializer = self.serializer_class(filtered_spots, many=True)
 
@@ -53,5 +58,5 @@ class ParkingSpaceAPIView(generics.ListAPIView):
         Returns:
             Boolean: p1 is within max_dist of p2
         """
-        max_dist = 0.25
+        max_dist = 1
         return haversine(p1, p2, unit=Unit.MILES) < max_dist

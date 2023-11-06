@@ -22,32 +22,67 @@
      */
     function addMarker(spot) {
         let marker = new google.maps.Marker({
-                position: {
-                    lat: parseFloat(spot.latitude), 
-                    lng: parseFloat(spot.longitude)
-                },
-                map: map,
-                title: spot.parking_spot_name
-            });
-            google.maps.event.addListener(marker, 'click', (function (marker, id) {
-                return function () {
-                    infoWindow.setContent(
-                        '<div class ="window" ><h1>Name: ' + spot.parking_spot_name + '</h1><br>' +
-                        '<div class ="window" ><h2>Type: ' + spot.type + '</h1><br>' +
-                        '<div class ="window" ><h2>Details: ' + spot.detail + '</h2><br>' +
-                        '<button onclick="makePost(\'' + '/map/post/' + spot.parking_spot_id + '\')">Make Post</button></div>'
-                    );
-                    infoWindow.open(map, marker);
+            position: {
+                lat: parseFloat(spot.latitude), 
+                lng: parseFloat(spot.longitude)
+            },
+            map: map,
+            title: spot.parking_spot_name
+        });
+        google.maps.event.addListener(marker, 'click', (function (marker, id) {
+            return function () {
+                let markerInfo;
+
+                if (spot.type === "Business") {
+                    markerInfo = getBusinessInfo(spot);
                 }
-            //TO DO : Change Marker ID from dca_license_number
-            //to parking_spot_id
-            //Jun will merge Meter Data Set
-            })(marker, spot.parking_spot_id));
+                else if (spot.type === "Street") {
+                    markerInfo = getStreetInfo(spot);
+                }
+
+                infoWindow.setContent(markerInfo);
+                infoWindow.open(map, marker);
+            }
+        })(marker, spot.parking_spot_id));
     }
 
     /**
-     * Add markers on map with click-to-view info window
+     * Helper function for addMarker()
+     * Sets up HTML info for business based markers (format different from other spots)
      * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
+     * @returns {string} HTML content - info on parking spot
+     */
+    function getBusinessInfo(spot) {
+        return '<div class="d-flex flex-column text-center p-2">' + 
+        '<div class="mb-3"><h1 class="h3 mb-1">' + spot.parking_spot_name + '</h1></div>' +
+        '<div class="mb-3">Type: ' + spot.type + '</div>' +
+        '<div class="mb-3">Details: ' + spot.detail + '</div>' +
+        `<div class="w-75 mx-auto"><button class="btn btn-primary btn-sm" onclick="makePost('/map/post/${spot.parking_spot_id}')">Make Post</button></div>` +
+        '</div>'
+    }
+
+    /**
+     * Helper function for addMarker()
+     * Sets up HTML info for street based markers (format different from other spots)
+     * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
+     */
+    
+    //TO DO : Meter parking is currently clasified as 'Street' (type in ParkingSpace model)
+    //Suggestion : Change from 'Street' to 'Meter'
+    function getStreetInfo(spot) {
+        return '<div class="d-flex flex-column text-center p-2">' +
+        '<div class="mb-3"><h1 class="h3 mb-1">' + 'Meter Parking' + '</h1></div>' +
+        '<div class="mb-3">Type: ' + spot.type + '</div>' +
+        '<div class="mb-3">Details: ' + spot.detail + '</div>' +
+        `<div class="w-75 mx-auto"><button class="btn btn-primary btn-sm" onclick="makePost('/map/post/${spot.parking_spot_id}')">Make Post</button></div>` +
+        '</div>'
+    }
+
+    /**
+     * Retrieve Parking Spots around center of map
+     * via an API endpoint with lat and lon as query parameters
+     * Sets markers for spots found within certain distance
+     * around center - reference api/views.py __is_within_dist method
      */
     function fetchParkingSpotAroundCenter() {
 
@@ -68,8 +103,8 @@
     }
 
     /**
-     * Add markers on map with click-to-view info window
-     * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
+     * Callback Function for Google Maps API
+     * after JS is loaded to page
      */
     function initMap() {
         const tandon_lat = 40.69446042799896;
@@ -82,14 +117,27 @@
         infoWindow =  new google.maps.InfoWindow({});
     }
 
+    /**
+     * Redirects to make post page, when user clicks on 
+     * button inside info window of parking spot on map
+     * @param {string} url - redirect url specified (see addMarker function)
+     */
     function makePost(url) {
         window.location.href = url;
     }
 
+    /**
+     * Sets up the following on webpage, on load
+     *      Add click event listener to "Load Parking Spots" button
+     */
+    function setup() {
+        loadParkingBtn.addEventListener('click', function(e) {
+            fetchParkingSpotAroundCenter();
+        })
+    }
 
-    loadParkingBtn.addEventListener('click', function(e) {
-        fetchParkingSpotAroundCenter();
-    })
+    setup();
+
 </script>
 <script
   async
