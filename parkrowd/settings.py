@@ -84,11 +84,15 @@ ROOT_URLCONF = "parkrowd.urls"
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 
 # * Allowed hosts settings
-ALLOWED_HOSTS = [
-    "127.0.0.1" "parkrowd.us-west-2.elasticbeanstalk.com"
+ALLOWED_HOSTS = (
+    ["127.0.0.1"]
     if os.getenv("PROD") == "false"
-    else "parkrowd-env.eba-spjjw3yh.us-west-2.elasticbeanstalk.com"
-]
+    else [
+        "parkrowd-env.eba-spjjw3yh.us-west-2.elasticbeanstalk.com",
+        "parkrowd.us-west-2.elasticbeanstalk.com",
+    ]
+)
+
 # ElasticBeanstalk healthcheck sends requests with host header = internal ip
 # So we detect if we are in elastic beanstalk,
 # and add the instances private ip address
