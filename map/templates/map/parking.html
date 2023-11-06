@@ -11,11 +11,12 @@
   var parkings = [
     {% for ps in parking_space %}
     {
-    name: '{{ ps.business_name }}',
+    id: '{{ ps.parking_spot_id }}',
+    name: '{{ ps.parking_spot_name }}',
     latitude: parseFloat({{ ps.latitude }}),
     longitude: parseFloat({{ ps.longitude }}),
-    id: '{{ ps.dca_license_number }}',
-    address_zip: '{{ps.address_zip}}'
+    type: '{{ps.type}}',
+    detail: '{{ps.detail}}'
     },
     {% endfor %}
   ];
@@ -28,8 +29,9 @@
 
     var infoWindow = new google.maps.InfoWindow();
     infoWindow.setContent(
-    '<div class ="window" ><h1>' + parkings[i].name + '</h1><br>' +
-    '<div class ="window" ><h2>' + parkings[i].address_zip + '</h2><br>' +
+    '<div class ="window" ><h1>Name: ' + parkings[i].name + '</h1><br>' +
+    '<div class ="window" ><h2>Type: ' + parkings[i].type + '</h1><br>' +
+    '<div class ="window" ><h2>Details: ' + parkings[i].detail + '</h2><br>' +
     '<button onclick="makePost(\'' + '/map/post/' + parkings[i].id + '\')">Make Post</button></div>'
 
     );
