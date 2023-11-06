@@ -30,7 +30,9 @@ jmespath==1.0.1
 mccabe==0.7.0
 mypy-extensions==1.0.0
 nodeenv==1.8.0
+numpy==1.26.1
 packaging==23.2
+pandas==2.1.2
 pathspec==0.10.1
 Pillow==10.1.0
 platformdirs==3.10.0
@@ -52,6 +54,7 @@ sqlparse==0.4.4
 termcolor==1.1.0
 texttable==1.6.7
 tqdm==4.66.1
+tzdata==2023.3
 urllib3==1.26.16
 virtualenv==20.24.5
 wcwidth==0.1.9
