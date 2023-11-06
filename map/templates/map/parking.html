@@ -1,15 +1,14 @@
 {% extends "parkrowd/main.html" %} {% block content %}
 <style>
-    #map {
-        position: fixed !important; 
-        bottom: 0; 
-        height: 60vh; 
-        width: 100%;
-    }
+    #map { height: 60vh; }
 </style>
 
-<div id="map"></div>
-<button id="load-parking-btn">Load Parking Spots</button>
+<div class="fixed-bottom">
+    <div class="map-container">
+        <button id="load-parking-btn" class="btn btn-primary">Load Parking Spots</button>
+        <div id="map"></div>
+    </div>
+</div>
 
 <script>
     let map;
@@ -27,8 +26,14 @@
                 lng: parseFloat(spot.longitude)
             },
             map: map,
-            title: spot.parking_spot_name
+            title: spot.parking_spot_name,
+            animation: google.maps.Animation.BOUNCE
         });
+
+        setTimeout(function() {
+            marker.setAnimation(null);
+        }, 750);
+
         google.maps.event.addListener(marker, 'click', (function (marker, id) {
             return function () {
                 let markerInfo;
