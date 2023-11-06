@@ -1,7 +1,4 @@
-{% extends "parkrowd/main.html" %}
-
-
-{% block content %}
+{% extends "parkrowd/main.html" %} {% block content %}
 <style>
     #map {
         position: fixed !important; 
@@ -16,7 +13,7 @@
 
 <script>
     let map;
-    let infowindow;
+    let infoWindow;
     const loadParkingBtn = document.getElementById("load-parking-btn");
 
     /**
@@ -25,21 +22,33 @@
      */
     function addMarker(spot) {
         let marker = new google.maps.Marker({
-                position: {lat:parseFloat(spot.latitude), lng:parseFloat(spot.longitude)},
+                position: {
+                    lat: parseFloat(spot.latitude), 
+                    lng: parseFloat(spot.longitude)
+                },
                 map: map,
-                title: spot.business_name
+                title: spot.parking_spot_name
             });
             google.maps.event.addListener(marker, 'click', (function (marker, id) {
                 return function () {
-                    infowindow.setContent(spot.business_name);
-                    infowindow.open(map, marker);
+                    infoWindow.setContent(
+                        '<div class ="window" ><h1>Name: ' + spot.parking_spot_name + '</h1><br>' +
+                        '<div class ="window" ><h2>Type: ' + spot.type + '</h1><br>' +
+                        '<div class ="window" ><h2>Details: ' + spot.detail + '</h2><br>' +
+                        '<button onclick="makePost(\'' + '/map/post/' + spot.parking_spot_id + '\')">Make Post</button></div>'
+                    );
+                    infoWindow.open(map, marker);
                 }
             //TO DO : Change Marker ID from dca_license_number
             //to parking_spot_id
             //Jun will merge Meter Data Set
-            })(marker, spot.dca_license_number));
+            })(marker, spot.parking_spot_id));
     }
 
+    /**
+     * Add markers on map with click-to-view info window
+     * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
+     */
     function fetchParkingSpotAroundCenter() {
 
         const center = map.getCenter();
@@ -48,31 +57,44 @@
 
         axios.get(`/api/spots/?lat=${lat}&lon=${lng}`)
             .then(function (response) {
-                // Process the API response data here
                 const spotsData = response.data;
                 spotsData.forEach(spot => {
                     addMarker(spot);
                 })
             })
             .catch(function (error) {
-                // Handle any errors here
-                console.log("Error retrieving data");
                 console.log(error);
             });
     }
 
+    /**
+     * Add markers on map with click-to-view info window
+     * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
+     */
     function initMap() {
+        const tandon_lat = 40.69446042799896;
+        const tandon_lon = -73.9864403526369;
+
         map = new google.maps.Map(document.getElementById('map'), {
-            center: {lat: 40.69446042799896, lng: -73.9864403526369},
+            center: {lat: tandon_lat, lng: tandon_lon},
             zoom: 18
         });
-        infowindow =  new google.maps.InfoWindow({});
+        infoWindow =  new google.maps.InfoWindow({});
     }
+
+    function makePost(url) {
+        window.location.href = url;
+    }
+
 
     loadParkingBtn.addEventListener('click', function(e) {
         fetchParkingSpotAroundCenter();
     })
-   
 </script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap"></script>
+<script
+  async
+  defer
+  src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap"
+></script>
 {% endblock %}
+

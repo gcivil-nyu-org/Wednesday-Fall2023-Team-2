@@ -1,6 +1,6 @@
 from django.views import View
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from .models import ParkingSpace
 
 from django.conf import settings
@@ -25,4 +25,29 @@ class MapView(View):
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
             "parking_space": parking_space,
         }
+        return render(request, self.template_name, context)
+
+
+class PostView(View):
+    """post view"""
+
+    model = ParkingSpace
+    template_name = "map/post.html"
+
+    def get(self, request: HttpRequest, dca_license_number: str) -> HttpResponse:
+        """return post view
+
+        Args:
+            request (HttpRequest): http request object
+            dca number (str): dca string
+
+        Returns:
+            HttpResponse: rendered post view
+        """
+        spot = get_object_or_404(ParkingSpace, parking_spot_id=parking_spot_id)
+
+        context = {
+            "spot": spot,
+        }
+
         return render(request, self.template_name, context)

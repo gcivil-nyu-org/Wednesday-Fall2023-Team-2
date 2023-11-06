@@ -4,6 +4,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
+from map.models import ParkingSpace
 from .managers import UserManager
 
 
@@ -61,6 +62,7 @@ class Post(models.Model):
     post = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(verbose_name="Date Created", default=timezone.now)
+    parking_space = models.ForeignKey(ParkingSpace, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
