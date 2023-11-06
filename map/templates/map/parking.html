@@ -1,42 +1,80 @@
-{% extends "parkrowd/main.html" %}
-
-
-{% block content %}
-<div id="map" style="height: 400px; width: 100%;"></div>
+{% extends "parkrowd/main.html" %} {% block content %}
+<div id="map" style="height: 400px; width: 100%"></div>
 <script>
-    let map;
-    function initMap() {
-        map = new google.maps.Map(document.getElementById('map'), {
-            center: {lat: 40.69446042799896, lng: -73.9864403526369},
-            zoom: 18
-        });
-        var infowindow =  new google.maps.InfoWindow({});
-        var parkings = [
-            {% for ps in parking_space %}
-                {
-                    name: '{{ ps.business_name }}',
-                    latitude: parseFloat({{ps.latitude}}),
-                    longitude: parseFloat({{ps.longitude}}),
-                    // Add more fields as needed
-                },
-            {% endfor %}
-        ];
-        var marker;
-        for (var i = 0; i < parkings.length; i++) {
-            marker = new google.maps.Marker({
-            position: {lat:parkings[i].latitude, lng:parkings[i].longitude},
-            map: map,
-            title: parkings[i].name
-            });
-            google.maps.event.addListener(marker, 'click', (function (marker, i) {
-                return function () {
-                infowindow.setContent(parkings[i].name);
-                infowindow.open(map, marker);
-                }
-                })(marker, i));
-        }
-    }
-   
+  let map;
+  function initMap() {
+    map = new google.maps.Map(document.getElementById('map'), {
+    center: { lat: 40.694462, lng: -73.985626 },
+    zoom: 18
+  });
+
+  var parkings = [
+    {% for ps in parking_space %}
+    {
+    name: '{{ ps.business_name }}',
+    latitude: parseFloat({{ ps.latitude }}),
+    longitude: parseFloat({{ ps.longitude }}),
+    id: '{{ ps.dca_license_number }}',
+    address_zip: '{{ps.address_zip}}'
+    },
+    {% endfor %}
+  ];
+
+  for (var i = 0; i < parkings.length; i++) {
+    var marker = new google.maps.Marker({
+      position: { lat: parkings[i].latitude, lng: parkings[i].longitude },
+      map: map,
+    });
+
+    var infoWindow = new google.maps.InfoWindow();
+    infoWindow.setContent(
+    '<div class ="window" ><h1>' + parkings[i].name + '</h1><br>' +
+    '<div class ="window" ><h2>' + parkings[i].address_zip + '</h2><br>' +
+    '<button onclick="makePost(\'' + '/map/post/' + parkings[i].id + '\')">Make Post</button></div>'
+
+    );
+
+    marker.addListener('click', function () {
+      infoWindow.open(map, this);
+    });
+  }
+  }
+
+  function makePost(url) {
+    window.location.href = url;
+  }
 </script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap"></script>
+<script
+  async
+  defer
+  src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap"
+></script>
+<style>
+  .window {
+    text-align: center;
+  }
+
+  .window h1 {
+    font-size: 20px;
+    margin: 0;
+  }
+
+  .window h2 {
+    font-size: 15px;
+    margin: 0;
+  }
+
+  .window button {
+    background-color: #add8e6;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .window button:hover {
+    background-color: #808080; 
+  }
+</style>
+</style>
 {% endblock %}
