@@ -1,6 +1,6 @@
 {% extends "parkrowd/main.html" %} {% block content %}
 <style>
-    #map, #filter-sliding-window { height: 60vh; }
+    #map, #filter-sliding-window { height: 75vh; }
 
     #filter-sliding-window {
         background-color: #fff;
@@ -37,11 +37,13 @@
                 <div class="form-group">
                     <label>Parking Types:</label>
                     <div class="btn-group-toggle" data-toggle="buttons">
+                        <!--Each input should have a "filter-checkbox" class for JS to apply filtering-->
+                        <!--Values for each input checkbox should be specified (match DB type)-->
                         <label class="btn btn-secondary">
-                            <input type="checkbox" autocomplete="off"> Business
+                            <input class="filter-checkbox" type="checkbox" autocomplete="off" value="Business"> Business
                         </label>
                         <label class="btn btn-secondary">
-                            <input type="checkbox" autocomplete="off"> Street
+                            <input class="filter-checkbox" type="checkbox" autocomplete="off" value="Street"> Street
                         </label>
                     </div>
                 </div>
@@ -64,7 +66,10 @@
     const filterWindowOpenBtn = document.getElementById("filter-window-open-btn");
     const filterWindowCloseBtn = document.getElementById("filter-window-close-btn");
     const filterSlidingWindow = document.getElementById("filter-sliding-window");
-    const applyFilterBtn = document.getElementById("")
+
+    const applyFilterBtn = document.getElementById("apply-filter-btn");
+    const businessTypeCheckbox = document.getElementById("business-type-checkbox");
+    const streetTypeCheckbox = document.getElementById("street-type-checkbox");
 
     const spotIds = new Set();
     const markers = [];
@@ -133,8 +138,10 @@
                 lng: parseFloat(spot.longitude)
             },
             content: pinBackground.element,
-            title: spot.parking_spot_name,
+            title: spot.parking_spot_name
         });
+        //To identify a marker when filtering
+        marker.type = spot.type;
         return marker;
     }
 
@@ -247,13 +254,46 @@
         filterWindowCloseBtn.addEventListener('click', function(e) {
             closeFilterWindow();
         });
+
+        applyFilterBtn.addEventListener('click', function(e) {
+            applyFilter();
+        });
     }
 
+    /**
+     * Applies filter based on input fields (with class "filter-checkbox") 
+     * that are selected
+     */
+    function applyFilter() {
+        //Finds all checkboxes with class "filter-checkbox"
+        //and creates and array with the names of checkboxes selected
+        const checkboxes = document.querySelectorAll('.filter-checkbox');
+        const selectedFilters = Array.from(checkboxes)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
+
+        //Iterates through all markers and properly
+        //sets the 'map' property accordingly
+        markers.forEach(marker => {
+            if (!selectedFilters.includes(marker.type)) {
+                marker.map = null;
+            } else {
+                marker.map = map;
+            }
+        });
+    }
+
+    /**
+     * Closes Filter Window by adjusting CSS class
+     */
     function openFilterWindow() {
         filterSlidingWindow.classList.add('open-window');
         filterSlidingWindow.classList.remove('close-window');
     }
 
+    /**
+     * Opens Filter Window by adjusting CSS class
+     */
     function closeFilterWindow() {
         filterSlidingWindow.classList.add('close-window');
         filterSlidingWindow.classList.remove('open-window');
