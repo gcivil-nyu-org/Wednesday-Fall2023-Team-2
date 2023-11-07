@@ -15,11 +15,19 @@
     let infoWindow;
     const loadParkingBtn = document.getElementById("load-parking-btn");
 
+    const spotIds = new Set();
+
     /**
      * Add markers on map with click-to-view info window
      * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
      */
     function addMarker(spot) {
+        if (spotIds.has(spot.parking_spot_id)) {
+            return ;
+        }
+
+        spotIds.add(spot.parking_spot_id);
+
         let marker = new google.maps.Marker({
             position: {
                 lat: parseFloat(spot.latitude), 
@@ -49,6 +57,7 @@
                 infoWindow.open(map, marker);
             }
         })(marker, spot.parking_spot_id));
+
     }
 
     /**
