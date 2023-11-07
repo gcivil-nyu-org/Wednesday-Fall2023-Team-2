@@ -21,12 +21,31 @@
      * Add markers on map with click-to-view info window
      * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
      */
-    function addMarker(spot) {
+    async function addMarker(spot) {
+        const { AdvancedMarkerElement,  PinElement} = await google.maps.importLibrary("marker");
         if (spotIds.has(spot.parking_spot_id)) {
             return ;
         }
 
         spotIds.add(spot.parking_spot_id);
+
+        if (spot.type === "Street") {
+            // Change the background color.
+            const pinBackground = new PinElement({
+            background: "#ffc107",
+            borderColor: "#ffc107",
+            });
+            let marker = new AdvancedMarkerElement({
+            map,
+            position: {
+                lat: parseFloat(spot.latitude), 
+                lng: parseFloat(spot.longitude)
+            },
+            content: pinBackground.element,
+            title: spot.parking_spot_name,
+            //animation: google.maps.Animation.BOUNCE
+            });
+        }
 
         let marker = new google.maps.Marker({
             position: {
@@ -120,13 +139,14 @@
      * Callback Function for Google Maps API
      * after JS is loaded to page
      */
-    function initMap() {
+    async function initMap() {
         const tandon_lat = 40.69446042799896;
         const tandon_lon = -73.9864403526369;
 
         map = new google.maps.Map(document.getElementById('map'), {
             center: {lat: tandon_lat, lng: tandon_lon},
-            zoom: 18
+            zoom: 18,
+            mapId: '{{ GOOGLE_MAP_ID }}'
         });
         infoWindow =  new google.maps.InfoWindow({});
     }
