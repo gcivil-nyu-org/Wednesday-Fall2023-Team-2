@@ -88,8 +88,8 @@ ALLOWED_HOSTS = (
     ["127.0.0.1"]
     if os.getenv("PROD") == "false"
     else [
-        "parkrowd-env.eba-spjjw3yh.us-west-2.elasticbeanstalk.com",
-        "parkrowd.us-west-2.elasticbeanstalk.com",
+        "parkrowd-prod.us-west-2.elasticbeanstalk.com",
+        "parkrowd-develop.us-west-2.elasticbeanstalk.com",
     ]
 )
 

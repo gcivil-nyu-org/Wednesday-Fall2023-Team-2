@@ -38,7 +38,7 @@ deploy:
       secret_access_key: "$AWS_ACCESS_SECRET_KEY"
       region: us-west-2
       app: parkrowd
-      env: Parkrowd-env-master
+      env: parkrowd-env-prod
       bucket_name: "$S3_BUCKET_NAME"
       on:
           branch: master
@@ -47,7 +47,7 @@ deploy:
       secret_access_key: "$AWS_ACCESS_SECRET_KEY"
       region: us-west-2
       app: parkrowd
-      env: Parkrowd-env
+      env: parkrowd-env-develop
       bucket_name: "$S3_BUCKET_NAME"
       on:
           branch: develop
