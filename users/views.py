@@ -487,7 +487,7 @@ class UserVerificationView(View):
             verification = form.save(commit=False)
             verification.username = get_object_or_404(User, username=username)
             verification.business_name = request.POST.get("business_name")
-            verification.business_type = request.POST.get("business_type")
+            verification.business_type = form.cleaned_data["business_type"]
             verification.business_address = request.POST.get("business_address")
             verification.uploaded_file = form.cleaned_data.get("uploaded_file")
             verification.save()

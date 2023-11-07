@@ -71,7 +71,7 @@ class UserVerificationViewTest(TestCase):
         # Test POST request with valid data
         data = {
             "business_name": "Test Business",
-            "business_type": "Test Type",
+            "business_type": "Public Parking Lot Owner",
             "business_address": "123 Test St",
             "uploaded_file": SimpleUploadedFile("testfile.pdf", b"Test file content"),
         }
@@ -92,7 +92,7 @@ class UserVerificationViewTest(TestCase):
         # Test POST request with invalid data
         data = {
             "business_name": "Test Business",
-            "business_type": "Test Type",
+            "business_type": "Public Parking Lot Owner",
             # Missing 'business_address' and 'uploaded_file'
         }
         response = self.client.post(
@@ -113,7 +113,7 @@ class UserVerificationViewTest(TestCase):
         # Test model creation based on valid form data
         data = {
             "business_name": "Test Business",
-            "business_type": "Test Type",
+            "business_type": "Public Parking Lot Owner",
             "business_address": "123 Test St",
         }
         uploaded_file = SimpleUploadedFile("testfile.pdf", b"Test file content")
