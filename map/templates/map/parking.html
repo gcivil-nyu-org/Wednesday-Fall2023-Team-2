@@ -1,12 +1,58 @@
 {% extends "parkrowd/main.html" %} {% block content %}
 <style>
-    #map { height: 60vh; }
+    #map, #filter-sliding-window { height: 60vh; }
+
+    #filter-sliding-window {
+        background-color: #fff;
+        left: -25%; /* Initially hidden */
+        width: 25%;
+        transition: left 0.3s ease-in-out;
+    }
+        
+    #filter-sliding-window.close-window {
+        left: -25%;
+    }
+        
+    #filter-sliding-window.open-window {
+        left: 0;
+    }
 </style>
 
 <div class="fixed-bottom">
     <div class="map-container">
+        <button id="filter-window-open-btn" class="btn btn-info">Adjust Filter</button>
         <button id="load-parking-btn" class="btn btn-primary">Load Parking Spots</button>
         <div id="map"></div>
+    </div>
+    <div id="filter-sliding-window" class="fixed-bottom close-window">
+        <div class="d-flex justify-content-end">
+            <button id="filter-window-close-btn" type="button" class="btn-close p-2" aria-label="Close"></button>
+        </div>
+        <div class="container mt-4">
+            <div class="container">
+                <h3>Filters</h3>
+                <hr>
+            </div>
+            <div class="container">
+                <div class="form-group">
+                    <label>Parking Types:</label>
+                    <div class="btn-group-toggle" data-toggle="buttons">
+                        <label class="btn btn-secondary">
+                            <input type="checkbox" autocomplete="off"> Business
+                        </label>
+                        <label class="btn btn-secondary">
+                            <input type="checkbox" autocomplete="off"> Street
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <hr>
+                <div class="d-flex justify-content-end">
+                    <button id="apply-filter-btn" class="btn btn-primary">Apply Filter</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -14,6 +60,11 @@
     let map;
     let infoWindow;
     const loadParkingBtn = document.getElementById("load-parking-btn");
+
+    const filterWindowOpenBtn = document.getElementById("filter-window-open-btn");
+    const filterWindowCloseBtn = document.getElementById("filter-window-close-btn");
+    const filterSlidingWindow = document.getElementById("filter-sliding-window");
+    const applyFilterBtn = document.getElementById("")
 
     const spotIds = new Set();
     const markers = [];
@@ -158,6 +209,11 @@
             mapId: '{{ GOOGLE_MAP_ID }}'
         });
         infoWindow =  new google.maps.InfoWindow({});
+
+        //When dragging map, close Filter Window
+        google.maps.event.addListener(map, "drag", function () {
+            closeFilterWindow();
+        });
     }
 
     /**
@@ -172,11 +228,35 @@
     /**
      * Sets up the following on webpage, on load
      *      Add click event listener to "Load Parking Spots" button
+     *      Add click event listener to "Adjust Filter" button
+     *      Add click event listener to "Close (X)" button
      */
     function setup() {
+        //Clicking on "Load Parking Spots" will fetch parking spots around
+        //map center
         loadParkingBtn.addEventListener('click', function(e) {
             fetchParkingSpotAroundCenter();
         });
+
+        //Clicking on "Adjust Filter" button will open Filter window
+        filterWindowOpenBtn.addEventListener('click', function(e) {
+            openFilterWindow();
+        });
+
+        //Clicking on "Close (X)" button will close Filter Window
+        filterWindowCloseBtn.addEventListener('click', function(e) {
+            closeFilterWindow();
+        });
+    }
+
+    function openFilterWindow() {
+        filterSlidingWindow.classList.add('open-window');
+        filterSlidingWindow.classList.remove('close-window');
+    }
+
+    function closeFilterWindow() {
+        filterSlidingWindow.classList.add('close-window');
+        filterSlidingWindow.classList.remove('open-window');
     }
 
     setup();
