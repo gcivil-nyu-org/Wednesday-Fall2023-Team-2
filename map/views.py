@@ -34,20 +34,17 @@ class PostView(View):
     model = ParkingSpace
     template_name = "map/post.html"
 
-    def get(self, request: HttpRequest, dca_license_number: str) -> HttpResponse:
+    def get(self, request: HttpRequest, parking_spot_id: str) -> HttpResponse:
         """return post view
 
         Args:
             request (HttpRequest): http request object
-            dca number (str): dca string
+            parking_spot_id (str): PK of ParkingSpace object clicked on map
 
         Returns:
             HttpResponse: rendered post view
         """
-        spot = get_object_or_404(ParkingSpace, dca_license_number=dca_license_number)
-
-        # * conditionally render the delete button
-        # * only if the user is logged-in and viewing his/her own profile
+        spot = get_object_or_404(ParkingSpace, parking_spot_id=parking_spot_id)
 
         context = {
             "spot": spot,

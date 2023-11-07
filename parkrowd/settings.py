@@ -137,8 +137,10 @@ EMAIL_BACKEND = (
 
 # * Application definition
 INSTALLED_APPS = [
+    "rest_framework",
     "django.contrib.auth",
     "django.contrib.admin",
+    "api.apps.ApiConfig",
     "map.apps.MapConfig",
     "users.apps.UsersConfig",
     "django.contrib.sessions",
