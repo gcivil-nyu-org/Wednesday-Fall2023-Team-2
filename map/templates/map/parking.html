@@ -6,7 +6,6 @@
 <div class="fixed-bottom">
     <div class="map-container">
         <button id="load-parking-btn" class="btn btn-primary">Load Parking Spots</button>
-        <button id="reset-markers" class="btn btn-primary">Reset Markers</button>
         <div id="map"></div>
     </div>
 </div>
@@ -116,6 +115,7 @@
         '<div class="mb-3"><h1 class="h3 mb-1">' + 'Meter Parking' + '</h1></div>' +
         '<div class="mb-3">Type: ' + spot.type + '</div>' +
         '<div class="mb-3">Details: ' + spot.detail + '</div>' +
+        '<div class="mb-3">Meter Hours: ' + spot.operation_hours + '</div>' +
         `<div class="w-75 mx-auto"><button class="btn btn-primary btn-sm" onclick="makePost('/map/post/${spot.parking_spot_id}')">Make Post</button></div>` +
         '</div>'
     }

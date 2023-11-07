@@ -10,6 +10,7 @@ class ParkingSpaceSerializer(serializers.ModelSerializer):
             "parking_spot_name",
             "longitude",
             "latitude",
+            "operation_hours",
             "type",
             "detail",
         ]
