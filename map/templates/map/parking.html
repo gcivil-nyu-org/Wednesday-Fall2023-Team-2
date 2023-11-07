@@ -6,6 +6,7 @@
 <div class="fixed-bottom">
     <div class="map-container">
         <button id="load-parking-btn" class="btn btn-primary">Load Parking Spots</button>
+        <button id="reset-markers" class="btn btn-primary">Reset Markers</button>
         <div id="map"></div>
     </div>
 </div>
@@ -16,50 +17,25 @@
     const loadParkingBtn = document.getElementById("load-parking-btn");
 
     const spotIds = new Set();
+    const markers = [];
 
     /**
      * Add markers on map with click-to-view info window
      * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
      */
     async function addMarker(spot) {
-        const { AdvancedMarkerElement,  PinElement} = await google.maps.importLibrary("marker");
+        //Prevents adding duplicate markers
         if (spotIds.has(spot.parking_spot_id)) {
             return ;
         }
-
+        //Keep track of Parking Spot IDs on Map using Set
         spotIds.add(spot.parking_spot_id);
+        
+        //Utility function to get custom AdvancedMarker with color
+        let marker = await getMarkerByType(spot);
 
-        if (spot.type === "Street") {
-            // Change the background color.
-            const pinBackground = new PinElement({
-            background: "#ffc107",
-            borderColor: "#ffc107",
-            });
-            let marker = new AdvancedMarkerElement({
-            map,
-            position: {
-                lat: parseFloat(spot.latitude), 
-                lng: parseFloat(spot.longitude)
-            },
-            content: pinBackground.element,
-            title: spot.parking_spot_name,
-            //animation: google.maps.Animation.BOUNCE
-            });
-        }
-
-        let marker = new google.maps.Marker({
-            position: {
-                lat: parseFloat(spot.latitude), 
-                lng: parseFloat(spot.longitude)
-            },
-            map: map,
-            title: spot.parking_spot_name,
-            animation: google.maps.Animation.BOUNCE
-        });
-
-        setTimeout(function() {
-            marker.setAnimation(null);
-        }, 750);
+        //Keep track of all markers with an array
+        markers.push(marker);
 
         google.maps.event.addListener(marker, 'click', (function (marker, id) {
             return function () {
@@ -77,6 +53,39 @@
             }
         })(marker, spot.parking_spot_id));
 
+    }
+
+    /**
+     * Helper function for addMarker()
+     * Creates an AdvancedMarkerElement (custom color marker) based on type
+     * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
+     * @returns {Object} AdvancedMarkerElement - see link below (Google Maps API)
+     * https://developers.google.com/maps/documentation/javascript/advanced-markers/basic-customization
+     */
+    async function getMarkerByType(spot) {
+        const { AdvancedMarkerElement,  PinElement } = await google.maps.importLibrary("marker");
+
+        const typeToColor = {
+            "Business": "#ff0000",
+            "Street": "#ffc107"
+        };
+
+        const color = typeToColor[spot.type];
+
+        const pinBackground = new PinElement({
+            background: color,
+            borderColor: color,
+        });
+        let marker = new AdvancedMarkerElement({
+            map,
+            position: {
+                lat: parseFloat(spot.latitude), 
+                lng: parseFloat(spot.longitude)
+            },
+            content: pinBackground.element,
+            title: spot.parking_spot_name,
+        });
+        return marker;
     }
 
     /**
@@ -167,7 +176,7 @@
     function setup() {
         loadParkingBtn.addEventListener('click', function(e) {
             fetchParkingSpotAroundCenter();
-        })
+        });
     }
 
     setup();
@@ -179,3 +188,4 @@
   src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap"
 ></script>
 {% endblock %}
+
