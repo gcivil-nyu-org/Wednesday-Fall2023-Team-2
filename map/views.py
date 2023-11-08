@@ -38,7 +38,9 @@ class PostView(View):
     form_class = CreatePostForm
     template_name = "map/post.html"
 
-    def get(self, request: HttpRequest, parking_spot_id: str) -> HttpResponse:
+    def get(
+        self, request: HttpRequest, parking_spot_id: str, username: str
+    ) -> HttpResponse:
         """return post view
 
         Args:
@@ -49,10 +51,12 @@ class PostView(View):
             HttpResponse: rendered post view
         """
         spot = get_object_or_404(ParkingSpace, parking_spot_id=parking_spot_id)
-        context = {"spot": spot, "form": self.form_class(None)}
+        context = {"spot": spot, "form": self.form_class(None), "username": username}
         return render(request, self.template_name, context)
 
-    def post(self, request: HttpRequest, parking_spot_id: str) -> HttpResponse:
+    def post(
+        self, request: HttpRequest, parking_spot_id: str, username: str
+    ) -> HttpResponse:
         """handle Post creation post req
 
         Args:
@@ -62,7 +66,7 @@ class PostView(View):
             HttpResponse: redirect or register view with error hints
         """
         spot = get_object_or_404(ParkingSpace, parking_spot_id=parking_spot_id)
-        author = get_object_or_404(User)
+        author = get_object_or_404(User, username=username)
         form = self.form_class(request.POST)
         if form.is_valid():
             new_post = form.save(commit=False)
