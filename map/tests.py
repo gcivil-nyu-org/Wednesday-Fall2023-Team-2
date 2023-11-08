@@ -1,26 +1,72 @@
 from django.test import TestCase
+from django.urls import reverse
+from django.utils import timezone
+
+from users.models import User, Post
+from .models import ParkingSpace
 
 
-# class CreatePostTests(TestCase):
-#     def test_post_view(self):
-#         """checks if post page returns a 200 status code
-#         and the template 'map/post.html' is used
-#         """
-#         response = self.client.get(reverse(POST_PATH_NAME))
-#         self.assertEqual(response.status_code, 200)
-#         self.assertTemplateUsed(response, POST_TEMPLATE)
+USERNAME = "parkrowd"
+EMAIL = "parkrowd@gmail.com"
+PASSWORD = "iLikeParking123!"
+DUMMY_PASSWORD = "noParkingForYou"
 
-#     def test_successful_post(self):
-#         """checks if post is made successfully
-#         and redirects (Status 302) to Map Page
-#         """
-#         post_data = {
-#             "author": AUTHOR,
-#             "title": TITLE,
-#             "post": POST,
-#             "created_at": DATE,
-#             "spot": SPOT,
-#         }
-#         response = self.client.post(reverse(POST_PATH_NAME), user_data)
-#         self.assertRedirects(response, reverse(MAP_PATH_NAME))
-#         self.assertTrue(User.objects.filter(username=USERNAME).exists())
+PARKING_SPOT_ID = "12657"
+ADDRESS_ZIP = "10001"
+LONGITUDE = "-73.9853043125"
+LATITUDE = "40.7486538125"
+PARKING_SPOT_NAME = "Empire State Building"
+
+TITLE = "Parking Here For 15 Minutes"
+POST = "After 3:15, I'll be gone."
+DATE = timezone.now()
+
+POST_PATH_NAME = "map:post"
+MAP_PATH_NAME = "map:parking"
+POST_TEMPLATE = "map/post.html"
+
+
+class CreatePostTests(TestCase):
+    def setUp(self):
+        # Create a test user and test spot
+        self.test_user = User.objects.create_user(
+            username=USERNAME, email=EMAIL, password=PASSWORD
+        )
+        self.test_spot = ParkingSpace.objects.create(
+            parking_spot_id=PARKING_SPOT_ID,
+            address_zip=ADDRESS_ZIP,
+            longitude=LONGITUDE,
+            latitude=LATITUDE,
+            parking_spot_name=PARKING_SPOT_NAME,
+        )
+
+    def test_post_view(self):
+        """checks if post page returns a 200 status code
+        and the template 'map/post.html' is used
+        """
+        response = self.client.get(
+            reverse(POST_PATH_NAME, args=[PARKING_SPOT_ID, USERNAME])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, POST_TEMPLATE)
+
+    def test_successful_post(self):
+        """checks if post is made successfully
+        and redirects (Status 302) to Map Page
+        """
+        post_data = {"title": TITLE, "post": POST, "created_at": DATE}
+        response = self.client.post(
+            reverse(POST_PATH_NAME, args=[PARKING_SPOT_ID, USERNAME]), post_data
+        )
+        self.assertRedirects(response, reverse(MAP_PATH_NAME))
+        self.assertTrue(Post.objects.filter(title=TITLE).exists())
+
+    def test_unsuccessful_post_invalid_data(self):
+        """check if user tries to submit empty post form"""
+        post_data = {"title": "", "post": "", "created_at": DATE}
+        response = self.client.post(
+            reverse(POST_PATH_NAME, args=[PARKING_SPOT_ID, USERNAME]), post_data
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(response, "form", "title", "This field is required.")
+        self.assertFormError(response, "form", "post", "This field is required.")
