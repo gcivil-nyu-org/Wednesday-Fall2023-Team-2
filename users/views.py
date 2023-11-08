@@ -343,6 +343,12 @@ class UserProfileView(View):
         # * only if the user is logged-in and viewing his/her own profile
         is_user_owner_of_profile = request.user.username == username
 
+        user.username_human = user.username.capitalize()
+        user.description = (
+            user.description
+            if user.description
+            else "This user was lazy and left no description here."
+        )
         context = {
             "user": user,
             "user_posts": user_posts,
