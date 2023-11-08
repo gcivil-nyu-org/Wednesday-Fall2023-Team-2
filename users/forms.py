@@ -94,10 +94,14 @@ class UserRegisterForm(UserCreationForm):
         fields = ["username", "email", "password1", "password2"]
 
 
-class PostForm(forms.ModelForm):
-    class Meta:
+"""
+Now in map.forms.py
+
+ class PostForm(forms.ModelForm):
+     class Meta:
         model = Post
         fields = ["title", "post", "created_at"]
+"""
 
 
 class UserVerificationForm(forms.ModelForm):
