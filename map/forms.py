@@ -8,14 +8,11 @@ https://stackoverflow.com/questions/5481713/whats-the-difference-between-django-
 """
 
 from django import forms
-from django.contrib.auth.forms import (
-    UserCreationForm,
-)
 
 from users.models import Post
 
 
-class CreatePostForm(UserCreationForm):
+class CreatePostForm(forms.ModelForm):
     """create post form"""
 
     title = forms.CharField(
