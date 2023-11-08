@@ -18,12 +18,10 @@ load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"), verbose=False)
 
 # region: django default (likely remain unchanged)
 # load secret key from OS env to keep it secret
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-
-# GOOGLE MAPS API Key :
-GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
-
-# use OS env to control this
+SECRET_KEY = os.getenv(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-fwhre62z62nwjg@ft0(-6^pt6@aaa$p+ha0xdsl$qpk5j0sc#n",
+)
 DEBUG = os.getenv("PROD") == "false"
 
 # * Internationalization
@@ -61,8 +59,7 @@ TEMPLATES = [
     },
 ]
 
-
-# *Password validation
+# Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -83,12 +80,20 @@ AUTH_PASSWORD_VALIDATORS = [
 # region: production related (likely to be changed)
 ROOT_URLCONF = "parkrowd.urls"
 
+# GOOGLE MAPS API Key :
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
+GOOGLE_MAP_ID = os.getenv("GOOGLE_MAP_ID")
+
 # * Allowed hosts settings
-ALLOWED_HOSTS = [
-    "127.0.0.1"
+ALLOWED_HOSTS = (
+    ["127.0.0.1"]
     if os.getenv("PROD") == "false"
-    else "parkrowd-env.eba-spjjw3yh.us-west-2.elasticbeanstalk.com"
-]
+    else [
+        "parkrowd-prod.us-west-2.elasticbeanstalk.com",
+        "parkrowd-develop.us-west-2.elasticbeanstalk.com",
+    ]
+)
+
 # ElasticBeanstalk healthcheck sends requests with host header = internal ip
 # So we detect if we are in elastic beanstalk,
 # and add the instances private ip address
@@ -109,8 +114,11 @@ MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
 
 # * Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-STATIC_URL = "/static/"
-STATIC_ROOT = "static"
+
+STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "parkrowd", "static", "parkrowd")]
+
 # Image File Setup
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
@@ -135,14 +143,17 @@ EMAIL_BACKEND = (
 
 # * Application definition
 INSTALLED_APPS = [
+    "rest_framework",
     "django.contrib.auth",
     "django.contrib.admin",
+    "api.apps.ApiConfig",
     "map.apps.MapConfig",
     "users.apps.UsersConfig",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.contenttypes",
+    "django_extensions",
 ]
 
 # * Middleware definition

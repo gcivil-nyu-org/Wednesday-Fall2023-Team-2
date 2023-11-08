@@ -22,6 +22,8 @@ before_script:
     - psql -c "ALTER DATABASE $RDS_DB_NAME OWNER TO $RDS_USERNAME;"
     - psql -c "ALTER USER $RDS_USERNAME CREATEDB;"
     - python manage.py migrate
+    - psql -c "DELETE FROM map_parkingspace;" -U $RDS_USERNAME -d $RDS_DB_NAME
+    - python manage.py runscript load_parking_lot_data --chdir ./map
 install:
     - pip install -r requirements.txt
 script:
@@ -36,7 +38,7 @@ deploy:
       secret_access_key: "$AWS_ACCESS_SECRET_KEY"
       region: us-west-2
       app: parkrowd
-      env: Parkrowd-env
+      env: parkrowd-env-prod
       bucket_name: "$S3_BUCKET_NAME"
       on:
           branch: master
@@ -45,7 +47,7 @@ deploy:
       secret_access_key: "$AWS_ACCESS_SECRET_KEY"
       region: us-west-2
       app: parkrowd
-      env: Parkrowd-env
+      env: parkrowd-env-develop
       bucket_name: "$S3_BUCKET_NAME"
       on:
           branch: develop

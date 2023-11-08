@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth.views import INTERNAL_RESET_SESSION_TOKEN
 
-from .models import User, Post
+from .models import User, Post, UserVerification
 from .backends import EmailOrUsernameAuthenticationBackend
 from .forms import (
     UserLoginForm,
@@ -337,15 +337,23 @@ class UserProfileView(View):
         """
         user = get_object_or_404(User, username=username)
         user_posts = Post.objects.filter(author=user)
+        user_verification = UserVerification.objects.filter(username=user).last()
 
         # * conditionally render the delete button
         # * only if the user is logged-in and viewing his/her own profile
         is_user_owner_of_profile = request.user.username == username
 
+        user.username_human = user.username.capitalize()
+        user.description = (
+            user.description
+            if user.description
+            else "This user was lazy and left no description here."
+        )
         context = {
             "user": user,
             "user_posts": user_posts,
             "is_user_owner_of_profile": is_user_owner_of_profile,
+            "user_verification": user_verification,
         }
 
         return render(request, self.template_name, context)
@@ -386,7 +394,7 @@ class UserProfileEditView(
 
         new_username = request.POST.get("input-username")
         new_email = request.POST.get("input-email")
-        new_avatar = request.FILES.get("input-avatar", None)
+        new_avatar = request.FILES.get("input-avatar", request.user.avatar)
         new_description = request.POST.get("input-description")
         user = get_object_or_404(User, username=username)
         # * if username is already taken
@@ -401,8 +409,7 @@ class UserProfileEditView(
             )
         user.username = new_username
         user.email = new_email
-        if new_avatar:
-            user.avatar = new_avatar
+        user.avatar = new_avatar
         user.description = new_description
         user.save()
 
@@ -486,7 +493,7 @@ class UserVerificationView(View):
             verification = form.save(commit=False)
             verification.username = get_object_or_404(User, username=username)
             verification.business_name = request.POST.get("business_name")
-            verification.business_type = request.POST.get("business_type")
+            verification.business_type = form.cleaned_data["business_type"]
             verification.business_address = request.POST.get("business_address")
             verification.uploaded_file = form.cleaned_data.get("uploaded_file")
             verification.save()

@@ -94,15 +94,24 @@ class UserRegisterForm(UserCreationForm):
         fields = ["username", "email", "password1", "password2"]
 
 
-class PostForm(forms.ModelForm):
-    class Meta:
+"""
+Now in map.forms.py
+
+ class PostForm(forms.ModelForm):
+     class Meta:
         model = Post
         fields = ["title", "post", "created_at"]
+"""
 
 
 class UserVerificationForm(forms.ModelForm):
+    BUSINESS_TYPES = (
+        ("Public Parking Lot Owner", "Public Parking Lot Owner"),
+        ("Private Parking Lot Owner", "Private Parking Lot Owner"),
+        ("Street Business Owner", "Street Business Owner"),
+    )
     business_name = forms.CharField(max_length=200)
-    business_type = forms.CharField(max_length=200)
+    business_type = forms.ChoiceField(choices=BUSINESS_TYPES)
     business_address = forms.CharField(max_length=200)
     uploaded_file = forms.FileField(
         label="Choose a file",
