@@ -19,14 +19,14 @@ class CreatePostForm(forms.ModelForm):
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
-                "placeholder": "Please give your post a title",
+                "placeholder": "Post title goes here",
             }
         )
     )
 
     post = forms.CharField(
         widget=forms.Textarea(
-            attrs={"class": "form-control", "placeholder": "Please enter your post"}
+            attrs={"class": "form-control", "placeholder": "Post content goes here"}
         )
     )
 
