@@ -1,2 +1,30 @@
-{% extends "parkrowd/main.html" %} {% block content %} test content parking_spot_id# =
-{{spot.parking_spot_id}} {%endblock%}
+{% extends "parkrowd/main.html" %} 
+{% block content %} 
+<h1>Writing Post for parking_spot_id# = {{spot.parking_spot_id}}</h1>
+<div class="container">
+    <div class="row justify-content-center py-4">
+      <div class="col-md-9">
+        <h3 class="text-center">Create New Post</h3>
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group py-1">
+            <label for="title">Title</label>
+            {{ form.title }}
+          </div>
+          <div class="form-group py-1">
+            <label for="post">Post</label>
+            {{ form.post }}
+          </div>
+          <div class="row py-4 justify-content-center">
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-primary">Create Post</button>
+            </div>
+          </div>
+        </form>
+        <div style="color: red">{{ form.errors }}</div>
+      </div>
+    </div>
+  </div>
+  </div>
+{%endblock%}
+

@@ -1,9 +1,11 @@
 from django.views import View
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from .models import ParkingSpace
 
 from django.conf import settings
+from .forms import CreatePostForm
+from users.models import User
 
 
 class MapView(View):
@@ -32,6 +34,7 @@ class PostView(View):
     """post view"""
 
     model = ParkingSpace
+    form_class = CreatePostForm
     template_name = "map/post.html"
 
     def get(self, request: HttpRequest, parking_spot_id: str) -> HttpResponse:
@@ -45,9 +48,25 @@ class PostView(View):
             HttpResponse: rendered post view
         """
         spot = get_object_or_404(ParkingSpace, parking_spot_id=parking_spot_id)
-
-        context = {
-            "spot": spot,
-        }
-
+        context = {"spot": spot, "form": self.form_class(None)}
         return render(request, self.template_name, context)
+
+    def post(self, request: HttpRequest, parking_spot_id: str) -> HttpResponse:
+        """handle Post creation post req
+
+        Args:
+            request (HttpRequest): http request object
+
+        Returns:
+            HttpResponse: redirect or register view with error hints
+        """
+        spot = get_object_or_404(ParkingSpace, parking_spot_id=parking_spot_id)
+        author = get_object_or_404(User)
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            new_post = form.save(commit=False)
+            new_post.parking_space = spot
+            new_post.author = author
+            # Safe text filter here for title and post
+            return redirect("map:parking")
+        return render(request, self.template_name, {"form": form})
