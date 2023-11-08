@@ -1,27 +1,32 @@
 {% extends "parkrowd/main.html" %} {% block content %}
 <style>
-    #map, #filter-sliding-window { height: 75vh; }
+    #map,
+    #filter-sliding-window {
+        height: 95vh;
+    }
 
     #filter-sliding-window {
         background-color: #fff;
-        left: -25%; /* Initially hidden */
+        left: -25%;
+        /* Initially hidden */
         width: 25%;
         transition: left 0.3s ease-in-out;
     }
-        
+
     #filter-sliding-window.close-window {
         left: -25%;
     }
-        
+
     #filter-sliding-window.open-window {
         left: 0;
     }
 </style>
-
+{% block navbarEnd %}
+<button id="filter-window-open-btn" class="btn btn-info" style="margin-right: 15px">Adjust Filter</button>
+<button id="load-parking-btn" class="btn btn-primary">Load Parking Spots</button>
+{% endblock %}
 <div class="fixed-bottom">
     <div class="map-container">
-        <button id="filter-window-open-btn" class="btn btn-info">Adjust Filter</button>
-        <button id="load-parking-btn" class="btn btn-primary">Load Parking Spots</button>
         <div id="map"></div>
     </div>
     <div id="filter-sliding-window" class="fixed-bottom close-window">
@@ -57,7 +62,6 @@
         </div>
     </div>
 </div>
-
 <script>
     let map;
     let infoWindow;
@@ -77,13 +81,13 @@
      * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
      */
     async function addMarker(spot) {
-        //Prevents adding duplicate markers
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
         if (spotIds.has(spot.parking_spot_id)) {
-            return ;
+            return;
         }
         //Keep track of Parking Spot IDs on Map using Set
         spotIds.add(spot.parking_spot_id);
-        
+
         //Utility function to get custom AdvancedMarker with color
         let marker = await getMarkerByType(spot);
 
@@ -116,7 +120,7 @@
      * https://developers.google.com/maps/documentation/javascript/advanced-markers/basic-customization
      */
     async function getMarkerByType(spot) {
-        const { AdvancedMarkerElement,  PinElement } = await google.maps.importLibrary("marker");
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
         const typeToColor = {
             "Business": "#ff0000",
@@ -132,7 +136,7 @@
         let marker = new AdvancedMarkerElement({
             map,
             position: {
-                lat: parseFloat(spot.latitude), 
+                lat: parseFloat(spot.latitude),
                 lng: parseFloat(spot.longitude)
             },
             content: pinBackground.element,
@@ -150,12 +154,12 @@
      * @returns {string} HTML content - info on parking spot
      */
     function getBusinessInfo(spot) {
-        return '<div class="d-flex flex-column text-center p-2">' + 
-        '<div class="mb-3"><h1 class="h3 mb-1">' + spot.parking_spot_name + '</h1></div>' +
-        '<div class="mb-3">Type: ' + spot.type + '</div>' +
-        '<div class="mb-3">Details: ' + spot.detail + '</div>' +
-        `<div class="w-75 mx-auto"><button class="btn btn-primary btn-sm" onclick="makePost('/map/post/${spot.parking_spot_id}')">Make Post</button></div>` +
-        '</div>'
+        return '<div class="d-flex flex-column text-center p-2">' +
+            '<div class="mb-3"><h1 class="h3 mb-1">' + spot.parking_spot_name + '</h1></div>' +
+            '<div class="mb-3">Type: ' + spot.type + '</div>' +
+            '<div class="mb-3">Details: ' + spot.detail + '</div>' +
+            `<div class="w-75 mx-auto"><button class="btn btn-primary btn-sm" onclick="makePost('/map/post/${spot.parking_spot_id}')">Make Post</button></div>` +
+            '</div>'
     }
 
     /**
@@ -163,17 +167,17 @@
      * Sets up HTML info for street based markers (format different from other spots)
      * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
      */
-    
+
     //TO DO : Meter parking is currently clasified as 'Street' (type in ParkingSpace model)
     //Suggestion : Change from 'Street' to 'Meter'
     function getStreetInfo(spot) {
         return '<div class="d-flex flex-column text-center p-2">' +
-        '<div class="mb-3"><h1 class="h3 mb-1">' + 'Meter Parking' + '</h1></div>' +
-        '<div class="mb-3">Type: ' + spot.type + '</div>' +
-        '<div class="mb-3">Details: ' + spot.detail + '</div>' +
-        '<div class="mb-3">Meter Hours: ' + spot.operation_hours + '</div>' +
-        `<div class="w-75 mx-auto"><button class="btn btn-primary btn-sm" onclick="makePost('/map/post/${spot.parking_spot_id}')">Make Post</button></div>` +
-        '</div>'
+            '<div class="mb-3"><h1 class="h3 mb-1">' + 'Meter Parking' + '</h1></div>' +
+            '<div class="mb-3">Type: ' + spot.type + '</div>' +
+            '<div class="mb-3">Details: ' + spot.detail + '</div>' +
+            '<div class="mb-3">Meter Hours: ' + spot.operation_hours + '</div>' +
+            `<div class="w-75 mx-auto"><button class="btn btn-primary btn-sm" onclick="makePost('/map/post/${spot.parking_spot_id}')">Make Post</button></div>` +
+            '</div>'
     }
 
     /**
@@ -209,11 +213,11 @@
         const tandon_lon = -73.9864403526369;
 
         map = new google.maps.Map(document.getElementById('map'), {
-            center: {lat: tandon_lat, lng: tandon_lon},
+            center: { lat: tandon_lat, lng: tandon_lon },
             zoom: 18,
             mapId: '{{ GOOGLE_MAP_ID }}'
         });
-        infoWindow =  new google.maps.InfoWindow({});
+        infoWindow = new google.maps.InfoWindow({});
 
         //When dragging map, close Filter Window
         google.maps.event.addListener(map, "drag", function () {
@@ -239,21 +243,21 @@
     function setup() {
         //Clicking on "Load Parking Spots" will fetch parking spots around
         //map center
-        loadParkingBtn.addEventListener('click', function(e) {
+        loadParkingBtn.addEventListener('click', function (e) {
             fetchParkingSpotAroundCenter();
         });
 
         //Clicking on "Adjust Filter" button will open Filter window
-        filterWindowOpenBtn.addEventListener('click', function(e) {
+        filterWindowOpenBtn.addEventListener('click', function (e) {
             openFilterWindow();
         });
 
         //Clicking on "Close (X)" button will close Filter Window
-        filterWindowCloseBtn.addEventListener('click', function(e) {
+        filterWindowCloseBtn.addEventListener('click', function (e) {
             closeFilterWindow();
         });
 
-        applyFilterBtn.addEventListener('click', function(e) {
+        applyFilterBtn.addEventListener('click', function (e) {
             applyFilter();
         });
     }
@@ -300,10 +304,6 @@
     setup();
 
 </script>
-<script
-  async
-  defer
-  src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap"
-></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap">
+</script>
 {% endblock %}
-
