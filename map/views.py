@@ -72,6 +72,7 @@ class PostView(View):
             new_post = form.save(commit=False)
             new_post.parking_space = spot
             new_post.author = author
+            new_post.save()
             # Safe text filter here for title and post
             return redirect("map:parking")
         return render(request, self.template_name, {"form": form})
