@@ -85,9 +85,11 @@ class ParkingSpaceChangeOccupancyAPIView(generics.ListAPIView):
         """
         occupancy_percent = request.data.get("percent")
         parking_spot_id = request.data.get("id")
-    
+
         if not (occupancy_percent and parking_spot_id):
-            response_data = {"message": "Bad Request: Missing percent and id parameters"}
+            response_data = {
+                "message": "Bad Request: Missing percent and id parameters"
+            }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -98,10 +100,19 @@ class ParkingSpaceChangeOccupancyAPIView(generics.ListAPIView):
             parking_space.occupancy_percent = occupancy_percent
             parking_space.save()
 
-            return Response({'message': 'Occupancy percent updated successfully.'}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Occupancy percent updated successfully."},
+                status=status.HTTP_200_OK,
+            )
 
         except ParkingSpace.DoesNotExist:
-            return Response({'message': 'ParkingSpace with the specified id does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "ParkingSpace with the specified id does not exist."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         except Exception as e:
-            return Response({'message': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"message": f"An error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

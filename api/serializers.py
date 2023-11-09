@@ -13,5 +13,5 @@ class ParkingSpaceSerializer(serializers.ModelSerializer):
             "operation_hours",
             "type",
             "detail",
-            "occupancy_percent"
+            "occupancy_percent",
         ]
