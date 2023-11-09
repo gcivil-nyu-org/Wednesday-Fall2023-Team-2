@@ -139,13 +139,15 @@
         const occupancy_percent = (spot.occupancy_percent !== null) 
             ? String(spot.occupancy_percent) + '%' 
             : null;
+        
+        const glyphColor = getGlyphColor(spot.occupancy_percent);
 
         const pinBackground = new PinElement({
             scale: 1.25,
             background: color,
             borderColor: color,
             glyph: occupancy_percent,
-            glyphColor: 'white'
+            glyphColor: glyphColor
         });
 
         let marker = new AdvancedMarkerElement({
@@ -165,6 +167,20 @@
     }
 
     /**
+     * Helper function for getMarkerByType()
+     * Determines glyph color based on occupancy percent
+     * Below 50% is lightgreen, Above 50% is lightcoral (red), Otherwise, white dot
+     * @param {Number} occupancy_percent - Number from 0 to 100
+     * @returns {string} color - glyph color
+     */
+    function getGlyphColor(occupancy_percent) {
+        const glyphColor = (occupancy_percent === null) 
+            ? 'white' : (occupancy_percent >= 50) 
+            ? 'lightcoral' : 'lightgreen';
+        return glyphColor;
+    }
+
+    /**
      * Helper function for addMarker()
      * Sets up HTML info for business based markers (format different from other spots)
      * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
@@ -178,6 +194,7 @@
             '<div class="mb-3">Type: ' + spot.type + '</div>' +
             '<div class="mb-3">Details: ' + spot.detail + '</div>' +
             getMakePostHTML(spotId) + 
+            '<div class="mb-3">This business has not yet been claimed.  Reach out to admin.</div>' +
             '</div>'
     }
 
@@ -212,7 +229,7 @@
         const makePostURL = `/map/post/${spotId}/{{user.username}}`;
 
         {% if user.is_authenticated %}
-            return `<div class="w-75 mx-auto">
+            return `<div class="w-75 mx-auto p-2">
                 <button class="btn btn-primary btn-sm" onclick="makePost('${makePostURL}')">
                     Make Post
                 </button>
@@ -269,7 +286,11 @@
                 },
             })
             .then(function (response) {
+                const glyphColor = getGlyphColor(occupancy_percent);
+
                 infoWindow.marker.pin.glyph = occupancy_percent + '%';
+                infoWindow.marker.pin.glyphColor = glyphColor;
+                
             })
             .catch(function (error) {
                 console.log(error);
