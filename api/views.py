@@ -13,7 +13,7 @@ from haversine import haversine, Unit
 # Create your views here.
 
 
-class ParkingSpaceAPIView(generics.ListAPIView):
+class ParkingSpaceNearCenterAPIView(generics.ListAPIView):
     """API endpoint
     /api/spots/?lat=LATITUDE&lon=LONGITUDE
     """
@@ -60,3 +60,48 @@ class ParkingSpaceAPIView(generics.ListAPIView):
         """
         max_dist = 1
         return haversine(p1, p2, unit=Unit.MILES) < max_dist
+
+
+class ParkingSpaceChangeOccupancyAPIView(generics.ListAPIView):
+    """API endpoint
+    /api/spot/occupancy/?percent=PERCENT&id=PARKING_SPACE_ID
+
+    Changes the Occupancy Percent of Parking Space (ID)
+    """
+
+    queryset = ParkingSpace.objects.all()
+    serializer_class = ParkingSpaceSerializer
+
+    def post(self, request: HttpRequest) -> Response:
+        """handles post requests to API endpoint above
+
+        Args:
+            request (HttpRequest): http request object
+
+        Returns:
+            Response: JSON Object with either parking_spot_id
+            sent on success OR
+            fail message to update front end
+        """
+        occupancy_percent = request.data.get("percent")
+        parking_spot_id = request.data.get("id")
+    
+        if not (occupancy_percent and parking_spot_id):
+            response_data = {"message": "Bad Request: Missing percent and id parameters"}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # * Retrieve the ParkingSpace instance
+            parking_space = ParkingSpace.objects.get(parking_spot_id=parking_spot_id)
+
+            # Update the occupancy_percent field
+            parking_space.occupancy_percent = occupancy_percent
+            parking_space.save()
+
+            return Response({'message': 'Occupancy percent updated successfully.'}, status=status.HTTP_200_OK)
+
+        except ParkingSpace.DoesNotExist:
+            return Response({'message': 'ParkingSpace with the specified id does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({'message': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

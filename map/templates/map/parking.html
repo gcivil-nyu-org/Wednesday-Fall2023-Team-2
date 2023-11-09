@@ -108,8 +108,11 @@
 
         infoWindow.setContent(markerInfo);
         infoWindow.open(map, marker);
+
+        infoWindow.marker = marker;
       }
     })(marker, spot.parking_spot_id));
+
 
   }
 
@@ -124,16 +127,23 @@
     const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
     const typeToColor = {
-      "Business": "#ff0000",
-      "Street": "#ffc107"
+      "Business": "black",
+      "Street": "indigo"
     };
 
     const color = typeToColor[spot.type];
+    const occupancy_percent = (spot.occupancy_percent !== null) 
+        ? String(spot.occupancy_percent) + '%' 
+        : null;
 
     const pinBackground = new PinElement({
-      background: color,
-      borderColor: color,
+        scale: 1.25,
+        background: color,
+        borderColor: color,
+        glyph: occupancy_percent,
+        glyphColor: 'white'
     });
+
     let marker = new AdvancedMarkerElement({
       map,
       position: {
@@ -145,6 +155,8 @@
     });
     //To identify a marker when filtering
     marker.type = spot.type;
+    //To retrieve the glyph (map marker center dot) info
+    marker.pin = pinBackground;
     return marker;
   }
 
@@ -169,16 +181,47 @@
    * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
    */
 
-  //TO DO : Meter parking is currently clasified as 'Street' (type in ParkingSpace model)
-  //Suggestion : Change from 'Street' to 'Meter'
   function getStreetInfo(spot) {
+    const hours = (spot.operation_hours !== null) ? spot.operation_hours : "N/A";
+
     return '<div class="d-flex flex-column text-center p-2">' +
-      '<div class="mb-3"><h1 class="h3 mb-1">' + 'Meter Parking' + '</h1></div>' +
+      '<div class="mb-3"><h1 class="h3 mb-1">' + 'Street Parking' + '</h1></div>' +
+      getOccupancyPercentHTML(spot) + 
       '<div class="mb-3">Type: ' + spot.type + '</div>' +
       '<div class="mb-3">Details: ' + spot.detail + '</div>' +
-      '<div class="mb-3">Meter Hours: ' + spot.operation_hours + '</div>' +
+      '<div class="mb-3">Hours: ' + hours + '</div>' +
       `<div class="w-75 mx-auto"><button class="btn btn-primary btn-sm" onclick="makePost('/map/post/${spot.parking_spot_id}/{{user.username}}')">Make Post</button></div>` +
       '</div>'
+  }
+
+  function getOccupancyPercentHTML(spot) {
+    if (spot.type === "Street") {
+        return '<div class="form-group mb-3">' +
+        '<label for="occupancy-status">Occupancy Percent:</label>' +
+        '<input type="number" class="form-control" id="occupancy-status-input" name="occupancy-status" min="0" max="100">' +
+        `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy(${spot.parking_spot_id})">Submit</button>` +
+        '</div>'
+    }
+  }
+
+  function submitOccupancy(spotId) {
+        ///api/spot/occupancy/?id=${spot.parking_spot_id}
+        const occupancyStatusInput = document.getElementById('occupancy-status-input');
+        const occupancy_percent = occupancyStatusInput.value;
+
+        axios.post(`/api/spot/occupancy/`, {
+                percent: occupancy_percent,
+                id: spotId
+            })
+            .then(function (response) {
+                // console.log(response);
+                console.log(infoWindow.marker.pin.glyph)
+                infoWindow.marker.pin.glyph = occupancy_percent + '%';
+                console.log(response);
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
   }
 
   /**
@@ -219,6 +262,25 @@
       mapId: '{{ GOOGLE_MAP_ID }}'
     });
     infoWindow = new google.maps.InfoWindow({});
+
+    infoWindow.addListener('domready', function (e) {
+        const occupancyStatusInput = document.getElementById('occupancy-status-input');
+        // console.log(infoWindow.marker.pin.glyph);
+        occupancyStatusInput.value = (infoWindow.marker.pin.glyph !== null) 
+            ? parseInt(infoWindow.marker.pin.glyph)
+            : 0;
+
+        occupancyStatusInput.addEventListener('input', function(e) {
+            let enteredValue = parseInt(e.value);
+
+            if (enteredValue < 0) {
+                e.value = 0;
+            }
+            if (enteredValue > 100) {
+                e.value = 100;
+            }
+        })
+    })
 
     //When dragging map, close Filter Window
     google.maps.event.addListener(map, "drag", function () {
@@ -261,6 +323,7 @@
     applyFilterBtn.addEventListener('click', function (e) {
       applyFilter();
     });
+
   }
 
   /**
@@ -304,7 +367,6 @@
 
   setup();
 
-  setup();
 </script>
 <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap">
 </script>
