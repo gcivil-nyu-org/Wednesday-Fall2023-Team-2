@@ -207,7 +207,7 @@
   function submitOccupancy(spotId) {
         ///api/spot/occupancy/?id=${spot.parking_spot_id}
         const occupancyStatusInput = document.getElementById('occupancy-status-input');
-        const occupancy_percent = occupancyStatusInput.value;
+        const occupancy_percent = parseInt(occupancyStatusInput.value);
 
         axios.post(`/api/spot/occupancy/`, {
                 percent: occupancy_percent,
