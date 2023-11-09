@@ -211,13 +211,19 @@
     //TO DO : Suggested that only Business Owner of a Spot
     //can change Occupancy Percent.  For now, allow any Driver (Registered User)
     //to change that percent on Street Parking
+
+    {% if user.is_authenticated %}
     if (spot.type === "Street") {
-        return '<div class="form-group mb-3">' +
-        '<label for="occupancy-status">Occupancy Percent:</label>' +
-        '<input type="number" class="form-control" id="occupancy-status-input" name="occupancy-status" min="0" max="100">' +
-        `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy(${spot.parking_spot_id})">Submit</button>` +
-        '</div>'
+        
+            return '<div class="form-group mb-3">' +
+            '<label for="occupancy-status">Occupancy Percent:</label>' +
+            '<input type="number" class="form-control" id="occupancy-status-input" name="occupancy-status" min="0" max="100">' +
+            `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy(${spot.parking_spot_id})">Submit</button>` +
+            '</div>'
+        
     }
+    {% endif %}
+    return '';
   }
 
   /**
@@ -289,6 +295,11 @@
     //i.e. non-numerical, negative values, and values over 100
     infoWindow.addListener('domready', function (e) {
         const occupancyStatusInput = document.getElementById('occupancy-status-input');
+
+        if (!occupancyStatusInput) {
+            return ;
+        }
+
         occupancyStatusInput.value = (infoWindow.marker.pin.glyph !== null) 
             ? parseInt(infoWindow.marker.pin.glyph)
             : 0;
