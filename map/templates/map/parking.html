@@ -173,11 +173,13 @@
    * @returns {string} HTML content - info on Business parking spot
    */
   function getBusinessInfo(spot) {
+    const spotId = spot.parking_spot_id;
+
     return '<div class="d-flex flex-column text-center p-2">' +
       '<div class="mb-3"><h1 class="h3 mb-1">' + spot.parking_spot_name + '</h1></div>' +
       '<div class="mb-3">Type: ' + spot.type + '</div>' +
       '<div class="mb-3">Details: ' + spot.detail + '</div>' +
-      `<div class="w-75 mx-auto"><button class="btn btn-primary btn-sm" onclick="makePost('/map/post/${spot.parking_spot_id}/{{user.username}}')">Make Post</button></div>` +
+      getMakePostHTML(spotId) + 
       '</div>'
   }
 
@@ -189,6 +191,7 @@
    */
 
   function getStreetInfo(spot) {
+    const spotId = spot.parking_spot_id;
     const hours = (spot.operation_hours !== null) ? spot.operation_hours : "N/A";
 
     return '<div class="d-flex flex-column text-center p-2">' +
@@ -197,15 +200,36 @@
       '<div class="mb-3">Type: ' + spot.type + '</div>' +
       '<div class="mb-3">Details: ' + spot.detail + '</div>' +
       '<div class="mb-3">Hours: ' + hours + '</div>' +
-      `<div class="w-75 mx-auto"><button class="btn btn-primary btn-sm" onclick="makePost('/map/post/${spot.parking_spot_id}/{{user.username}}')">Make Post</button></div>` +
+      getMakePostHTML(spotId);
       '</div>'
+  }
+
+  /**
+   * Helper function for getBusinessInfo() and getStreetInfo()
+   * Conditionally hides "Make Post" button if user is not logged in
+   * @param {string} spotId - ParkingSpace PK : parking_spot_id field
+   * @returns {string} HTML content - "Make Post" button OR nothing
+   */
+  function getMakePostHTML(spotId) {
+    const makePostURL = `/map/post/${spotId}/{{user.username}}`;
+
+    {% if user.is_authenticated %}
+        return `<div class="w-75 mx-auto">
+            <button class="btn btn-primary btn-sm" onclick="makePost(${makePostURL})">
+                Make Post
+            </button>
+        </div>`
+    {% else %}
+        return '';
+    {% endif %}
+
   }
 
   /**
    * Helper function for getBusinessInfo() and getStreetInfo()
    * Creates the HTML for allowing user to change Occupancy Percent of Spot
    * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
-   * @returns {string} HTML content - Occupancy Percent Input Field and Button
+   * @returns {string} HTML content - Occupancy Percent Input Field and Button OR nothing
    */
   function getOccupancyPercentHTML(spot) {
     //TO DO : Suggested that only Business Owner of a Spot
