@@ -213,7 +213,7 @@
 
         {% if user.is_authenticated %}
             return `<div class="w-75 mx-auto">
-                <button class="btn btn-primary btn-sm" onclick="makePost(${makePostURL})">
+                <button class="btn btn-primary btn-sm" onclick="makePost('${makePostURL}')">
                     Make Post
                 </button>
             </div>`
@@ -303,13 +303,13 @@
 
         axios.get(`/api/spots/?lat=${lat}&lon=${lng}`)
             .then(function (response) {
-            const spotsData = response.data;
-            spotsData.forEach(spot => {
-                addMarker(spot);
-            })
+                const spotsData = response.data;
+                spotsData.forEach(spot => {
+                    addMarker(spot);
+                })
             })
             .catch(function (error) {
-            console.log(error);
+                console.log(error);
             });
     }
 
