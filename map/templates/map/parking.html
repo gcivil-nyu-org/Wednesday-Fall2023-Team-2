@@ -108,7 +108,10 @@
 
         infoWindow.setContent(markerInfo);
         infoWindow.open(map, marker);
-
+        
+        //Add marker dynamically as property for the Info Window
+        //that shows when clicking on Marker on Map.
+        //Used for quick access to glyph (map marker center dot) of Marker
         infoWindow.marker = marker;
       }
     })(marker, spot.parking_spot_id));
@@ -132,6 +135,9 @@
     };
 
     const color = typeToColor[spot.type];
+
+    //Retrieve and process occupancy_percent from
+    //backend to display percent on Marker
     const occupancy_percent = (spot.occupancy_percent !== null) 
         ? String(spot.occupancy_percent) + '%' 
         : null;
@@ -164,7 +170,7 @@
    * Helper function for addMarker()
    * Sets up HTML info for business based markers (format different from other spots)
    * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
-   * @returns {string} HTML content - info on parking spot
+   * @returns {string} HTML content - info on Business parking spot
    */
   function getBusinessInfo(spot) {
     return '<div class="d-flex flex-column text-center p-2">' +
@@ -179,6 +185,7 @@
    * Helper function for addMarker()
    * Sets up HTML info for street based markers (format different from other spots)
    * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
+   * @returns {string} HTML content - info on Street parking spot
    */
 
   function getStreetInfo(spot) {
@@ -194,7 +201,16 @@
       '</div>'
   }
 
+  /**
+   * Helper function for getBusinessInfo() and getStreetInfo()
+   * Creates the HTML for allowing user to change Occupancy Percent of Spot
+   * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
+   * @returns {string} HTML content - Occupancy Percent Input Field and Button
+   */
   function getOccupancyPercentHTML(spot) {
+    //TO DO : Suggested that only Business Owner of a Spot
+    //can change Occupancy Percent.  For now, allow any Driver (Registered User)
+    //to change that percent on Street Parking
     if (spot.type === "Street") {
         return '<div class="form-group mb-3">' +
         '<label for="occupancy-status">Occupancy Percent:</label>' +
@@ -204,20 +220,24 @@
     }
   }
 
+  /**
+   * Onclick function for Occupancy Percent Submit Button
+   * Parses current value in Input Field and makes POST API call to change
+   * on backend.  
+   * @param {string} spotId - ParkingSpace PK : parking_spot_id field
+   */
   function submitOccupancy(spotId) {
-        ///api/spot/occupancy/?id=${spot.parking_spot_id}
         const occupancyStatusInput = document.getElementById('occupancy-status-input');
         const occupancy_percent = parseInt(occupancyStatusInput.value);
-
+        
+        //See ParkingSpaceChangeOccupancyAPIView in api/views.py
+        //for API endpoint
         axios.post(`/api/spot/occupancy/`, {
                 percent: occupancy_percent,
                 id: spotId
             })
             .then(function (response) {
-                // console.log(response);
-                console.log(infoWindow.marker.pin.glyph)
                 infoWindow.marker.pin.glyph = occupancy_percent + '%';
-                console.log(response);
             })
             .catch(function (error) {
                 console.log(error);
@@ -263,17 +283,18 @@
     });
     infoWindow = new google.maps.InfoWindow({});
 
+    //When Info Window has loaded completely, add an
+    //Event Listener to the Occupancy Percent input field
+    //to prevent user from putting invalid values
+    //i.e. non-numerical, negative values, and values over 100
     infoWindow.addListener('domready', function (e) {
         const occupancyStatusInput = document.getElementById('occupancy-status-input');
-        // console.log(infoWindow.marker.pin.glyph);
         occupancyStatusInput.value = (infoWindow.marker.pin.glyph !== null) 
             ? parseInt(infoWindow.marker.pin.glyph)
             : 0;
 
         occupancyStatusInput.addEventListener('input', function(e) {
-
             let enteredValue = parseInt(e.target.value);
-            console.log(enteredValue);
 
             if (enteredValue < 0 || isNaN(enteredValue)) {
                 e.target.value = 0;
