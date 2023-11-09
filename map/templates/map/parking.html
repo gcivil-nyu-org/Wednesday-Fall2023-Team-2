@@ -271,13 +271,15 @@
             : 0;
 
         occupancyStatusInput.addEventListener('input', function(e) {
-            let enteredValue = parseInt(e.value);
 
-            if (enteredValue < 0) {
-                e.value = 0;
+            let enteredValue = parseInt(e.target.value);
+            console.log(enteredValue);
+
+            if (enteredValue < 0 || isNaN(enteredValue)) {
+                e.target.value = 0;
             }
             if (enteredValue > 100) {
-                e.value = 100;
+                e.target.value = 100;
             }
         })
     })
