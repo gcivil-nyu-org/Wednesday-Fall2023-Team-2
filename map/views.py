@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from .models import ParkingSpace
 
 from django.conf import settings
-from .forms import CreatePostForm
+from .forms import CreatePostForm, CreateParkingSpaceForm
 from users.models import User
 
 
@@ -76,3 +76,19 @@ class PostView(View):
             # Safe text filter here for title and post
             return redirect("map:parking")
         return render(request, self.template_name, {"form": form})
+
+class ParkingSpaceView(View):
+    """post view"""
+
+    model = ParkingSpace
+    form_class = CreateParkingSpaceForm
+    template_name = "map/add_spot.html"
+
+    def get(
+        self, request: HttpRequest, username: str
+    ) -> HttpResponse:
+        print(request.GET.get("lat"))
+        print(request.GET.get("lon"))
+        return render(request, self.template_name)
+
+    

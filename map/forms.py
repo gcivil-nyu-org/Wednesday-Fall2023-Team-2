@@ -10,6 +10,7 @@ https://stackoverflow.com/questions/5481713/whats-the-difference-between-django-
 from django import forms
 
 from users.models import Post
+from map.models import ParkingSpace
 
 
 class CreatePostForm(forms.ModelForm):
@@ -33,3 +34,17 @@ class CreatePostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ["title", "post"]
+
+
+class CreateParkingSpaceForm(forms.ModelForm):
+    """create spot form"""
+
+    details = forms.CharField(
+        widget=forms.Textarea(
+            attrs={"class": "form-control", "placeholder": "Spot details go here"}
+        )
+    )
+
+    class Meta:
+        model = ParkingSpace
+        fields = ["details"]
