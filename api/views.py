@@ -1,16 +1,12 @@
-from django.shortcuts import render
-from django.http import HttpRequest, HttpResponse
-
-from map.models import ParkingSpace
-from .serializers import ParkingSpaceSerializer
-
-from rest_framework import generics
 from rest_framework import status
+from django.http import HttpRequest
+from rest_framework import generics
+from haversine import haversine, Unit
 from rest_framework.response import Response
 
-from haversine import haversine, Unit
-
-# Create your views here.
+from users.models import Post
+from map.models import ParkingSpace
+from .serializers import ParkingSpaceSerializer, PostSerializer
 
 
 class ParkingSpaceNearCenterAPIView(generics.ListAPIView):
@@ -116,3 +112,11 @@ class ParkingSpaceChangeOccupancyAPIView(generics.ListAPIView):
                 {"message": f"An error occurred: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class ParkingSpacePostsAPIView(generics.ListAPIView):
+    serializer_class = PostSerializer
+
+    def get_queryset(self):
+        parking_space_id = self.kwargs["spotId"]
+        return Post.objects.filter(parking_space__parking_spot_id=parking_space_id)
