@@ -16,4 +16,9 @@ urlpatterns = [
         views.ParkingSpaceChangeOccupancyAPIView.as_view(),
         name="change-occupancy",
     ),
+    path(
+        "spot/posts/<str:spotId>/",
+        views.ParkingSpacePostsAPIView.as_view(),
+        name="get-spot-posts",
+    ),
 ]

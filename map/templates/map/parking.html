@@ -1,6 +1,6 @@
 <!-- @format -->
 
-{% extends "parkrowd/main.html" %} {% block content %}
+{% extends "parkrowd/main.html" %} {% block content %} {% block header %}
 <style>
   #map,
   #filter-sliding-window {
@@ -22,17 +22,31 @@
   #filter-sliding-window.open-window {
     left: 0;
   }
+
+  #postSidebar {
+    height: 95vh;
+    background-color: #fff;
+    width: 45%;
+    transition: left 0.5s ease-in-out;
+  }
+
+  #postSidebar.close-window {
+    left: -45%;
+  }
+
+  #postSidebar.open-window {
+    left: 0;
+  }
 </style>
-{% block navbarEnd %}
+{% endblock %} {% block navbarEnd %}
 <button id="filter-window-open-btn" class="btn btn-info btn-sm" style="margin-right: 15px">
   Adjust Filter
 </button>
 <button id="load-parking-btn" class="btn btn-primary btn-sm">Load Parking Spots</button>
 {% endblock %}
+
 <div class="fixed-bottom">
-  <div class="map-container">
-    <div id="map"></div>
-  </div>
+  <div id="map"></div>
   <!-- Filter Sidebar -->
   <div id="filter-sliding-window" class="fixed-bottom close-window">
     <div class="d-flex justify-content-end">
@@ -76,35 +90,107 @@
   <!-- END Filter Sidebar -->
 
   <!-- Post & Comment Sidebar -->
+  <div id="postSidebar" class="fixed-bottom close-window">
+    <div class="d-flex justify-content-end">
+      <button
+        type="button"
+        aria-label="Close"
+        class="btn-close p-2"
+        id="postSidebarCloseBtn"
+      ></button>
+    </div>
+    <div class="container mt-4">
+      <div class="container">
+        <h3 id="postSidebarHeader">Posts & Comments</h3>
+        <hr />
+      </div>
+      <div class="container text-center" id="postSidebarBody"></div>
+    </div>
+  </div>
   <!-- END Post & Comment Sidebar -->
 </div>
 <script>
   let map;
   let infoWindow;
-  const loadParkingBtn = document.getElementById("load-parking-btn");
 
+  const markers = [];
+  const spotMap = {};
+
+  const postSidebar = document.getElementById("postSidebar");
+  const loadParkingBtn = document.getElementById("load-parking-btn");
+  const applyFilterBtn = document.getElementById("apply-filter-btn");
+  const postSidebarBody = document.getElementById("postSidebarBody");
+  const postSidebarHeader = document.getElementById("postSidebarHeader");
+  const postSidebarCloseBtn = document.getElementById("postSidebarCloseBtn");
+  const filterSlidingWindow = document.getElementById("filter-sliding-window");
   const filterWindowOpenBtn = document.getElementById("filter-window-open-btn");
   const filterWindowCloseBtn = document.getElementById("filter-window-close-btn");
-  const filterSlidingWindow = document.getElementById("filter-sliding-window");
-
-  const applyFilterBtn = document.getElementById("apply-filter-btn");
-
-  const spotIds = new Set();
-  const markers = [];
 
   const isUserAuthenticated = "{{user.is_authenticated}}" === "True" ? true : false;
 
+  // #region Google Maps Callback
+  /**
+   * Callback Function for Google Maps API
+   * after JS is loaded to page
+   */
+  async function initMap() {
+    const tandon_lat = 40.69446042799896;
+    const tandon_lon = -73.9864403526369;
+
+    map = new google.maps.Map(document.getElementById("map"), {
+      center: { lat: tandon_lat, lng: tandon_lon },
+      zoom: 18,
+      mapId: "{{ GOOGLE_MAP_ID }}",
+    });
+    infoWindow = new google.maps.InfoWindow({});
+
+    //When Info Window has loaded completely, add an
+    //Event Listener to the Occupancy Percent input field
+    //to prevent user from putting invalid values
+    //i.e. non-numerical, negative values, and values over 100
+    infoWindow.addListener("domready", function (e) {
+      const occupancyStatusInput = document.getElementById("occupancy-status-input");
+
+      if (!occupancyStatusInput) {
+        return;
+      }
+
+      occupancyStatusInput.value =
+        infoWindow.marker.pin.glyph !== null ? parseInt(infoWindow.marker.pin.glyph) : 0;
+
+      occupancyStatusInput.addEventListener("input", function (e) {
+        let enteredValue = parseInt(e.target.value);
+
+        if (enteredValue < 0 || isNaN(enteredValue)) {
+          e.target.value = 0;
+        }
+        if (enteredValue > 100) {
+          e.target.value = 100;
+        }
+      });
+    });
+
+    //When dragging map, close Filter/PostSidebar Window
+    google.maps.event.addListener(map, "drag", function () {
+      closeFilterWindow();
+      closePostSidebar();
+    });
+  }
+  // #endregion Google Maps Callback
+
+  // #region Marker
   /**
    * Add markers on map with click-to-view info window
    * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
    */
   async function addMarker(spot) {
-    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
-    if (spotIds.has(spot.parking_spot_id)) {
+    // * handle invalid marker
+    if (spot.parking_spot_id in spotMap) {
+      console.error(`Spot ${JSON.stringify(spot)} has no valid parking_spot_id`);
       return;
     }
-    //Keep track of Parking Spot IDs on Map using Set
-    spotIds.add(spot.parking_spot_id);
+    //Keep track of Parking Spots on Map
+    spotMap[spot.parking_spot_id] = spot;
 
     //Utility function to get custom AdvancedMarker with color
     let marker = await getMarkerByType(spot);
@@ -117,13 +203,7 @@
       "click",
       (function (marker, id) {
         return function () {
-          let markerInfo;
-
-          if (spot.type === "Business") {
-            markerInfo = getBusinessInfo(spot);
-          } else if (spot.type === "Street") {
-            markerInfo = getStreetInfo(spot);
-          }
+          const markerInfo = spot.type === "Business" ? getBusinessInfo(spot) : getStreetInfo(spot);
 
           infoWindow.setContent(markerInfo);
           infoWindow.open(map, marker);
@@ -207,21 +287,16 @@
   function getBusinessInfo(spot) {
     const spotId = spot.parking_spot_id;
 
-    return (
-      '<div class="d-flex flex-column text-center p-2">' +
-      '<div class="mb-3"><h1 class="h3 mb-1">' +
-      spot.parking_spot_name +
-      "</h1></div>" +
-      '<div class="mb-3">Type: ' +
-      spot.type +
-      "</div>" +
-      '<div class="mb-3">Details: ' +
-      spot.detail +
-      "</div>" +
-      getMakePostHTML(spotId) +
-      '<div class="mb-3">This business has not yet been claimed.  Reach out to admin.</div>' +
-      "</div>"
-    );
+    return `<div class="d-flex flex-column text-center p-2">
+      <div class="mb-3">
+        <h1 class="h3 mb-1">${spot.parking_spot_name}</h1>
+      </div>
+      <div class="mb-3">Type: ${spot.type}</div>
+      <div class="mb-3">Details: ${spot.detail}</div>
+      ${getMakePostHTML(spotId)}
+      ${getViewPostHTML(spotId)}
+      <div class="mb-3">This business has not yet been claimed.  Reach out to admin.</div>
+    </div>`;
   }
 
   /**
@@ -235,24 +310,17 @@
     const spotId = spot.parking_spot_id;
     const hours = spot.operation_hours !== null ? spot.operation_hours : "N/A";
 
-    return (
-      '<div class="d-flex flex-column text-center p-2">' +
-      '<div class="mb-3"><h1 class="h3 mb-1">' +
-      "Street Parking" +
-      "</h1></div>" +
-      getOccupancyPercentHTML(spot) +
-      '<div class="mb-3">Type: ' +
-      spot.type +
-      "</div>" +
-      '<div class="mb-3">Details: ' +
-      spot.detail +
-      "</div>" +
-      '<div class="mb-3">Hours: ' +
-      hours +
-      "</div>" +
-      getMakePostHTML(spotId)
-    );
-    ("</div>");
+    return `<div class="d-flex flex-column text-center p-2">
+      <div class="mb-3">
+        <h1 class="h3 mb-1">Street Parking</h1>
+      </div>
+      ${getOccupancyPercentHTML(spot)}
+      <div class="mb-3">Type: ${spot.type}</div>
+      <div class="mb-3">Details: ${spot.detail}</div>
+      <div class="mb-3">Hours: ${hours}</div>
+      ${getMakePostHTML(spotId)}
+      ${getViewPostHTML(spotId)}
+    </div>`;
   }
 
   /**
@@ -266,12 +334,64 @@
 
     if (isUserAuthenticated) {
       return `<div class="w-75 mx-auto p-2">
-              <button class="btn btn-primary btn-sm" onclick="makePost('${makePostURL}')">
+              <button class="btn btn-outline-primary btn-sm" onclick="makePost('${makePostURL}')">
                   Make Post
               </button>
         </div>`;
     }
     return "";
+  }
+
+  function getViewPostHTML(spotId) {
+    console.log(spotId);
+    return `<div class="w-75 mx-auto p-2">
+      <button class="btn btn-outline-primary btn-sm" onclick="viewPost('${spotId}')">
+          View Posts
+      </button>
+    </div>`;
+  }
+
+  function viewPost(spotId) {
+    const spot = spotMap[spotId];
+    postSidebarBody.innerHTML = `<div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>`;
+    openPostSidebar();
+
+    axios.get(`/api/spot/posts/${spotId}`).then((res) => {
+      console.log(res.data);
+      const newPostSidebarBody = res.data.reduce(
+        (prev, cur) =>
+          prev +
+          `<div class="card mb-5">
+        <div class="card-header">
+          <h4 class="text-center">${cur.title || "No title"}</h4>
+          <div class="text-center">${cur.post || "Empty post"}</div>
+          <div class="text-end">
+            -- by ${cur.author?.username || "unknown user"}
+          </div>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">Comment 1</li>
+          <li class="list-group-item">Comment 2</li>
+          <li class="list-group-item">Comment 3</li>
+        </ul>
+      </div>`,
+        "",
+      );
+
+      postSidebarBody.innerHTML = newPostSidebarBody;
+    });
+  }
+
+  function openPostSidebar() {
+    postSidebar.classList.add("show-window");
+    postSidebar.classList.remove("close-window");
+  }
+
+  function closePostSidebar() {
+    postSidebar.classList.remove("show-window");
+    postSidebar.classList.add("close-window");
   }
 
   /**
@@ -345,77 +465,6 @@
   }
 
   /**
-   * Retrieve Parking Spots around center of map
-   * via an API endpoint with lat and lon as query parameters
-   * Sets markers for spots found within certain distance
-   * around center - reference api/views.py __is_within_dist method
-   */
-  function fetchParkingSpotAroundCenter() {
-    const center = map.getCenter();
-    const lat = center.lat();
-    const lng = center.lng();
-
-    axios
-      .get(`/api/spots/?lat=${lat}&lon=${lng}`)
-      .then(function (response) {
-        const spotsData = response.data;
-        spotsData.forEach((spot) => {
-          addMarker(spot);
-        });
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  }
-
-  /**
-   * Callback Function for Google Maps API
-   * after JS is loaded to page
-   */
-  async function initMap() {
-    const tandon_lat = 40.69446042799896;
-    const tandon_lon = -73.9864403526369;
-
-    map = new google.maps.Map(document.getElementById("map"), {
-      center: { lat: tandon_lat, lng: tandon_lon },
-      zoom: 18,
-      mapId: "{{ GOOGLE_MAP_ID }}",
-    });
-    infoWindow = new google.maps.InfoWindow({});
-
-    //When Info Window has loaded completely, add an
-    //Event Listener to the Occupancy Percent input field
-    //to prevent user from putting invalid values
-    //i.e. non-numerical, negative values, and values over 100
-    infoWindow.addListener("domready", function (e) {
-      const occupancyStatusInput = document.getElementById("occupancy-status-input");
-
-      if (!occupancyStatusInput) {
-        return;
-      }
-
-      occupancyStatusInput.value =
-        infoWindow.marker.pin.glyph !== null ? parseInt(infoWindow.marker.pin.glyph) : 0;
-
-      occupancyStatusInput.addEventListener("input", function (e) {
-        let enteredValue = parseInt(e.target.value);
-
-        if (enteredValue < 0 || isNaN(enteredValue)) {
-          e.target.value = 0;
-        }
-        if (enteredValue > 100) {
-          e.target.value = 100;
-        }
-      });
-    });
-
-    //When dragging map, close Filter Window
-    google.maps.event.addListener(map, "drag", function () {
-      closeFilterWindow();
-    });
-  }
-
-  /**
    * Redirects to make post page, when user clicks on
    * button inside info window of parking spot on map
    * @param {string} url - redirect url specified (see addMarker function)
@@ -423,35 +472,9 @@
   function makePost(url) {
     window.location.href = url;
   }
+  // #endregion Marker
 
-  /**
-   * Sets up the following on webpage, on load
-   *      Add click event listener to "Load Parking Spots" button
-   *      Add click event listener to "Adjust Filter" button
-   *      Add click event listener to "Close (X)" button
-   */
-  function setup() {
-    //Clicking on "Load Parking Spots" will fetch parking spots around
-    //map center
-    loadParkingBtn.addEventListener("click", function (e) {
-      fetchParkingSpotAroundCenter();
-    });
-
-    //Clicking on "Adjust Filter" button will open Filter window
-    filterWindowOpenBtn.addEventListener("click", function (e) {
-      openFilterWindow();
-    });
-
-    //Clicking on "Close (X)" button will close Filter Window
-    filterWindowCloseBtn.addEventListener("click", function (e) {
-      closeFilterWindow();
-    });
-
-    applyFilterBtn.addEventListener("click", function (e) {
-      applyFilter();
-    });
-  }
-
+  // #region filter
   /**
    * Applies filter based on input fields (with class "filter-checkbox")
    * that are selected
@@ -491,8 +514,72 @@
     filterSlidingWindow.classList.remove("open-window");
   }
 
+  // #endregion filter
+
+  // #region setup & evt listeners
+
+  /**
+   * Retrieve Parking Spots around center of map
+   * via an API endpoint with lat and lon as query parameters
+   * Sets markers for spots found within certain distance
+   * around center - reference api/views.py __is_within_dist method
+   */
+  function fetchParkingSpotAroundCenter() {
+    const center = map.getCenter();
+    const lat = center.lat();
+    const lng = center.lng();
+
+    axios
+      .get(`/api/spots/?lat=${lat}&lon=${lng}`)
+      .then(function (response) {
+        const spotsData = response.data;
+        spotsData.forEach((spot) => {
+          addMarker(spot);
+        });
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
+
+  /**
+   * Sets up the following on webpage, on load
+   *      Add click event listener to "Load Parking Spots" button
+   *      Add click event listener to "Adjust Filter" button
+   *      Add click event listener to "Close (X)" button
+   */
+  function setup() {
+    //Clicking on "Load Parking Spots" will fetch parking spots around
+    //map center
+    loadParkingBtn.addEventListener("click", function (e) {
+      fetchParkingSpotAroundCenter();
+    });
+
+    //Clicking on "Adjust Filter" button will open Filter window
+    filterWindowOpenBtn.addEventListener("click", function (e) {
+      openFilterWindow();
+    });
+
+    //Clicking on "Close (X)" button will close Filter Window
+    filterWindowCloseBtn.addEventListener("click", function (e) {
+      closeFilterWindow();
+    });
+
+    applyFilterBtn.addEventListener("click", function (e) {
+      applyFilter();
+    });
+
+    postSidebarCloseBtn.addEventListener("click", function (e) {
+      closePostSidebar();
+    });
+  }
+
+  // setup event listners
   setup();
+
+  // #endregion setup & evt listners
 </script>
+
 <script
   async
   defer
