@@ -1,5 +1,6 @@
-{% extends "parkrowd/main.html" %}
-{% block content %}
+<!-- @format -->
+
+{% extends "parkrowd/main.html" %} {% block content %}
 <style>
   #map,
   #filter-sliding-window {
@@ -23,21 +24,29 @@
   }
 </style>
 {% block navbarEnd %}
-<button id="filter-window-open-btn" class="btn btn-info" style="margin-right: 15px">Adjust Filter</button>
-<button id="load-parking-btn" class="btn btn-primary">Load Parking Spots</button>
+<button id="filter-window-open-btn" class="btn btn-info btn-sm" style="margin-right: 15px">
+  Adjust Filter
+</button>
+<button id="load-parking-btn" class="btn btn-primary btn-sm">Load Parking Spots</button>
 {% endblock %}
 <div class="fixed-bottom">
   <div class="map-container">
     <div id="map"></div>
   </div>
+  <!-- Filter Sidebar -->
   <div id="filter-sliding-window" class="fixed-bottom close-window">
     <div class="d-flex justify-content-end">
-      <button id="filter-window-close-btn" type="button" class="btn-close p-2" aria-label="Close"></button>
+      <button
+        id="filter-window-close-btn"
+        type="button"
+        class="btn-close p-2"
+        aria-label="Close"
+      ></button>
     </div>
     <div class="container mt-4">
       <div class="container">
         <h3>Filters</h3>
-        <hr>
+        <hr />
       </div>
       <div class="container">
         <div class="form-group">
@@ -46,422 +55,447 @@
             <!--Each input should have a "filter-checkbox" class for JS to apply filtering-->
             <!--Values for each input checkbox should be specified (match DB type)-->
             <label class="btn btn-secondary">
-              <input class="filter-checkbox" type="checkbox" autocomplete="off" value="Business"> Business
+              <input class="filter-checkbox" type="checkbox" autocomplete="off" value="Business" />
+              Business
             </label>
             <label class="btn btn-secondary">
-              <input class="filter-checkbox" type="checkbox" autocomplete="off" value="Street"> Street
+              <input class="filter-checkbox" type="checkbox" autocomplete="off" value="Street" />
+              Street
             </label>
           </div>
         </div>
       </div>
       <div class="container">
-        <hr>
+        <hr />
         <div class="d-flex justify-content-end">
           <button id="apply-filter-btn" class="btn btn-primary">Apply Filter</button>
         </div>
       </div>
     </div>
   </div>
+  <!-- END Filter Sidebar -->
+
+  <!-- Post & Comment Sidebar -->
+  <!-- END Post & Comment Sidebar -->
 </div>
 <script>
-    let map;
-    let infoWindow;
-    const loadParkingBtn = document.getElementById("load-parking-btn");
+  let map;
+  let infoWindow;
+  const loadParkingBtn = document.getElementById("load-parking-btn");
 
-    const filterWindowOpenBtn = document.getElementById("filter-window-open-btn");
-    const filterWindowCloseBtn = document.getElementById("filter-window-close-btn");
-    const filterSlidingWindow = document.getElementById("filter-sliding-window");
+  const filterWindowOpenBtn = document.getElementById("filter-window-open-btn");
+  const filterWindowCloseBtn = document.getElementById("filter-window-close-btn");
+  const filterSlidingWindow = document.getElementById("filter-sliding-window");
 
-    const applyFilterBtn = document.getElementById("apply-filter-btn");
+  const applyFilterBtn = document.getElementById("apply-filter-btn");
 
-    const spotIds = new Set();
-    const markers = [];
+  const spotIds = new Set();
+  const markers = [];
 
-    /**
-     * Add markers on map with click-to-view info window
-     * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
-     */
-    async function addMarker(spot) {
-        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
-        if (spotIds.has(spot.parking_spot_id)) {
-            return;
-        }
-        //Keep track of Parking Spot IDs on Map using Set
-        spotIds.add(spot.parking_spot_id);
+  const isUserAuthenticated = "{{user.is_authenticated}}" === "True" ? true : false;
 
-        //Utility function to get custom AdvancedMarker with color
-        let marker = await getMarkerByType(spot);
+  /**
+   * Add markers on map with click-to-view info window
+   * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
+   */
+  async function addMarker(spot) {
+    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+    if (spotIds.has(spot.parking_spot_id)) {
+      return;
+    }
+    //Keep track of Parking Spot IDs on Map using Set
+    spotIds.add(spot.parking_spot_id);
 
-        //Keep track of all markers with an array
-        markers.push(marker);
+    //Utility function to get custom AdvancedMarker with color
+    let marker = await getMarkerByType(spot);
 
-        google.maps.event.addListener(marker, 'click', (function (marker, id) {
+    //Keep track of all markers with an array
+    markers.push(marker);
+
+    google.maps.event.addListener(
+      marker,
+      "click",
+      (function (marker, id) {
         return function () {
-            let markerInfo;
+          let markerInfo;
 
-            if (spot.type === "Business") {
+          if (spot.type === "Business") {
             markerInfo = getBusinessInfo(spot);
-            }
-            else if (spot.type === "Street") {
+          } else if (spot.type === "Street") {
             markerInfo = getStreetInfo(spot);
-            }
+          }
 
-            infoWindow.setContent(markerInfo);
-            infoWindow.open(map, marker);
-            
-            //Add marker dynamically as property for the Info Window
-            //that shows when clicking on Marker on Map.
-            //Used for quick access to glyph (map marker center dot) of Marker
-            infoWindow.marker = marker;
-        }
-        })(marker, spot.parking_spot_id));
-    }
+          infoWindow.setContent(markerInfo);
+          infoWindow.open(map, marker);
 
-    /**
-     * Helper function for addMarker()
-     * Creates an AdvancedMarkerElement (custom color marker) based on type
-     * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
-     * @returns {Object} AdvancedMarkerElement - see link below (Google Maps API)
-     * https://developers.google.com/maps/documentation/javascript/advanced-markers/basic-customization
-     */
-    async function getMarkerByType(spot) {
-        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
-
-        const typeToColor = {
-            "Business": "black",
-            "Street": "indigo"
+          //Add marker dynamically as property for the Info Window
+          //that shows when clicking on Marker on Map.
+          //Used for quick access to glyph (map marker center dot) of Marker
+          infoWindow.marker = marker;
         };
+      })(marker, spot.parking_spot_id),
+    );
+  }
 
-        const color = typeToColor[spot.type];
+  /**
+   * Helper function for addMarker()
+   * Creates an AdvancedMarkerElement (custom color marker) based on type
+   * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
+   * @returns {Object} AdvancedMarkerElement - see link below (Google Maps API)
+   * https://developers.google.com/maps/documentation/javascript/advanced-markers/basic-customization
+   */
+  async function getMarkerByType(spot) {
+    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
-        //Retrieve and process occupancy_percent from
-        //backend to display percent on Marker
-        const occupancy_percent = (spot.occupancy_percent !== null) 
-            ? String(spot.occupancy_percent) + '%' 
-            : null;
-        
-        const glyphColor = getGlyphColor(spot.occupancy_percent);
+    const typeToColor = {
+      Business: "black",
+      Street: "indigo",
+    };
 
-        const pinBackground = new PinElement({
-            scale: 1.25,
-            background: color,
-            borderColor: color,
-            glyph: occupancy_percent,
-            glyphColor: glyphColor
+    const color = typeToColor[spot.type];
+
+    //Retrieve and process occupancy_percent from
+    //backend to display percent on Marker
+    const occupancy_percent =
+      spot.occupancy_percent !== null ? String(spot.occupancy_percent) + "%" : null;
+
+    const glyphColor = getGlyphColor(spot.occupancy_percent);
+
+    const pinBackground = new PinElement({
+      scale: 1.25,
+      background: color,
+      borderColor: color,
+      glyph: occupancy_percent,
+      glyphColor: glyphColor,
+    });
+
+    let marker = new AdvancedMarkerElement({
+      map,
+      position: {
+        lat: parseFloat(spot.latitude),
+        lng: parseFloat(spot.longitude),
+      },
+      content: pinBackground.element,
+      title: spot.parking_spot_name,
+    });
+    //To identify a marker when filtering
+    marker.type = spot.type;
+    //To retrieve the glyph (map marker center dot) info
+    marker.pin = pinBackground;
+    return marker;
+  }
+
+  /**
+   * Helper function for getMarkerByType()
+   * Determines glyph color based on occupancy percent
+   * Below 50% is lightgreen, Above 50% is lightcoral (red), Otherwise, white dot
+   * @param {Number} occupancy_percent - Number from 0 to 100
+   * @returns {string} color - glyph color
+   */
+  function getGlyphColor(occupancy_percent) {
+    const glyphColor =
+      occupancy_percent === null ? "white" : occupancy_percent >= 50 ? "lightcoral" : "lightgreen";
+    return glyphColor;
+  }
+
+  /**
+   * Helper function for addMarker()
+   * Sets up HTML info for business based markers (format different from other spots)
+   * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
+   * @returns {string} HTML content - info on Business parking spot
+   */
+  function getBusinessInfo(spot) {
+    const spotId = spot.parking_spot_id;
+
+    return (
+      '<div class="d-flex flex-column text-center p-2">' +
+      '<div class="mb-3"><h1 class="h3 mb-1">' +
+      spot.parking_spot_name +
+      "</h1></div>" +
+      '<div class="mb-3">Type: ' +
+      spot.type +
+      "</div>" +
+      '<div class="mb-3">Details: ' +
+      spot.detail +
+      "</div>" +
+      getMakePostHTML(spotId) +
+      '<div class="mb-3">This business has not yet been claimed.  Reach out to admin.</div>' +
+      "</div>"
+    );
+  }
+
+  /**
+   * Helper function for addMarker()
+   * Sets up HTML info for street based markers (format different from other spots)
+   * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
+   * @returns {string} HTML content - info on Street parking spot
+   */
+
+  function getStreetInfo(spot) {
+    const spotId = spot.parking_spot_id;
+    const hours = spot.operation_hours !== null ? spot.operation_hours : "N/A";
+
+    return (
+      '<div class="d-flex flex-column text-center p-2">' +
+      '<div class="mb-3"><h1 class="h3 mb-1">' +
+      "Street Parking" +
+      "</h1></div>" +
+      getOccupancyPercentHTML(spot) +
+      '<div class="mb-3">Type: ' +
+      spot.type +
+      "</div>" +
+      '<div class="mb-3">Details: ' +
+      spot.detail +
+      "</div>" +
+      '<div class="mb-3">Hours: ' +
+      hours +
+      "</div>" +
+      getMakePostHTML(spotId)
+    );
+    ("</div>");
+  }
+
+  /**
+   * Helper function for getBusinessInfo() and getStreetInfo()
+   * Conditionally hides "Make Post" button if user is not logged in
+   * @param {string} spotId - ParkingSpace PK : parking_spot_id field
+   * @returns {string} HTML content - "Make Post" button OR nothing
+   */
+  function getMakePostHTML(spotId) {
+    const makePostURL = `/map/post/${spotId}/{{user.username}}`;
+
+    if (isUserAuthenticated) {
+      return `<div class="w-75 mx-auto p-2">
+              <button class="btn btn-primary btn-sm" onclick="makePost('${makePostURL}')">
+                  Make Post
+              </button>
+        </div>`;
+    }
+    return "";
+  }
+
+  /**
+   * Helper function for getBusinessInfo() and getStreetInfo()
+   * Creates the HTML for allowing user to change Occupancy Percent of Spot
+   * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
+   * @returns {string} HTML content - Occupancy Percent Input Field and Button OR nothing
+   */
+  function getOccupancyPercentHTML(spot) {
+    //TO DO : Suggested that only Business Owner of a Spot
+    //can change Occupancy Percent.  For now, allow any Driver (Registered User)
+    //to change that percent on Street Parking
+
+    if (spot.type === "Street" && isUserAuthenticated) {
+      return (
+        '<div class="form-group mb-3">' +
+        '<label for="occupancy-status">Occupancy Percent:</label>' +
+        '<input type="number" class="form-control" id="occupancy-status-input" name="occupancy-status" min="0" max="100">' +
+        `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy(${spot.parking_spot_id})">Submit</button>` +
+        "</div>"
+      );
+    }
+    return "";
+  }
+
+  /**
+   * Onclick function for Occupancy Percent Submit Button
+   * Parses current value in Input Field and makes POST API call to change
+   * on backend.
+   * @param {string} spotId - ParkingSpace PK : parking_spot_id field
+   */
+  function submitOccupancy(spotId) {
+    const occupancyStatusInput = document.getElementById("occupancy-status-input");
+    const occupancy_percent = parseInt(occupancyStatusInput.value);
+
+    //See ParkingSpaceChangeOccupancyAPIView in api/views.py
+    //for API endpoint
+    const formData = {
+      percent: occupancy_percent,
+      id: spotId,
+    };
+
+    axios
+      .post(`/api/spot/occupancy/`, formData, {
+        headers: {
+          "X-CSRFToken": getCSRFToken(),
+        },
+      })
+      .then(function (response) {
+        const glyphColor = getGlyphColor(occupancy_percent);
+
+        infoWindow.marker.pin.glyph = occupancy_percent + "%";
+        infoWindow.marker.pin.glyphColor = glyphColor;
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
+
+  /**
+   * Retrieves CSRF token
+   * @returns {string} cookieValue - CSRF cookie value
+   */
+  function getCSRFToken() {
+    const cookieValue = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("csrftoken="))
+      .split("=")[1];
+
+    return cookieValue;
+  }
+
+  /**
+   * Retrieve Parking Spots around center of map
+   * via an API endpoint with lat and lon as query parameters
+   * Sets markers for spots found within certain distance
+   * around center - reference api/views.py __is_within_dist method
+   */
+  function fetchParkingSpotAroundCenter() {
+    const center = map.getCenter();
+    const lat = center.lat();
+    const lng = center.lng();
+
+    axios
+      .get(`/api/spots/?lat=${lat}&lon=${lng}`)
+      .then(function (response) {
+        const spotsData = response.data;
+        spotsData.forEach((spot) => {
+          addMarker(spot);
         });
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
 
-        let marker = new AdvancedMarkerElement({
-            map,
-            position: {
-                lat: parseFloat(spot.latitude),
-                lng: parseFloat(spot.longitude)
-            },
-            content: pinBackground.element,
-            title: spot.parking_spot_name
-        });
-        //To identify a marker when filtering
-        marker.type = spot.type;
-        //To retrieve the glyph (map marker center dot) info
-        marker.pin = pinBackground;
-        return marker;
-    }
+  /**
+   * Callback Function for Google Maps API
+   * after JS is loaded to page
+   */
+  async function initMap() {
+    const tandon_lat = 40.69446042799896;
+    const tandon_lon = -73.9864403526369;
 
-    /**
-     * Helper function for getMarkerByType()
-     * Determines glyph color based on occupancy percent
-     * Below 50% is lightgreen, Above 50% is lightcoral (red), Otherwise, white dot
-     * @param {Number} occupancy_percent - Number from 0 to 100
-     * @returns {string} color - glyph color
-     */
-    function getGlyphColor(occupancy_percent) {
-        const glyphColor = (occupancy_percent === null) 
-            ? 'white' : (occupancy_percent >= 50) 
-            ? 'lightcoral' : 'lightgreen';
-        return glyphColor;
-    }
+    map = new google.maps.Map(document.getElementById("map"), {
+      center: { lat: tandon_lat, lng: tandon_lon },
+      zoom: 18,
+      mapId: "{{ GOOGLE_MAP_ID }}",
+    });
+    infoWindow = new google.maps.InfoWindow({});
 
-    /**
-     * Helper function for addMarker()
-     * Sets up HTML info for business based markers (format different from other spots)
-     * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
-     * @returns {string} HTML content - info on Business parking spot
-     */
-    function getBusinessInfo(spot) {
-        const spotId = spot.parking_spot_id;
+    //When Info Window has loaded completely, add an
+    //Event Listener to the Occupancy Percent input field
+    //to prevent user from putting invalid values
+    //i.e. non-numerical, negative values, and values over 100
+    infoWindow.addListener("domready", function (e) {
+      const occupancyStatusInput = document.getElementById("occupancy-status-input");
 
-        return '<div class="d-flex flex-column text-center p-2">' +
-            '<div class="mb-3"><h1 class="h3 mb-1">' + spot.parking_spot_name + '</h1></div>' +
-            '<div class="mb-3">Type: ' + spot.type + '</div>' +
-            '<div class="mb-3">Details: ' + spot.detail + '</div>' +
-            getMakePostHTML(spotId) + 
-            '<div class="mb-3">This business has not yet been claimed.  Reach out to admin.</div>' +
-            '</div>'
-    }
+      if (!occupancyStatusInput) {
+        return;
+      }
 
-    /**
-     * Helper function for addMarker()
-     * Sets up HTML info for street based markers (format different from other spots)
-     * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
-     * @returns {string} HTML content - info on Street parking spot
-     */
+      occupancyStatusInput.value =
+        infoWindow.marker.pin.glyph !== null ? parseInt(infoWindow.marker.pin.glyph) : 0;
 
-    function getStreetInfo(spot) {
-        const spotId = spot.parking_spot_id;
-        const hours = (spot.operation_hours !== null) ? spot.operation_hours : "N/A";
+      occupancyStatusInput.addEventListener("input", function (e) {
+        let enteredValue = parseInt(e.target.value);
 
-        return '<div class="d-flex flex-column text-center p-2">' +
-            '<div class="mb-3"><h1 class="h3 mb-1">' + 'Street Parking' + '</h1></div>' +
-            getOccupancyPercentHTML(spot) + 
-            '<div class="mb-3">Type: ' + spot.type + '</div>' +
-            '<div class="mb-3">Details: ' + spot.detail + '</div>' +
-            '<div class="mb-3">Hours: ' + hours + '</div>' +
-            getMakePostHTML(spotId);
-            '</div>'
-    }
-
-    /**
-     * Helper function for getBusinessInfo() and getStreetInfo()
-     * Conditionally hides "Make Post" button if user is not logged in
-     * @param {string} spotId - ParkingSpace PK : parking_spot_id field
-     * @returns {string} HTML content - "Make Post" button OR nothing
-     */
-    function getMakePostHTML(spotId) {
-        const makePostURL = `/map/post/${spotId}/{{user.username}}`;
-
-        {% if user.is_authenticated %}
-            return `<div class="w-75 mx-auto p-2">
-                <button class="btn btn-primary btn-sm" onclick="makePost('${makePostURL}')">
-                    Make Post
-                </button>
-            </div>`
-        {% else %}
-            return '';
-        {% endif %}
-
-    }
-
-    /**
-     * Helper function for getBusinessInfo() and getStreetInfo()
-     * Creates the HTML for allowing user to change Occupancy Percent of Spot
-     * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
-     * @returns {string} HTML content - Occupancy Percent Input Field and Button OR nothing
-     */
-    function getOccupancyPercentHTML(spot) {
-        //TO DO : Suggested that only Business Owner of a Spot
-        //can change Occupancy Percent.  For now, allow any Driver (Registered User)
-        //to change that percent on Street Parking
-
-        {% if user.is_authenticated %}
-        if (spot.type === "Street") {
-            return '<div class="form-group mb-3">' +
-            '<label for="occupancy-status">Occupancy Percent:</label>' +
-            '<input type="number" class="form-control" id="occupancy-status-input" name="occupancy-status" min="0" max="100">' +
-            `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy(${spot.parking_spot_id})">Submit</button>` +
-            '</div>'
+        if (enteredValue < 0 || isNaN(enteredValue)) {
+          e.target.value = 0;
         }
-        {% endif %}
-        return '';
-    }
+        if (enteredValue > 100) {
+          e.target.value = 100;
+        }
+      });
+    });
 
-    /**
-     * Onclick function for Occupancy Percent Submit Button
-     * Parses current value in Input Field and makes POST API call to change
-     * on backend.  
-     * @param {string} spotId - ParkingSpace PK : parking_spot_id field
-     */
-    function submitOccupancy(spotId) {
-        const occupancyStatusInput = document.getElementById('occupancy-status-input');
-        const occupancy_percent = parseInt(occupancyStatusInput.value);
-        
-        //See ParkingSpaceChangeOccupancyAPIView in api/views.py
-        //for API endpoint
-        const formData = {
-            percent: occupancy_percent,
-            id: spotId
-        };
+    //When dragging map, close Filter Window
+    google.maps.event.addListener(map, "drag", function () {
+      closeFilterWindow();
+    });
+  }
 
-        axios.post(`/api/spot/occupancy/`, formData, {
-                headers: {
-                    'X-CSRFToken': getCSRFToken(),
-                },
-            })
-            .then(function (response) {
-                const glyphColor = getGlyphColor(occupancy_percent);
+  /**
+   * Redirects to make post page, when user clicks on
+   * button inside info window of parking spot on map
+   * @param {string} url - redirect url specified (see addMarker function)
+   */
+  function makePost(url) {
+    window.location.href = url;
+  }
 
-                infoWindow.marker.pin.glyph = occupancy_percent + '%';
-                infoWindow.marker.pin.glyphColor = glyphColor;
-                
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-    }
+  /**
+   * Sets up the following on webpage, on load
+   *      Add click event listener to "Load Parking Spots" button
+   *      Add click event listener to "Adjust Filter" button
+   *      Add click event listener to "Close (X)" button
+   */
+  function setup() {
+    //Clicking on "Load Parking Spots" will fetch parking spots around
+    //map center
+    loadParkingBtn.addEventListener("click", function (e) {
+      fetchParkingSpotAroundCenter();
+    });
 
-    /**
-     * Retrieves CSRF token  
-     * @returns {string} cookieValue - CSRF cookie value
-     */
-    function getCSRFToken() {
-        const cookieValue = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('csrftoken='))
-            .split('=')[1];
+    //Clicking on "Adjust Filter" button will open Filter window
+    filterWindowOpenBtn.addEventListener("click", function (e) {
+      openFilterWindow();
+    });
 
-        return cookieValue;
-    }
+    //Clicking on "Close (X)" button will close Filter Window
+    filterWindowCloseBtn.addEventListener("click", function (e) {
+      closeFilterWindow();
+    });
 
-    /**
-     * Retrieve Parking Spots around center of map
-     * via an API endpoint with lat and lon as query parameters
-     * Sets markers for spots found within certain distance
-     * around center - reference api/views.py __is_within_dist method
-     */
-    function fetchParkingSpotAroundCenter() {
+    applyFilterBtn.addEventListener("click", function (e) {
+      applyFilter();
+    });
+  }
 
-        const center = map.getCenter();
-        const lat = center.lat();
-        const lng = center.lng();
+  /**
+   * Applies filter based on input fields (with class "filter-checkbox")
+   * that are selected
+   */
+  function applyFilter() {
+    //Finds all checkboxes with class "filter-checkbox"
+    //and creates and array with the names of checkboxes selected
+    const checkboxes = document.querySelectorAll(".filter-checkbox");
+    const selectedFilters = Array.from(checkboxes)
+      .filter((checkbox) => checkbox.checked)
+      .map((checkbox) => checkbox.value);
 
-        axios.get(`/api/spots/?lat=${lat}&lon=${lng}`)
-            .then(function (response) {
-                const spotsData = response.data;
-                spotsData.forEach(spot => {
-                    addMarker(spot);
-                })
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-    }
+    //Iterates through all markers and properly
+    //sets the 'map' property accordingly
+    markers.forEach((marker) => {
+      if (!selectedFilters.includes(marker.type)) {
+        marker.map = null;
+      } else {
+        marker.map = map;
+      }
+    });
+  }
 
-    /**
-     * Callback Function for Google Maps API
-     * after JS is loaded to page
-     */
-    async function initMap() {
-        const tandon_lat = 40.69446042799896;
-        const tandon_lon = -73.9864403526369;
+  /**
+   * Closes Filter Window by adjusting CSS class
+   */
+  function openFilterWindow() {
+    filterSlidingWindow.classList.add("open-window");
+    filterSlidingWindow.classList.remove("close-window");
+  }
 
-        map = new google.maps.Map(document.getElementById('map'), {
-            center: { lat: tandon_lat, lng: tandon_lon },
-            zoom: 18,
-            mapId: '{{ GOOGLE_MAP_ID }}'
-        });
-        infoWindow = new google.maps.InfoWindow({});
+  /**
+   * Opens Filter Window by adjusting CSS class
+   */
+  function closeFilterWindow() {
+    filterSlidingWindow.classList.add("close-window");
+    filterSlidingWindow.classList.remove("open-window");
+  }
 
-        //When Info Window has loaded completely, add an
-        //Event Listener to the Occupancy Percent input field
-        //to prevent user from putting invalid values
-        //i.e. non-numerical, negative values, and values over 100
-        infoWindow.addListener('domready', function (e) {
-            const occupancyStatusInput = document.getElementById('occupancy-status-input');
-
-            if (!occupancyStatusInput) {
-                return ;
-            }
-
-            occupancyStatusInput.value = (infoWindow.marker.pin.glyph !== null) 
-                ? parseInt(infoWindow.marker.pin.glyph)
-                : 0;
-
-            occupancyStatusInput.addEventListener('input', function(e) {
-                let enteredValue = parseInt(e.target.value);
-
-                if (enteredValue < 0 || isNaN(enteredValue)) {
-                    e.target.value = 0;
-                }
-                if (enteredValue > 100) {
-                    e.target.value = 100;
-                }
-            })
-        })
-
-        //When dragging map, close Filter Window
-        google.maps.event.addListener(map, "drag", function () {
-        closeFilterWindow();
-        });
-    }
-
-    /**
-     * Redirects to make post page, when user clicks on 
-     * button inside info window of parking spot on map
-     * @param {string} url - redirect url specified (see addMarker function)
-     */
-    function makePost(url) {
-        window.location.href = url;
-    }
-
-    /**
-     * Sets up the following on webpage, on load
-     *      Add click event listener to "Load Parking Spots" button
-     *      Add click event listener to "Adjust Filter" button
-     *      Add click event listener to "Close (X)" button
-     */
-    function setup() {
-        //Clicking on "Load Parking Spots" will fetch parking spots around
-        //map center
-        loadParkingBtn.addEventListener('click', function (e) {
-            fetchParkingSpotAroundCenter();
-        });
-
-        //Clicking on "Adjust Filter" button will open Filter window
-        filterWindowOpenBtn.addEventListener('click', function (e) {
-            openFilterWindow();
-        });
-
-        //Clicking on "Close (X)" button will close Filter Window
-        filterWindowCloseBtn.addEventListener('click', function (e) {
-            closeFilterWindow();
-        });
-
-        applyFilterBtn.addEventListener('click', function (e) {
-            applyFilter();
-        });
-
-    }
-
-    /**
-     * Applies filter based on input fields (with class "filter-checkbox") 
-     * that are selected
-     */
-    function applyFilter() {
-        //Finds all checkboxes with class "filter-checkbox"
-        //and creates and array with the names of checkboxes selected
-        const checkboxes = document.querySelectorAll('.filter-checkbox');
-        const selectedFilters = Array.from(checkboxes)
-            .filter(checkbox => checkbox.checked)
-            .map(checkbox => checkbox.value);
-
-        //Iterates through all markers and properly
-        //sets the 'map' property accordingly
-        markers.forEach(marker => {
-            if (!selectedFilters.includes(marker.type)) {
-            marker.map = null;
-            } else {
-            marker.map = map;
-            }
-        });
-    }
-
-    /**
-     * Closes Filter Window by adjusting CSS class
-     */
-    function openFilterWindow() {
-        filterSlidingWindow.classList.add('open-window');
-        filterSlidingWindow.classList.remove('close-window');
-    }
-
-    /**
-     * Opens Filter Window by adjusting CSS class
-     */
-    function closeFilterWindow() {
-        filterSlidingWindow.classList.add('close-window');
-        filterSlidingWindow.classList.remove('open-window');
-    }
-
-    setup();
-
+  setup();
 </script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap">
-</script>
+<script
+  async
+  defer
+  src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap"
+></script>
 {% endblock %}
