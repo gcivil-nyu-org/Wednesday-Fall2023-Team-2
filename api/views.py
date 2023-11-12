@@ -1,12 +1,16 @@
 from rest_framework import status
+from django.utils import timezone
 from django.http import HttpRequest
 from rest_framework import generics
 from haversine import haversine, Unit
+from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication
 
 from map.models import ParkingSpace
 from users.models import Post, Comment
-from .serializers import ParkingSpaceSerializer, PostSerializer, CommentSerializer
+from .serializers import ParkingSpaceSerializer, PostSerializer
 
 
 class ParkingSpaceNearCenterAPIView(generics.ListAPIView):
@@ -58,15 +62,15 @@ class ParkingSpaceNearCenterAPIView(generics.ListAPIView):
         return haversine(p1, p2, unit=Unit.MILES) < max_dist
 
 
-class ParkingSpaceChangeOccupancyAPIView(generics.ListAPIView):
+class ParkingSpaceChangeOccupancyAPIView(APIView):
     """API endpoint
     /api/spot/occupancy/?percent=PERCENT&id=PARKING_SPACE_ID
 
     Changes the Occupancy Percent of Parking Space (ID)
     """
 
-    queryset = ParkingSpace.objects.all()
-    serializer_class = ParkingSpaceSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication]
 
     def post(self, request: HttpRequest) -> Response:
         """handles post requests to API endpoint above
@@ -115,8 +119,44 @@ class ParkingSpaceChangeOccupancyAPIView(generics.ListAPIView):
 
 
 class ParkingSpacePostsAPIView(generics.ListAPIView):
+    """GET API endpoint
+    /api/spot/posts/<str:spotId>
+
+    get a list of all the posts associated with a spot
+    """
+
     serializer_class = PostSerializer
 
     def get_queryset(self):
         parking_space_id = self.kwargs["spotId"]
         return Post.objects.filter(parking_space__parking_spot_id=parking_space_id)
+
+
+class ParkingSpaceAddCommentAPIView(APIView):
+    """POST API endpoint
+    /api/spot/posts/add-comment/<int:postId>
+
+    get a list of all the posts associated with a spot
+    """
+
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication]
+
+    def post(self, request: HttpRequest, postId: int) -> Response:
+        comment_content = request.data["commentContent"]
+        if not comment_content:
+            return Response("Error: empty comment content", 400)
+        try:
+            post = Post.objects.get(id=postId)
+        except Post.DoesNotExist:
+            return Response(f"No post with post id {postId}", 400)
+
+        new_comment = Comment(
+            content=comment_content,
+            author=request.user,
+            post=post,
+            created_at=timezone.now(),
+        )
+        new_comment.save()
+
+        return Response("Comment created!", 200)
