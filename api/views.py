@@ -87,9 +87,7 @@ class ParkingSpaceChangeOccupancyAPIView(APIView):
         parking_spot_id = request.data.get("id")
 
         if not (occupancy_percent and parking_spot_id):
-            response_data = {
-                "message": "Bad Request: Missing percent and id parameters"
-            }
+            response_data = {"message": "Bad Request: Missing percent or id parameters"}
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
         try:
