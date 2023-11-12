@@ -343,12 +343,24 @@
   }
 
   function getViewPostHTML(spotId) {
-    console.log(spotId);
     return `<div class="w-75 mx-auto p-2">
       <button class="btn btn-outline-primary btn-sm" onclick="viewPost('${spotId}')">
           View Posts
       </button>
     </div>`;
+  }
+
+  function createCommentHTMLList(comments) {
+    return `<ul class="list-group list-group-flush">
+      ${comments.reduce(
+        (prev, cur) =>
+          prev +
+          `<li class="list-group-item">${cur.content}&nbsp;&nbsp;&nbsp;&nbsp;--by ${
+            cur.author?.username || "unknown user"
+          } at ${new Date(cur.created_at).toLocaleString()}</li>`,
+        "",
+      )}
+    </ul>`;
   }
 
   function viewPost(spotId) {
@@ -359,23 +371,17 @@
     openPostSidebar();
 
     axios.get(`/api/spot/posts/${spotId}`).then((res) => {
-      console.log(res.data);
       const newPostSidebarBody = res.data.reduce(
         (prev, cur) =>
           prev +
           `<div class="card mb-5">
         <div class="card-header">
           <h4 class="text-center">${cur.title || "No title"}</h4>
-          <div class="text-center">${cur.post || "Empty post"}</div>
-          <div class="text-end">
-            -- by ${cur.author?.username || "unknown user"}
-          </div>
+          <div class="text-center">${cur.post || "Empty post"}&nbsp;&nbsp;&nbsp;&nbsp;-- by ${
+            cur.author?.username || "unknown user"
+          } at ${new Date(cur.created_at).toLocaleString()}</div>
         </div>
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item">Comment 1</li>
-          <li class="list-group-item">Comment 2</li>
-          <li class="list-group-item">Comment 3</li>
-        </ul>
+        ${createCommentHTMLList(cur.comments)}
       </div>`,
         "",
       );

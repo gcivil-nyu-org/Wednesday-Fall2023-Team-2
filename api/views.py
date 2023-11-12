@@ -4,9 +4,9 @@ from rest_framework import generics
 from haversine import haversine, Unit
 from rest_framework.response import Response
 
-from users.models import Post
 from map.models import ParkingSpace
-from .serializers import ParkingSpaceSerializer, PostSerializer
+from users.models import Post, Comment
+from .serializers import ParkingSpaceSerializer, PostSerializer, CommentSerializer
 
 
 class ParkingSpaceNearCenterAPIView(generics.ListAPIView):
