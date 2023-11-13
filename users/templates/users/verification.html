@@ -1,3 +1,5 @@
+<!-- @format -->
+
 {% extends "parkrowd/main.html" %} {% block content %}
 <div class="container-lg">
   <div class="row mt-4">
@@ -23,17 +25,27 @@
         <td>{{ verification.submitted_at }}</td>
         <td>{{ verification.updated_at }}</td>
         {% if verification.status == "verified" or verification.status == "cancelled" %}
-          <td>{{ verification.status }}</td>
+        <td>{{ verification.status }}</td>
         {% else %}
-          <td>{{ verification.status }}
-            <a href="#" class="btn btn-outline-secondary" btn-close-color="red" onClick="document.getElementById('cancel-verification').submit()">
-              Cancel verfication
+        <td>
+          {{ verification.status }}
+          <a
+            href="#"
+            class="btn btn-outline-secondary"
+            btn-close-color="red"
+            onClick="document.getElementById('cancel-verification').submit()"
+          >
+            Cancel verfication
           </a>
-          <form id="cancel-verification" method="POST" action="{% url 'users:verification-cancel' verification.id%}">
-              {% csrf_token %}
-              <input type="hidden" />
+          <form
+            id="cancel-verification"
+            method="POST"
+            action="{% url 'users:verification-cancel' verification.id%}"
+          >
+            {% csrf_token %}
+            <input type="hidden" />
           </form>
-          </td>
+        </td>
         {% endif %}
       </tr>
       {% empty %}
@@ -41,7 +53,7 @@
       {% endfor %}
     </tbody>
   </table>
-{% if not active_verification %}
+  {% if not active_verification %}
   <div class="row">
     <h2>Submit verification</h2>
     <h3>Please fill out ALL feilds</h3>
@@ -51,6 +63,7 @@
     <div class="form-group">
       <label for="username">Username</label>
       <input
+        required
         id="username"
         type="text"
         class="form-control"
@@ -60,25 +73,14 @@
     </div>
     <div class="form-group">
       <label for="business_name">Business Name</label>
-      <input
-        id="business_name"
-        type="text"
-        class="form-control"
-        name="business_name"
-      />
+      <input id="business_name" type="text" class="form-control" name="business_name" required />
     </div>
     <div class="form-group">
       <label for="business_type">Business Type</label>
-      <select name="business_type" id="business_type" class="form-control">
-        <option value="" selected disabled>
-          Please select a business type
-        </option>
-        <option value="Public Parking Lot Owner">
-          Public Parking Lot Owner
-        </option>
-        <option value="Private Parking Lot Owner">
-          Private Parking Lot Owner
-        </option>
+      <select name="business_type" id="business_type" class="form-control" required>
+        <option value="" selected disabled>Please select a business type</option>
+        <option value="Public Parking Lot Owner">Public Parking Lot Owner</option>
+        <option value="Private Parking Lot Owner">Private Parking Lot Owner</option>
         <option value="Street Business Owner">Street Business Owner</option>
       </select>
     </div>
@@ -89,14 +91,15 @@
         type="text"
         class="form-control"
         name="business_address"
+        required
       />
     </div>
     <div class="form-group">
       <label for="uploaded_file"
-        >Upload Documentation(Supported file types: "pdf", "doc", "docx", "png",
-        "jpg", "jpeg")</label
+        >Upload Documentation(Supported file types: "pdf", "doc", "docx", "png", "jpg",
+        "jpeg")</label
       >
-      <input id="uploaded_file" type="file" name="uploaded_file" />
+      <input id="uploaded_file" type="file" name="uploaded_file" required />
     </div>
     <div class="row justify-content-end py-4">
       <div class="col-md-1">
