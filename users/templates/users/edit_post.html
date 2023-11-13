@@ -1,0 +1,31 @@
+<!-- @format -->
+{% extends "parkrowd/main.html" %} {% block content %}
+<div class="container">
+    <div class="row justify-content-center py-4">
+      <div class="col-md-9">
+        <h3 class="text-center">Edit Post</h3>
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" class="form-control" value="{{ post.title }}">
+        </div>
+        <div class="form-group">
+            <label for="post">Post:</label>
+            <textarea id="post" name="post" class="form-control" rows="5">{{ post.post }}</textarea>
+        </div>
+          <div class="row py-4 justify-content-center">
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+            <div class="col-md-1">
+                <a href="{% url 'users:profile' user.username %}" class="btn btn-secondary">Cancel</a>
+            </div>
+          </div>
+        </form>
+        <div style="color: red">{{ form.errors }}</div>
+      </div>
+    </div>
+  </div>
+  </div>
+{% endblock %}
