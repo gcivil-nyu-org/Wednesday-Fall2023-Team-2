@@ -556,7 +556,8 @@ class EditPost(View):
         post.created_at = timezone.now()
         post.save()
         # currently only editing posts from profile page
-        if "users" in (request.META.get("HTTP_REFERER")):
-            return redirect("users:profile", username=username)
-        else:
-            return redirect("map:parking")
+        # if "users" in (request.META.get("HTTP_REFERER")):
+        #   return redirect("users:profile", username=username)
+        # else:
+        #   return redirect("map:parking")
+        return redirect("users:profile", username=username)
