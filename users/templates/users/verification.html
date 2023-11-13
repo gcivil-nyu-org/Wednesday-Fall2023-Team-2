@@ -27,7 +27,7 @@
         {% else %}
           <td>{{ verification.status }}
             <a href="#" class="btn btn-outline-secondary" btn-close-color="red" onClick="document.getElementById('cancel-verification').submit()">
-              Cacel verfication
+              Cancel verfication
           </a>
           <form id="cancel-verification" method="POST" action="{% url 'users:verification-cancel' verification.id%}">
               {% csrf_token %}
