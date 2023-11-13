@@ -26,12 +26,12 @@
   #postSidebar {
     height: 95vh;
     background-color: #fff;
-    width: 45%;
+    width: 35%;
     transition: left 0.5s ease-in-out;
   }
 
   #postSidebar.close-window {
-    left: -45%;
+    left: -35%;
   }
 
   #postSidebar.open-window {
@@ -104,7 +104,7 @@
         <h3 id="postSidebarHeader">Posts & Comments</h3>
         <hr />
       </div>
-      <div class="container text-center" id="postSidebarBody"></div>
+      <div class="container" id="postSidebarBody"></div>
     </div>
   </div>
   <!-- END Post & Comment Sidebar -->
@@ -343,12 +343,27 @@
   }
 
   function getViewPostHTML(spotId) {
-    console.log(spotId);
     return `<div class="w-75 mx-auto p-2">
       <button class="btn btn-outline-primary btn-sm" onclick="viewPost('${spotId}')">
           View Posts
       </button>
     </div>`;
+  }
+
+  function createCommentHTMLList(comments) {
+    return `<ul class="list-group list-group-flush">
+      ${comments.reduce(
+        (prev, cur) =>
+          prev +
+          `<li class="list-group-item">
+            ${cur.content}
+            <div class="text-end">--by ${cur.author?.username || "unknown user"} at ${new Date(
+            cur.created_at,
+          ).toLocaleString()}</div>
+          </li>`,
+        "",
+      )}
+    </ul>`;
   }
 
   function viewPost(spotId) {
@@ -359,22 +374,40 @@
     openPostSidebar();
 
     axios.get(`/api/spot/posts/${spotId}`).then((res) => {
-      console.log(res.data);
       const newPostSidebarBody = res.data.reduce(
         (prev, cur) =>
           prev +
           `<div class="card mb-5">
-        <div class="card-header">
-          <h4 class="text-center">${cur.title || "No title"}</h4>
-          <div class="text-center">${cur.post || "Empty post"}</div>
-          <div class="text-end">
-            -- by ${cur.author?.username || "unknown user"}
+        <div class="card-body">
+          <h4 class="card-title">${cur.title || "No title"}</h4>
+          <div class="card-text">
+            ${cur.post || "Empty post"}
+            <div class="text-end">
+              -- by ${cur.author?.username || "unknown user"} at ${new Date(
+            cur.created_at,
+          ).toLocaleString()}
+            </div>
           </div>
         </div>
+        ${createCommentHTMLList(cur.comments)}
         <ul class="list-group list-group-flush">
-          <li class="list-group-item">Comment 1</li>
-          <li class="list-group-item">Comment 2</li>
-          <li class="list-group-item">Comment 3</li>
+          <li class="list-group-item text-end">
+            <button class="btn btn-primary btn-sm" onClick="addComment('${
+              cur.id
+            }')">Add Comment</button>
+            <div class="mb-3 text-start" style="display:none" id="commentInputDiv-${cur.id}">
+              <label class="form-label">New Comment</label>
+              <textarea class="form-control" id="commentInput-${
+                cur.id
+              }" rows="3" required></textarea>
+              <div class="text-end mt-2">
+                <button type="submit" class="btn btn-outline-primary" onClick="submitComment('${
+                  cur.id
+                }', '${spotId}')">Submit</button>
+              </div>
+            </div>
+            <div class="mt-2 text-start" id="errorMsg-${cur.id}"/>
+          </li>
         </ul>
       </div>`,
         "",
@@ -382,6 +415,34 @@
 
       postSidebarBody.innerHTML = newPostSidebarBody;
     });
+  }
+
+  function addComment(postId) {
+    document.getElementById(`commentInputDiv-${postId}`).style.display = "block";
+  }
+
+  function submitComment(postId, spotId) {
+    axios
+      .post(
+        `/api/spot/posts/add-comment/${postId}`,
+        {
+          commentContent: document.getElementById(`commentInput-${postId}`).value,
+        },
+        {
+          headers: {
+            "X-CSRFToken": getCSRFToken(),
+          },
+        },
+      )
+      .then((res) => {
+        viewPost(spotId);
+      })
+      .catch((err) => {
+        console.error(err);
+        const errorMsgDiv = document.getElementById(`errorMsg-${postId}`);
+        if (errorMsgDiv)
+          errorMsgDiv.innerHTML = `<span style="color:red">${err.response.data}</span>`;
+      });
   }
 
   function openPostSidebar() {
@@ -442,7 +503,6 @@
       })
       .then(function (response) {
         const glyphColor = getGlyphColor(occupancy_percent);
-
         infoWindow.marker.pin.glyph = occupancy_percent + "%";
         infoWindow.marker.pin.glyphColor = glyphColor;
       })

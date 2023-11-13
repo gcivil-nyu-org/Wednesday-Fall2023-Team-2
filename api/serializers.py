@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from users.models import Post
+from users.models import Post, Comment
 from users.serializers import UserSerializer
 from map.models import ParkingSpace
 
@@ -20,9 +20,26 @@ class ParkingSpaceSerializer(serializers.ModelSerializer):
         ]
 
 
-class PostSerializer(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
     author = UserSerializer()
 
     class Meta:
+        model = Comment
+        fields = ["content", "author", "created_at"]
+
+
+class PostSerializer(serializers.ModelSerializer):
+    author = UserSerializer()
+    comments = CommentSerializer(many=True, read_only=True)
+
+    class Meta:
         model = Post
-        fields = ["title", "post", "author", "created_at", "parking_space"]
+        fields = [
+            "id",
+            "title",
+            "post",
+            "author",
+            "created_at",
+            "parking_space",
+            "comments",
+        ]
