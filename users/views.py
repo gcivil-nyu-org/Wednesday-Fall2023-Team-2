@@ -475,7 +475,18 @@ class UserVerificationView(View):
         Returns:
             HttpResponse: rendered user profile edit page
         """
-        context = {"user": get_object_or_404(User, username=username)}
+        user = get_object_or_404(User, username=username)
+        user_verification = UserVerification.objects.filter(username=user)
+        non_active_status = ["verified", "cancelled"]
+        active_verification = UserVerification.objects.filter(username=user).exclude(
+            status__in=non_active_status
+        )
+
+        context = {
+            "user": user,
+            "user_verification": user_verification,
+            "active_verification": active_verification,
+        }
         return render(request, self.template_name, context)
 
     def post(self, request: HttpRequest, username: str) -> HttpResponse:
@@ -503,3 +514,22 @@ class UserVerificationView(View):
                 request, "Please resubmit the application with all necessary fields."
             )
             return redirect("users:profile", username=username)
+
+
+class VerificationCancelView(View):
+    """verification cancel view"""
+
+    def post(self, request: HttpRequest, id: int) -> HttpResponse:
+        """handle verification cancel post req
+
+        Args:
+            request (HttpRequest): http request object
+
+        Returns:
+            HttpResponse: redirect user to verification page
+        """
+        verification = get_object_or_404(UserVerification, id=id)
+        username = verification.username.username
+        verification.status = "cancelled"
+        verification.save()
+        return redirect("users:verification", username=username)
