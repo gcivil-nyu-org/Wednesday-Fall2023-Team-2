@@ -1,11 +1,18 @@
 from rest_framework import serializers
 
 from users.models import Post, Comment
-from users.serializers import UserSerializer
-from map.models import ParkingSpace
+from users.models import ParkingSpace, User
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["username"]
 
 
 class ParkingSpaceSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
     class Meta:
         model = ParkingSpace
         fields = [
@@ -17,6 +24,7 @@ class ParkingSpaceSerializer(serializers.ModelSerializer):
             "type",
             "detail",
             "occupancy_percent",
+            "user",
         ]
 
 

@@ -14,3 +14,8 @@ class ParkingSpace(models.Model):
     operation_hours = models.CharField(max_length=200, default="unknown")
     # * occupancy_percent: 0% or 100% for Business, 0% through 100% for Street
     occupancy_percent = models.IntegerField(blank=True, null=True)
+    # * owner : FK linking to User who created ParkingSpace via "Add Spot" page
+    # * NOTE : To avoid circular import reference, a string reference
+    # * can be written instead.  Here it is the custom user model
+    # * from users
+    user = models.ForeignKey("users.user", on_delete=models.CASCADE, null=True)
