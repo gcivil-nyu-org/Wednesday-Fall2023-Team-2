@@ -1,5 +1,6 @@
 """user views
 """
+from django.utils import timezone
 from django.views import View
 from django.contrib import auth
 from django.contrib import messages
@@ -19,6 +20,7 @@ from .forms import (
     UserVerificationForm,
     UserPasswordResetForm,
     UserPasswordResetConfirmForm,
+    EditPostForm,
 )
 
 UserModel = auth.get_user_model()
@@ -514,6 +516,62 @@ class UserVerificationView(View):
                 request, "Please resubmit the application with all necessary fields."
             )
             return redirect("users:profile", username=username)
+
+
+class EditPost(View):
+    """edit post view"""
+
+    model = Post
+    form_class = EditPostForm
+    template_name = "users/edit_post.html"
+
+    def get(self, request: HttpRequest, username: str, post_id: int) -> HttpResponse:
+        """return edit post page
+
+        Args:
+            request (HttpRequest): http request object
+            username (str): username string
+            post_id (str): post id/primary key
+
+        Returns:
+            HttpResponse: rendered edit post page
+        """
+        post = get_object_or_404(Post, id=post_id)
+        context = {"post": post}
+
+        if request.user == post.author:
+            return render(request, self.template_name, context)
+        else:
+            return HttpResponse(status=403)
+
+    def post(self, request: HttpRequest, username: str, post_id: str) -> HttpResponse:
+        """handle edit post
+
+        Args:
+            request (HttpRequest): http request object
+            username (str): username string
+            post_id (str): post id/primary key
+
+        Returns:
+            HttpResponse: redirect back to profile page
+        """
+        new_title = request.POST.get("title")
+        new_post = request.POST.get("post")
+        post = get_object_or_404(Post, id=post_id)
+
+        if not new_post.strip():
+            return redirect("users:edit_post", username=username, post_id=post_id)
+
+        post.title = new_title
+        post.post = new_post
+        post.created_at = timezone.now()
+        post.save()
+        # currently only editing posts from profile page
+        # if "users" in (request.META.get("HTTP_REFERER")):
+        #   return redirect("users:profile", username=username)
+        # else:
+        #   return redirect("map:parking")
+        return redirect("users:profile", username=username)
 
 
 class VerificationCancelView(View):

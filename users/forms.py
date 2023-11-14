@@ -171,3 +171,26 @@ class UserPasswordResetConfirmForm(SetPasswordForm):
 
     class Meta:
         fields = ["new_password1", "new_password2"]
+
+
+class EditPostForm(forms.ModelForm):
+    """edit post form"""
+
+    title = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Post title goes here",
+            }
+        )
+    )
+
+    post = forms.CharField(
+        widget=forms.Textarea(
+            attrs={"class": "form-control", "placeholder": "Post content goes here"}
+        )
+    )
+
+    class Meta:
+        model = Post
+        fields = ["title", "post"]
