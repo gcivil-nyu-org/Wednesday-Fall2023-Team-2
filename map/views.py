@@ -7,6 +7,10 @@ from django.conf import settings
 from .forms import CreatePostForm
 from users.models import User
 
+from better_profanity import profanity
+
+profanity.load_censor_words()
+
 
 class MapView(View):
     """main map view"""
@@ -72,7 +76,8 @@ class PostView(View):
             new_post = form.save(commit=False)
             new_post.parking_space = spot
             new_post.author = author
+            new_post.title = profanity.censor(form.cleaned_data["title"])
+            new_post.post = profanity.censor(form.cleaned_data["post"])
             new_post.save()
-            # Safe text filter here for title and post
             return redirect("map:parking")
         return render(request, self.template_name, {"form": form})

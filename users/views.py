@@ -23,6 +23,10 @@ from .forms import (
     EditPostForm,
 )
 
+from better_profanity import profanity
+
+profanity.load_censor_words()
+
 UserModel = auth.get_user_model()
 # * Expiration is 1 week
 SESSION_COOKIE_EXPIRATION = 604800
@@ -56,7 +60,8 @@ class UserRegisterView(View):
         Returns:
             HttpResponse: redirect or register view with error hints
         """
-        form = self.form_class(request.POST)
+        form = self.form_class(request.POST.copy())
+        form.data["username"] = profanity.censor(form.data["username"])
         if form.is_valid():
             user = form.save(commit=False)
             user.username = user.username.lower()
@@ -96,7 +101,7 @@ class UserLoginView(View):
         """
         form = self.form_class(request.POST)
 
-        username = request.POST.get("username")
+        username = profanity.censor(request.POST.get("username"))
         password = request.POST.get("password")
         remember_me = request.POST.get("remember_me")
 
@@ -394,10 +399,10 @@ class UserProfileEditView(
             HttpResponse: redirect back to profile page
         """
 
-        new_username = request.POST.get("input-username")
+        new_username = profanity.censor(request.POST.get("input-username"))
         new_email = request.POST.get("input-email")
         new_avatar = request.FILES.get("input-avatar", request.user.avatar)
-        new_description = request.POST.get("input-description")
+        new_description = profanity.censor(request.POST.get("input-description"))
         user = get_object_or_404(User, username=username)
         # * if username is already taken
         if (
@@ -555,8 +560,8 @@ class EditPost(View):
         Returns:
             HttpResponse: redirect back to profile page
         """
-        new_title = request.POST.get("title")
-        new_post = request.POST.get("post")
+        new_title = profanity.censor(request.POST.get("title"))
+        new_post = profanity.censor(request.POST.get("post"))
         post = get_object_or_404(Post, id=post_id)
 
         if not new_post.strip():

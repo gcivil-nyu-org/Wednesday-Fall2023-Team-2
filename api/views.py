@@ -12,6 +12,10 @@ from map.models import ParkingSpace
 from users.models import Post, Comment
 from .serializers import ParkingSpaceSerializer, PostSerializer
 
+from better_profanity import profanity
+
+profanity.load_censor_words()
+
 
 class ParkingSpaceNearCenterAPIView(generics.ListAPIView):
     """API endpoint
@@ -141,7 +145,7 @@ class ParkingSpaceAddCommentAPIView(APIView):
     authentication_classes = [SessionAuthentication]
 
     def post(self, request: HttpRequest, postId: int) -> Response:
-        comment_content = request.data["commentContent"]
+        comment_content = profanity.censor(request.data["commentContent"])
         if not comment_content:
             return Response("Error: empty comment content", 400)
         try:
