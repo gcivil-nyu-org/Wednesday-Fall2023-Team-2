@@ -301,7 +301,7 @@
       <br />
       ${getClaimBusinessHTML(spot)}
     </div>`;
-  } 
+  }
 
   function getClaimBusinessHTML(spot) {
     if (!spot.user?.username) {
@@ -491,7 +491,10 @@
     const loggedInUser = "{{ request.user.username }}";
     const userIsOwnerOfBusiness = spot.user?.username === loggedInUser;
 
-    if (((spot.type === "Street") || (spot.type === "Business" && userIsOwnerOfBusiness)) && isUserAuthenticated) {
+    if (
+      (spot.type === "Street" || (spot.type === "Business" && userIsOwnerOfBusiness)) &&
+      isUserAuthenticated
+    ) {
       return (
         '<div class="form-group mb-3">' +
         '<label for="occupancy-status">Occupancy Percent:</label>' +
