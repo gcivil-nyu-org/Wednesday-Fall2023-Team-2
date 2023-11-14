@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from users.models import Post, Comment
-from users.serializers import UserSerializer
 from users.models import ParkingSpace, User
 
 
