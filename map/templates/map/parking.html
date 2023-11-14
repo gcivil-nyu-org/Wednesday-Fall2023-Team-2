@@ -291,12 +291,29 @@
       <div class="mb-3">
         <h1 class="h3 mb-1">${spot.parking_spot_name}</h1>
       </div>
+      <div class="mb-3">ID: ${spotId}</div>
+      ${getOccupancyPercentHTML(spot)}
+      ${getOwner(spot)}
       <div class="mb-3">Type: ${spot.type}</div>
       <div class="mb-3">Details: ${spot.detail}</div>
       ${getMakePostHTML(spotId)}
       ${getViewPostHTML(spotId)}
-      <div class="mb-3">This business has not yet been claimed.  Reach out to admin.</div>
+      <br />
+      ${getClaimBusinessHTML(spot)}
     </div>`;
+  } 
+
+  function getClaimBusinessHTML(spot) {
+    if (!spot.user?.username) {
+      return `<div class="mb-3">
+        This business has not yet been claimed.  
+      </div>
+      <div class="mb-3">
+        Reach out to an admin with this Parking Space's ID.
+      </div>
+      `;
+    }
+    return "";
   }
 
   /**
@@ -314,13 +331,22 @@
       <div class="mb-3">
         <h1 class="h3 mb-1">Street Parking</h1>
       </div>
+      <div class="mb-3">ID: ${spotId}</div>
       ${getOccupancyPercentHTML(spot)}
+      ${getOwner(spot)}
       <div class="mb-3">Type: ${spot.type}</div>
       <div class="mb-3">Details: ${spot.detail}</div>
       <div class="mb-3">Hours: ${hours}</div>
       ${getMakePostHTML(spotId)}
       ${getViewPostHTML(spotId)}
     </div>`;
+  }
+
+  function getOwner(spot) {
+    if (spot.user?.username) {
+      return `<div class="mb-3">Owner: ${spot.user.username}</div>`;
+    }
+    return "";
   }
 
   /**
@@ -462,11 +488,10 @@
    * @returns {string} HTML content - Occupancy Percent Input Field and Button OR nothing
    */
   function getOccupancyPercentHTML(spot) {
-    //TO DO : Suggested that only Business Owner of a Spot
-    //can change Occupancy Percent.  For now, allow any Driver (Registered User)
-    //to change that percent on Street Parking
+    const loggedInUser = "{{ request.user.username }}";
+    const userIsOwnerOfBusiness = spot.user?.username === loggedInUser;
 
-    if (spot.type === "Street" && isUserAuthenticated) {
+    if (((spot.type === "Street") || (spot.type === "Business" && userIsOwnerOfBusiness)) && isUserAuthenticated) {
       return (
         '<div class="form-group mb-3">' +
         '<label for="occupancy-status">Occupancy Percent:</label>' +
