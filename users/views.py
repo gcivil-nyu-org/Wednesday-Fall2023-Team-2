@@ -591,4 +591,3 @@ class VerificationCancelView(View):
         verification.status = "cancelled"
         verification.save()
         return redirect("users:verification", username=username)
-
