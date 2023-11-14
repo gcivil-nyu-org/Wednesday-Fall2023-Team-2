@@ -48,7 +48,9 @@ class Migration(migrations.Migration):
                 (
                     "post",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to="users.post"
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="comments",
+                        to="users.post",
                     ),
                 ),
             ],
