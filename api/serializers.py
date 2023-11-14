@@ -4,10 +4,12 @@ from users.models import Post, Comment
 from users.serializers import UserSerializer
 from users.models import ParkingSpace, User
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username']
+        fields = ["username"]
+
 
 class ParkingSpaceSerializer(serializers.ModelSerializer):
     user = UserSerializer()
@@ -23,7 +25,7 @@ class ParkingSpaceSerializer(serializers.ModelSerializer):
             "type",
             "detail",
             "occupancy_percent",
-            "user"
+            "user",
         ]
 
 

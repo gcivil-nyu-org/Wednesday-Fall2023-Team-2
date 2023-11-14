@@ -18,4 +18,4 @@ class ParkingSpace(models.Model):
     # * NOTE : To avoid circular import reference, a string reference
     # * can be written instead.  Here it is the custom user model
     # * from users
-    user = models.ForeignKey('users.user', on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey("users.user", on_delete=models.CASCADE, null=True)

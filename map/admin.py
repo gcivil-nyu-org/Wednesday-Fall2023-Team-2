@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import ParkingSpace
 
+
 # Register your models here.
 class ParkingSpaceAdmin(admin.ModelAdmin):
     """Parking Space Admin Page"""
@@ -10,6 +11,7 @@ class ParkingSpaceAdmin(admin.ModelAdmin):
     # * To claim an existing spot, a Business Owner
     # * must contact the Admin to connect a Parking Space
     # * with the owner's username
-    search_fields = ['parking_spot_id']
+    search_fields = ["parking_spot_id"]
+
 
 admin.site.register(ParkingSpace, ParkingSpaceAdmin)
