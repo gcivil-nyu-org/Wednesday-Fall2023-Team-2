@@ -496,7 +496,7 @@
         '<div class="form-group mb-3">' +
         '<label for="occupancy-status">Occupancy Percent:</label>' +
         '<input type="number" class="form-control" id="occupancy-status-input" name="occupancy-status" min="0" max="100">' +
-        `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy(${spot.parking_spot_id})">Submit</button>` +
+        `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy('${spot.parking_spot_id}')">Submit</button>` +
         "</div>"
       );
     }
