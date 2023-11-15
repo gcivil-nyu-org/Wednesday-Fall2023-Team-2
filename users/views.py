@@ -26,6 +26,8 @@ from .forms import (
 from better_profanity import profanity
 
 profanity.load_censor_words()
+# Custom swear words can be added to this array
+custom_badwords = ["bullshittery", "bitchy"]
 
 UserModel = auth.get_user_model()
 # * Expiration is 1 week
@@ -60,6 +62,7 @@ class UserRegisterView(View):
         Returns:
             HttpResponse: redirect or register view with error hints
         """
+        profanity.add_censor_words(custom_badwords)
         form = self.form_class(request.POST.copy())
         form.data["username"] = profanity.censor(form.data["username"])
         if form.is_valid():
@@ -100,7 +103,7 @@ class UserLoginView(View):
             HttpResponse: redirect or login view with error hints
         """
         form = self.form_class(request.POST)
-
+        profanity.add_censor_words(custom_badwords)
         username = profanity.censor(request.POST.get("username"))
         password = request.POST.get("password")
         remember_me = request.POST.get("remember_me")
@@ -398,7 +401,7 @@ class UserProfileEditView(
         Returns:
             HttpResponse: redirect back to profile page
         """
-
+        profanity.add_censor_words(custom_badwords)
         new_username = profanity.censor(request.POST.get("input-username"))
         new_email = request.POST.get("input-email")
         new_avatar = request.FILES.get("input-avatar", request.user.avatar)
@@ -560,6 +563,7 @@ class EditPost(View):
         Returns:
             HttpResponse: redirect back to profile page
         """
+        profanity.add_censor_words(custom_badwords)
         new_title = profanity.censor(request.POST.get("title"))
         new_post = profanity.censor(request.POST.get("post"))
         post = get_object_or_404(Post, id=post_id)

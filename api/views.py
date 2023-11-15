@@ -15,6 +15,8 @@ from .serializers import ParkingSpaceSerializer, PostSerializer
 from better_profanity import profanity
 
 profanity.load_censor_words()
+# Custom swear words can be added to this array
+custom_badwords = ["bullshittery", "bitchy"]
 
 
 class ParkingSpaceNearCenterAPIView(generics.ListAPIView):
@@ -145,6 +147,7 @@ class ParkingSpaceAddCommentAPIView(APIView):
     authentication_classes = [SessionAuthentication]
 
     def post(self, request: HttpRequest, postId: int) -> Response:
+        profanity.add_censor_words(custom_badwords)
         comment_content = profanity.censor(request.data["commentContent"])
         if not comment_content:
             return Response("Error: empty comment content", 400)
