@@ -12,4 +12,9 @@ urlpatterns = [
         views.PostView.as_view(),
         name="post",
     ),
+    path(
+        "parking/add-spot/<str:username>/",
+        views.ParkingSpaceView.as_view(),
+        name="add-parking-space",
+    ),
 ]

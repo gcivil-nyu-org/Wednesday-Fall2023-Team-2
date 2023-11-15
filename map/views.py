@@ -1,10 +1,11 @@
 from django.views import View
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
+from django.db.models import Max
 from .models import ParkingSpace
 
 from django.conf import settings
-from .forms import CreatePostForm
+from .forms import CreatePostForm, CreateParkingSpaceForm
 from users.models import User
 
 from better_profanity import profanity
@@ -52,6 +53,7 @@ class PostView(View):
         Args:
             request (HttpRequest): http request object
             parking_spot_id (str): PK of ParkingSpace object clicked on map
+            username (str): username of post author
 
         Returns:
             HttpResponse: rendered post view
@@ -67,6 +69,8 @@ class PostView(View):
 
         Args:
             request (HttpRequest): http request object
+            parking_spot_id (str): PK of ParkingSpace object clicked on map
+            username (str): username of post author
 
         Returns:
             HttpResponse: redirect or register view with error hints
@@ -82,5 +86,71 @@ class PostView(View):
             new_post.title = profanity.censor(form.cleaned_data["title"])
             new_post.post = profanity.censor(form.cleaned_data["post"])
             new_post.save()
+            return redirect("map:parking")
+        return render(request, self.template_name, {"form": form})
+
+
+class ParkingSpaceView(View):
+    """Parking Space view"""
+
+    model = ParkingSpace
+    form_class = CreateParkingSpaceForm
+    template_name = "map/add_spot.html"
+
+    def get(self, request: HttpRequest, username: str) -> HttpResponse:
+        """return spot view
+
+        Args:
+            request (HttpRequest): http request object
+            username (str): username of post author
+
+        Returns:
+            HttpResponse: rendered post view
+        """
+        context = {
+            "lat": request.GET.get("lat"),
+            "lon": request.GET.get("lon"),
+            "form": self.form_class(None),
+            "username": username,
+        }
+        # print(request.GET.get("lat"))
+        # print(request.GET.get("lon"))
+        return render(request, self.template_name, context)
+
+    def __get_next_custom_id(self):
+        # Get the maximum existing custom_id in the database
+        max_custom_id = ParkingSpace.objects.aggregate(Max("parking_spot_id"))[
+            "parking_spot_id__max"
+        ]
+        max_custom_id = int(max_custom_id)
+
+        # If there are no existing records, start with a default value (e.g., 1)
+        if max_custom_id is None:
+            return "1"
+
+        # Increment the max_custom_id to get the next custom_id
+        return str(max_custom_id + 1)
+
+    def post(self, request: HttpRequest, username: str) -> HttpResponse:
+        """handle spot creation post req
+
+        Args:
+            request (HttpRequest): http request object
+            username (str): username of post author
+
+        Returns:
+            HttpResponse: redirect or register view with error hints
+        """
+        user = get_object_or_404(User, username=username)
+        lat = request.GET.get("lat")
+        lon = request.GET.get("lon")
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            new_spot = form.save(commit=False)
+            new_spot.parking_spot_id = self.__get_next_custom_id()
+            new_spot.longitude = lon
+            new_spot.latitude = lat
+            new_spot.user = user
+            new_spot.save()
             return redirect("map:parking")
         return render(request, self.template_name, {"form": form})
