@@ -397,23 +397,23 @@
    * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
    * @returns {string} HTML content - info on Business parking spot
    */
-  function getBusinessInfo(spot) {
+   function getBusinessInfo(spot) {
     const spotId = spot.parking_spot_id;
 
-    return `<div class="d-flex flex-column text-center p-2">
-      <div class="mb-3">
-        <h1 class="h3 mb-1">${spot.parking_spot_name}</h1>
-      </div>
-      <div class="mb-3">ID: ${spotId}</div>
-      ${getOccupancyPercentHTML(spot)}
-      ${getOwner(spot)}
-      <div class="mb-3">Type: ${spot.type}</div>
-      <div class="mb-3">Details: ${spot.detail}</div>
-      ${getMakePostHTML(spotId)}
-      ${getViewPostHTML(spotId)}
-      <br />
-      ${getClaimBusinessHTML(spot)}
-    </div>`;
+    return (
+      '<div class="d-flex flex-column text-center p-2">' +
+      getParkingSpotNameHTML(spot) +
+      `<div class="mb-3">ID: ${spotId}</div>` +
+      getOccupancyPercentHTML(spot) +
+      getOwner(spot) +
+      getTypeHTML(spot) +
+      getBoroughHTML(spot) +
+      getDetailsHTML(spot) +
+      getOperationalHoursHTML(spot) +
+      getMakePostHTML(spotId) +
+      getClaimBusinessHTML(spot) +
+      "</div>"
+    );
   }
 
   function getClaimBusinessHTML(spot) {
@@ -490,28 +490,6 @@
     return glyphColor;
   }
 
-  /**
-   * Helper function for addMarker()
-   * Sets up HTML info for business based markers (format different from other spots)
-   * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
-   * @returns {string} HTML content - info on Business parking spot
-   */
-  function getBusinessInfo(spot) {
-    const spotId = spot.parking_spot_id;
-
-    return (
-      '<div class="d-flex flex-column text-center p-2">' +
-      getParkingSpotNameHTML(spot) +
-      getOccupancyPercentHTML(spot) +
-      getTypeHTML(spot) +
-      getBoroughHTML(spot) +
-      getDetailsHTML(spot) +
-      getOperationalHoursHTML(spot) +
-      getMakePostHTML(spotId) +
-      '<div class="mb-3">This business has not yet been claimed.  Reach out to admin.</div>' +
-      "</div>"
-    );
-  }
 
   function getParkingSpotNameHTML(spot) {
     let parking_spot_name;
@@ -581,6 +559,7 @@
       ${getOwner(spot)}
       ${getTypeHTML(spot)}
       ${getDetailsHTML(spot)}
+      ${getBoroughHTML(spot)}
       ${getOperationalHoursHTML(spot)}
       ${getMakePostHTML(spotId)}
       ${getViewPostHTML(spotId)}
@@ -943,3 +922,4 @@
   src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap"
 ></script>
 {% endblock %}
+

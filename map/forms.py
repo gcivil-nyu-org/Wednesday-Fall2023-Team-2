@@ -92,7 +92,7 @@ class CreateParkingSpaceForm(forms.ModelForm):
         ),
     )
 
-    details = forms.CharField(
+    detail = forms.CharField(
         widget=forms.Textarea(
             attrs={"class": "form-control", "placeholder": "Spot details go here"}
         )
@@ -126,7 +126,7 @@ class CreateParkingSpaceForm(forms.ModelForm):
             "parking_spot_name",
             "type",
             "borough",
-            "details",
+            "detail",
             "operation_hours",
             "occupancy_percent",
         ]
