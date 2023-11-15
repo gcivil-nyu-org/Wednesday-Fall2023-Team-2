@@ -39,12 +39,76 @@ class CreatePostForm(forms.ModelForm):
 class CreateParkingSpaceForm(forms.ModelForm):
     """create spot form"""
 
+    """
+    For now, not used. Could potentially calculate in views.py using reverse geolocation lookup.
+    address_zip = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Zip Code goes here",
+            }
+        )
+    )
+    """
+
+    parking_spot_name = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Spot name goes here",
+            }
+        )
+    )
+
+    type = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Street or Business",
+            }
+        )
+    )
+
+    borough = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Borough goes here",
+            }
+        )
+    )
+
     details = forms.CharField(
         widget=forms.Textarea(
             attrs={"class": "form-control", "placeholder": "Spot details go here"}
         )
     )
 
+    operation_hours = forms.CharField(
+        widget=forms.Textarea(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Any information on operational hours goes here",
+            }
+        )
+    )
+
+    occupancy_percent = forms.IntegerField(
+        widget=forms.NumberInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Please give an occupancy between 0 and 100 Percent",
+            }
+        )
+    )
+
     class Meta:
         model = ParkingSpace
-        fields = ["details"]
+        fields = [
+            "parking_spot_name",
+            "type",
+            "borough",
+            "details",
+            "operation_hours",
+            "occupancy_percent",
+        ]

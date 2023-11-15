@@ -15,6 +15,6 @@ urlpatterns = [
     path(
         "parking/add-spot/<str:username>/",
         views.ParkingSpaceView.as_view(),
-        name="add-parking-space"
-    )
+        name="add-parking-space",
+    ),
 ]
