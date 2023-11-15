@@ -11,7 +11,10 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth.tokens import default_token_generator
 
 from users.models import User
-from .models import UserVerification
+from .models import (
+    UserVerification,
+    Post,
+)
 from parkrowd.settings import EMAIL_HOST_USER
 from .views import UserPasswordResetConfirmView
 from .forms import (
@@ -19,6 +22,7 @@ from .forms import (
     UserPasswordResetForm,
     UserPasswordResetConfirmForm,
 )
+from map.models import ParkingSpace
 
 USERNAME = "parkrowd"
 EMAIL = "parkrowd@gmail.com"
@@ -37,6 +41,7 @@ PASSWORD_RESET_PATH_NAME = "users:password-reset"
 PASSWORD_RESET_CONFIRM_PATH_NAME = "users:password-reset-confirm"
 PASSWORD_RESET_SUCCESS_PATH_NAME = "users:password-reset-success"
 PASSWORD_RESET_EMAIL_SENT_PATH_NAME = "users:password-reset-email-sent"
+EDIT_POST_PATH_NAME = "users:edit_post"
 
 LOGIN_TEMPLATE = "users/login.html"
 WELCOME_TEMPLATE = "users/welcome.html"
@@ -47,6 +52,16 @@ PASSWORD_RESET_TEMPLATE = "users/password_reset.html"
 PASSWORD_RESET_CONFIRM_TEMPLATE = "users/password_reset_confirm.html"
 PASSWORD_RESET_SUCCESS_TEMPLATE = "users/password_reset_success.html"
 PASSWORD_RESET_EMAIL_SENT_TEMPLATE = "users/password_reset_email_sent.html"
+EDIT_POST_TEMPLATE = "users/edit_post.html"
+
+PARKING_SPOT_ID = "12657"
+ADDRESS_ZIP = "10001"
+LONGITUDE = "-73.9853043125"
+LATITUDE = "40.7486538125"
+PARKING_SPOT_NAME = "Empire State Building"
+TEST_TITLE = "My Post"
+TEST_POST = "This Spot is Great"
+DATE_TIME = timezone.now()
 
 
 class UserVerificationViewTest(TestCase):
@@ -508,3 +523,82 @@ class EmailTest(TestCase):
         self.assertEqual(mail.outbox[0].body, test_message)
         self.assertEqual(mail.outbox[0].subject, test_subject)
         self.assertEqual(mail.outbox[0].from_email, EMAIL_HOST_USER)
+
+
+class EditPostTest(TestCase):
+    def setUp(self):
+        # Create a test user, test post, and test spot
+        self.test_user = User.objects.create_user(
+            username=USERNAME, email=EMAIL, password=PASSWORD
+        )
+        self.test_spot = ParkingSpace.objects.create(
+            parking_spot_id=PARKING_SPOT_ID,
+            address_zip=ADDRESS_ZIP,
+            longitude=LONGITUDE,
+            latitude=LATITUDE,
+            parking_spot_name=PARKING_SPOT_NAME,
+        )
+        self.test_post = Post.objects.create(
+            title=TEST_TITLE,
+            post=TEST_POST,
+            author=self.test_user,
+            created_at=DATE_TIME,
+            parking_space=self.test_spot,
+        )
+
+    def test_edit_post_get_view(self):
+        """checks if edit post page returns a 200 Status Code
+        and the template 'users/edit_post.html' is used
+        """
+        self.client.login(username=USERNAME, password=PASSWORD)
+        response = self.client.get(
+            reverse(EDIT_POST_PATH_NAME, args=[USERNAME, self.test_post.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, EDIT_POST_TEMPLATE)
+
+    def test_post_valid_request(self):
+        # Test POST request with valid data
+        data = {
+            "title": "test title",
+            "post": "test post",
+        }
+        response = self.client.post(
+            reverse(EDIT_POST_PATH_NAME, args=[USERNAME, self.test_post.pk]),
+            data,
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)  # Ensure the response is OK
+        self.assertRedirects(
+            response, reverse(PROFILE_PATH_NAME, args=[USERNAME])
+        )  # Ensure redirection
+
+        # Ensure that the post object was succesfully changed
+        self.assertTrue(
+            Post.objects.filter(
+                pk=self.test_post.pk, title=data["title"], post=data["post"]
+            ).exists()
+        )
+
+    def test_post_invalid_request(self):
+        """***This test may need to change if we allow users to edit posts from the map page as well***"""
+        self.client.login(username=USERNAME, password=PASSWORD)
+        # Test POST request with invalid data
+        data = {
+            "title": "test title",
+            "post": "",
+        }
+        response = self.client.post(
+            reverse(EDIT_POST_PATH_NAME, args=[USERNAME, self.test_post.pk]),
+            data,
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)  # Ensure the response is OK
+        self.assertRedirects(
+            response, reverse(EDIT_POST_PATH_NAME, args=[USERNAME, self.test_post.pk])
+        )  # Ensure redirection
+
+        # Ensure that the post has not changed
+        self.assertTrue(
+            Post.objects.filter(pk=self.test_post.pk, post=TEST_POST).exists()
+        )
