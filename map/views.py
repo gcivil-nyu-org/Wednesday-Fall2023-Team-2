@@ -129,7 +129,6 @@ class ParkingSpaceView(View):
             return "1"
 
         # Increment the max_custom_id to get the next custom_id
-        print(max_custom_id)
         return str(max_custom_id + 1)
 
     def post(self, request: HttpRequest, username: str) -> HttpResponse:
