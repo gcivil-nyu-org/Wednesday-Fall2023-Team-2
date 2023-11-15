@@ -53,17 +53,14 @@ class CreateParkingSpaceForm(forms.ModelForm):
     )
     """
 
-    PARKING_SPACE_TYPES = [
-        ('Business', 'Business'),
-        ('Street', 'Street')
-    ]
+    PARKING_SPACE_TYPES = [("Business", "Business"), ("Street", "Street")]
 
     BOROUGHS = [
-        ('Manhattan', 'Manhattan'),
-        ('Brooklyn', 'Brooklyn'),
-        ('Queens', 'Queens'),
-        ('Bronx', 'Bronx'),
-        ('Staten Island', 'Staten Island')
+        ("Manhattan", "Manhattan"),
+        ("Brooklyn", "Brooklyn"),
+        ("Queens", "Queens"),
+        ("Bronx", "Bronx"),
+        ("Staten Island", "Staten Island"),
     ]
 
     parking_spot_name = forms.CharField(
@@ -82,7 +79,7 @@ class CreateParkingSpaceForm(forms.ModelForm):
                 "class": "form-control",
                 "placeholder": "Street or Business",
             }
-        )
+        ),
     )
 
     borough = forms.ChoiceField(
@@ -92,7 +89,7 @@ class CreateParkingSpaceForm(forms.ModelForm):
                 "class": "form-control",
                 "placeholder": "Borough goes here",
             }
-        )
+        ),
     )
 
     details = forms.CharField(
@@ -120,7 +117,7 @@ class CreateParkingSpaceForm(forms.ModelForm):
                 "class": "form-control",
                 "placeholder": "Please give an occupancy between 0 and 100 Percent",
             }
-        )
+        ),
     )
 
     class Meta:
