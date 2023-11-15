@@ -12,6 +12,8 @@ from django import forms
 from users.models import Post
 from map.models import ParkingSpace
 
+import django.core.validators
+
 
 class CreatePostForm(forms.ModelForm):
     """create post form"""
@@ -51,6 +53,19 @@ class CreateParkingSpaceForm(forms.ModelForm):
     )
     """
 
+    PARKING_SPACE_TYPES = [
+        ('Business', 'Business'),
+        ('Street', 'Street')
+    ]
+
+    BOROUGHS = [
+        ('Manhattan', 'Manhattan'),
+        ('Brooklyn', 'Brooklyn'),
+        ('Queens', 'Queens'),
+        ('Bronx', 'Bronx'),
+        ('Staten Island', 'Staten Island')
+    ]
+
     parking_spot_name = forms.CharField(
         widget=forms.TextInput(
             attrs={
@@ -60,7 +75,8 @@ class CreateParkingSpaceForm(forms.ModelForm):
         )
     )
 
-    type = forms.CharField(
+    type = forms.ChoiceField(
+        choices=PARKING_SPACE_TYPES,
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
@@ -69,7 +85,8 @@ class CreateParkingSpaceForm(forms.ModelForm):
         )
     )
 
-    borough = forms.CharField(
+    borough = forms.ChoiceField(
+        choices=BOROUGHS,
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
@@ -94,6 +111,10 @@ class CreateParkingSpaceForm(forms.ModelForm):
     )
 
     occupancy_percent = forms.IntegerField(
+        validators=[
+            django.core.validators.MinValueValidator(0),
+            django.core.validators.MaxValueValidator(100),
+        ],
         widget=forms.NumberInput(
             attrs={
                 "class": "form-control",

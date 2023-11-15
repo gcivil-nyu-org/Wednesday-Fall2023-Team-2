@@ -17,12 +17,41 @@
           {{ form.parking_spot_name }}
         </div>
         <div class="form-group py-1">
-            <label for="type">Street or Business?</label>
-            {{ form.type }}
+          <label for="business_type">Type</label>
+          <select name="business_type" id="business_type" class="form-control">
+            <option value="" selected disabled>
+              Select a Parking Space type...
+            </option>
+            <option value="Business">
+              Business
+            </option>
+            <option value="Street">
+              Street
+            </option>
+          </select>
         </div>
         <div class="form-group py-1">
-            <label for="borough">Borough</label>
-            {{ form.borough }}
+          <label for="business_type">Borough</label>
+          <select name="business_type" id="business_type" class="form-control">
+            <option value="" selected disabled>
+              Select a borough...
+            </option>
+            <option value="Manhattan">
+              Manhattan
+            </option>
+            <option value="Brooklyn">
+              Brooklyn
+            </option>
+            <option value="Queens">
+              Queens
+            </option>
+            <option value="Bronx">
+              Bronx
+            </option>
+            <option value="Staten Island">
+              Staten Island
+            </option>
+          </select>
         </div>
         <div class="form-group py-1">
             <label for="details">Details</label>

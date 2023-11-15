@@ -53,7 +53,6 @@ class PostView(View):
             HttpResponse: rendered post view
         """
         spot = get_object_or_404(ParkingSpace, parking_spot_id=parking_spot_id)
-        print(spot.parking_spot_id)
         context = {"spot": spot, "form": self.form_class(None), "username": username}
         return render(request, self.template_name, context)
 
@@ -141,8 +140,7 @@ class ParkingSpaceView(View):
         form = self.form_class(request.POST)
         if form.is_valid():
             new_spot = form.save(commit=False)
-            new_spot.parking_space_id = self.__get_next_custom_id()
-            print(new_spot.parking_space_id)
+            new_spot.parking_spot_id = self.__get_next_custom_id()
             new_spot.longitude = lon
             new_spot.latitude = lat
             new_spot.user = user

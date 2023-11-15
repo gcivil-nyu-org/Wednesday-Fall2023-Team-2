@@ -297,21 +297,72 @@
   function getBusinessInfo(spot) {
     const spotId = spot.parking_spot_id;
 
+    //parking_spot_name, type, borough, detail, operation_hours, occupancy_percent
+
     return (
       '<div class="d-flex flex-column text-center p-2">' +
-      '<div class="mb-3"><h1 class="h3 mb-1">' +
-      spot.parking_spot_name +
-      "</h1></div>" +
-      '<div class="mb-3">Type: ' +
-      spot.type +
-      "</div>" +
-      '<div class="mb-3">Details: ' +
-      spot.detail +
-      "</div>" +
+      getParkingSpotNameHTML(spot) +
+      getOccupancyPercentHTML(spot) +
+      getTypeHTML(spot) +
+      getBoroughHTML(spot) +
+      getDetailsHTML(spot) +
+      getOperationalHoursHTML(spot) +
       getMakePostHTML(spotId) +
       '<div class="mb-3">This business has not yet been claimed.  Reach out to admin.</div>' +
       "</div>"
     );
+  }
+
+  function getParkingSpotNameHTML(spot) {
+    let parking_spot_name;
+
+    if (!spot.parking_spot_name) {
+      parking_spot_name = "Street Parking";
+    } else {
+      parking_spot_name = spot.parking_spot_name;
+    }
+
+    return '<div class="mb-3">' +
+      '<h1 class="h3 mb-1">' +
+      parking_spot_name +
+      "</h1>" +
+      "</div>";
+  }
+
+  function getTypeHTML(spot) {
+    if (spot.type) {
+      return '<div class="mb-3">Type: ' +
+      spot.type +
+      "</div>";
+    }
+    return "";
+  }
+
+  function getBoroughHTML(spot) {
+    if (spot.borough) {
+      return '<div class="mb-3">Borough: ' +
+      spot.borough +
+      "</div>";
+    }
+    return "";
+  }
+
+  function getDetailsHTML(spot) {
+    if (spot.detail) {
+      return '<div class="mb-3">Details: ' +
+      spot.detail +
+      "</div>";
+    }
+    return "";
+  }
+
+  function getOperationalHoursHTML(spot) {
+    if (spot.operation_hours) {
+      return '<div class="mb-3">Operational Hours: ' +
+      spot.operation_hours +
+      "</div>";
+    }
+    return "";
   }
 
   /**
@@ -327,22 +378,15 @@
 
     return (
       '<div class="d-flex flex-column text-center p-2">' +
-      '<div class="mb-3"><h1 class="h3 mb-1">' +
-      "Street Parking" +
-      "</h1></div>" +
+      getParkingSpotNameHTML(spot) +
       getOccupancyPercentHTML(spot) +
-      '<div class="mb-3">Type: ' +
-      spot.type +
-      "</div>" +
-      '<div class="mb-3">Details: ' +
-      spot.detail +
-      "</div>" +
-      '<div class="mb-3">Hours: ' +
-      hours +
-      "</div>" +
-      getMakePostHTML(spotId)
+      getTypeHTML(spot) +
+      getBoroughHTML(spot) +
+      getDetailsHTML(spot) +
+      getOperationalHoursHTML(spot) +
+      getMakePostHTML(spotId) +
+      "</div>"
     );
-    ("</div>");
   }
 
   /**
