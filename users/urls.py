@@ -45,4 +45,14 @@ urlpatterns = [
         views.UserVerificationView.as_view(),
         name="verification",
     ),
+    path(
+        "edit_post/<str:username>/<int:post_id>",
+        views.EditPost.as_view(),
+        name="edit_post",
+    ),
+    path(
+        "verification-cancel/<int:id>",
+        views.VerificationCancelView.as_view(),
+        name="verification-cancel",
+    ),
 ]

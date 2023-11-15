@@ -16,4 +16,14 @@ urlpatterns = [
         views.ParkingSpaceChangeOccupancyAPIView.as_view(),
         name="change-occupancy",
     ),
+    path(
+        "spot/posts/<str:spotId>/",
+        views.ParkingSpacePostsAPIView.as_view(),
+        name="get-spot-posts",
+    ),
+    path(
+        "spot/posts/add-comment/<int:postId>",
+        views.ParkingSpaceAddCommentAPIView.as_view(),
+        name="add-comment",
+    ),
 ]

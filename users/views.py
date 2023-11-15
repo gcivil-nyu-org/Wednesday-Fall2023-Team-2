@@ -1,5 +1,6 @@
 """user views
 """
+from django.utils import timezone
 from django.views import View
 from django.contrib import auth
 from django.contrib import messages
@@ -19,7 +20,14 @@ from .forms import (
     UserVerificationForm,
     UserPasswordResetForm,
     UserPasswordResetConfirmForm,
+    EditPostForm,
 )
+
+from better_profanity import profanity
+
+profanity.load_censor_words()
+# Custom swear words can be added to this array
+custom_badwords = ["bullshittery", "bitchy"]
 
 UserModel = auth.get_user_model()
 # * Expiration is 1 week
@@ -54,7 +62,9 @@ class UserRegisterView(View):
         Returns:
             HttpResponse: redirect or register view with error hints
         """
-        form = self.form_class(request.POST)
+        profanity.add_censor_words(custom_badwords)
+        form = self.form_class(request.POST.copy())
+        form.data["username"] = profanity.censor(form.data["username"])
         if form.is_valid():
             user = form.save(commit=False)
             user.username = user.username.lower()
@@ -93,8 +103,8 @@ class UserLoginView(View):
             HttpResponse: redirect or login view with error hints
         """
         form = self.form_class(request.POST)
-
-        username = request.POST.get("username")
+        profanity.add_censor_words(custom_badwords)
+        username = profanity.censor(request.POST.get("username"))
         password = request.POST.get("password")
         remember_me = request.POST.get("remember_me")
 
@@ -391,11 +401,11 @@ class UserProfileEditView(
         Returns:
             HttpResponse: redirect back to profile page
         """
-
-        new_username = request.POST.get("input-username")
+        profanity.add_censor_words(custom_badwords)
+        new_username = profanity.censor(request.POST.get("input-username"))
         new_email = request.POST.get("input-email")
         new_avatar = request.FILES.get("input-avatar", request.user.avatar)
-        new_description = request.POST.get("input-description")
+        new_description = profanity.censor(request.POST.get("input-description"))
         user = get_object_or_404(User, username=username)
         # * if username is already taken
         if (
@@ -475,7 +485,18 @@ class UserVerificationView(View):
         Returns:
             HttpResponse: rendered user profile edit page
         """
-        context = {"user": get_object_or_404(User, username=username)}
+        user = get_object_or_404(User, username=username)
+        user_verification = UserVerification.objects.filter(username=user)
+        non_active_status = ["verified", "cancelled"]
+        active_verification = UserVerification.objects.filter(username=user).exclude(
+            status__in=non_active_status
+        )
+
+        context = {
+            "user": user,
+            "user_verification": user_verification,
+            "active_verification": active_verification,
+        }
         return render(request, self.template_name, context)
 
     def post(self, request: HttpRequest, username: str) -> HttpResponse:
@@ -503,3 +524,79 @@ class UserVerificationView(View):
                 request, "Please resubmit the application with all necessary fields."
             )
             return redirect("users:profile", username=username)
+
+
+class EditPost(View):
+    """edit post view"""
+
+    model = Post
+    form_class = EditPostForm
+    template_name = "users/edit_post.html"
+
+    def get(self, request: HttpRequest, username: str, post_id: int) -> HttpResponse:
+        """return edit post page
+
+        Args:
+            request (HttpRequest): http request object
+            username (str): username string
+            post_id (str): post id/primary key
+
+        Returns:
+            HttpResponse: rendered edit post page
+        """
+        post = get_object_or_404(Post, id=post_id)
+        context = {"post": post}
+
+        if request.user == post.author:
+            return render(request, self.template_name, context)
+        else:
+            return HttpResponse(status=403)
+
+    def post(self, request: HttpRequest, username: str, post_id: str) -> HttpResponse:
+        """handle edit post
+
+        Args:
+            request (HttpRequest): http request object
+            username (str): username string
+            post_id (str): post id/primary key
+
+        Returns:
+            HttpResponse: redirect back to profile page
+        """
+        profanity.add_censor_words(custom_badwords)
+        new_title = profanity.censor(request.POST.get("title"))
+        new_post = profanity.censor(request.POST.get("post"))
+        post = get_object_or_404(Post, id=post_id)
+
+        if not new_post.strip():
+            return redirect("users:edit_post", username=username, post_id=post_id)
+
+        post.title = new_title
+        post.post = new_post
+        post.created_at = timezone.now()
+        post.save()
+        # currently only editing posts from profile page
+        # if "users" in (request.META.get("HTTP_REFERER")):
+        #   return redirect("users:profile", username=username)
+        # else:
+        #   return redirect("map:parking")
+        return redirect("users:profile", username=username)
+
+
+class VerificationCancelView(View):
+    """verification cancel view"""
+
+    def post(self, request: HttpRequest, id: int) -> HttpResponse:
+        """handle verification cancel post req
+
+        Args:
+            request (HttpRequest): http request object
+
+        Returns:
+            HttpResponse: redirect user to verification page
+        """
+        verification = get_object_or_404(UserVerification, id=id)
+        username = verification.username.username
+        verification.status = "cancelled"
+        verification.save()
+        return redirect("users:verification", username=username)

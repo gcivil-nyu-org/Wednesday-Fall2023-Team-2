@@ -1,30 +1,33 @@
-{% extends "parkrowd/main.html" %}
+<!-- @format -->
 
-{% block navbarEnd %}
-{% if request.user.is_authenticated %}
-<a href="#" class="btn btn-outline-warning" onClick="document.getElementById('logout-form').submit()"> Logout</a>
+{% extends "parkrowd/main.html" %} {% block navbarEnd %} {% if request.user.is_authenticated %}
+<a
+  href="#"
+  class="btn btn-outline-warning"
+  onClick="document.getElementById('logout-form').submit()"
+>
+  Logout</a
+>
 
 <form id="logout-form" method="POST" action="{% url 'users:logout' %}">
   {% csrf_token %}
   <input type="hidden" />
 </form>
-{% endif %}
-{% endblock %}
-
-
-{% block content %}
+{% endif %} {% endblock %} {% block content %}
 <div class="container-lg">
   <div class="card">
-    <div class="card-header">
-      {{ user.username_human }}'s Profile
-    </div>
+    <div class="card-header">{{ user.username_human }}'s Profile</div>
     <div class="card-body">
       <div class="card-text d-flex align-items-center">
         <div class="d-flex align-items-center card-body">
           <!--Profile Avatar-->
           <div class="image">
-            <img src="{{ user.avatar.url }}" width="100" height="100"
-              style="vertical-align:top;margin:20px 20px;float:left;border:5px solid black" />
+            <img
+              src="{{ user.avatar.url }}"
+              width="100"
+              height="100"
+              style="vertical-align: top; margin: 20px 20px; float: left; border: 5px solid black"
+            />
           </div>
           <!--END Profile Avatar-->
 
@@ -40,11 +43,19 @@
                 </div>
                 {% if user.is_verified %}
                 <div class="row">
-                  <div class="col-md-auto">Business Type
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                      class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                  <div class="col-md-auto">
+                    Business Type
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      class="bi bi-check-circle-fill"
+                      viewBox="0 0 16 16"
+                    >
                       <path
-                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"
+                      />
                     </svg>
                     :
                   </div>
@@ -63,46 +74,64 @@
       {% if request.user.is_authenticated and is_user_owner_of_profile %}
       <div class="button mt-2 d-flex flex-row align-items-center justify-content-end">
         <!--Edit Profile-->
-        <a href="{% url 'users:profile-edit' request.user.username %}" class="btn btn-primary mx-1">Edit</a>
+        <a href="{% url 'users:profile-edit' request.user.username %}" class="btn btn-primary mx-1"
+          >Edit</a
+        >
         <!--END Edit Profile-->
-        <a href="{% url 'users:verification' request.user.username %}" class="btn btn-outline-primary mx-2">Verify</a>
-        <button type="button" class="btn btn-danger mx-2" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+        <a
+          href="{% url 'users:verification' request.user.username %}"
+          class="btn btn-outline-primary mx-2"
+          >Verify</a
+        >
+        <button
+          type="button"
+          class="btn btn-danger mx-2"
+          data-bs-toggle="modal"
+          data-bs-target="#deleteAccountModal"
+        >
           Delete Account
         </button>
       </div>
       <!-- Delete Account Modal -->
-      <div class="modal fade" id="deleteAccountModal" tabindex="-1" role="dialog" aria-labelledby="deleteAccount"
-        aria-hidden="true">
+      <div
+        class="modal fade"
+        id="deleteAccountModal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="deleteAccount"
+        aria-hidden="true"
+      >
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title" id="deleteAccountTitle">Delete Account</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-              </button>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
             </div>
-            <div class="modal-body">
-              Are you sure you want to delete your account?
-            </div>
+            <div class="modal-body">Are you sure you want to delete your account?</div>
             <div class="modal-footer">
               <form action="{% url 'users:profile-delete' request.user.username %}" method="POST">
                 {% csrf_token %}
                 <button type="submit" name="delete_profile" class="btn btn-danger">Yes</button>
               </form>
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                Cancel
+              </button>
             </div>
           </div>
         </div>
       </div>
       {% if messages %}
       <ul class="messages">
-        {% for message in messages %}
-        {% if message.tags == 'error' %}
+        {% for message in messages %} {% if message.tags == 'error' %}
         <li>{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
-        {% endif %}
-        {% endfor %}
+        {% endif %} {% endfor %}
       </ul>
-      {% endif %}
-      {% endif %}
+      {% endif %} {% endif %}
       <!--END Delete Account-->
     </div>
   </div>
@@ -120,6 +149,13 @@
         <h3>{{ post.title }}</h3>
         <p>{{ post.post }}</p>
         <p>Posted on {{ post.created_at }}</p>
+        {% if request.user == post.author %}
+        <a
+          href="{% url 'users:edit_post' username=user.username post_id=post.id %}"
+          class="btn btn-primary mx-1"
+          >Edit</a
+        >
+        {% endif %}
       </div>
       {% empty %}
       <p>No posts found for this user.</p>
@@ -127,7 +163,5 @@
     </div>
   </div>
   <!--END Posts-->
-
-
 </div>
 {% endblock %}
