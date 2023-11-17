@@ -38,8 +38,7 @@
     left: 0;
   }
 </style>
-{% endblock %} {% block navbarEnd %}
-{% if request.user.is_authenticated %}
+{% endblock %} {% block navbarEnd %} {% if request.user.is_authenticated %}
 <button id="add-spot-btn" class="btn btn-dark btn-sm" style="margin-right: 15px">Add Spot</button>
 {% endif %}
 <button id="filter-window-open-btn" class="btn btn-info btn-sm" style="margin-right: 15px">
@@ -89,9 +88,8 @@
         </div>
       </div>
     </div>
-     <!-- END Filter Sidebar -->
+    <!-- END Filter Sidebar -->
   </div>
- 
 
   <!-- Post & Comment Sidebar -->
   <div id="postSidebar" class="fixed-bottom close-window">
@@ -112,7 +110,6 @@
     </div>
   </div>
   <!-- END Post & Comment Sidebar -->
-
 </div>
 <!-- Add Spot Modal Confirmation -->
 <div
@@ -131,8 +128,17 @@
       </div>
       <div class="modal-body">Are you sure you want to add a spot here?</div>
       <div class="modal-footer">
-        <button type="submit" id="confirm-add-spot-btn" name="add-spot" class="btn btn-primary">Yes</button>
-        <button type="button" id="cancel-add-spot-btn" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" id="confirm-add-spot-btn" name="add-spot" class="btn btn-primary">
+          Yes
+        </button>
+        <button
+          type="button"
+          id="cancel-add-spot-btn"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+        >
+          Cancel
+        </button>
       </div>
     </div>
   </div>
@@ -171,7 +177,7 @@
   let map;
   let infoWindow;
   let addSpotMarker;
-  
+
   const markers = [];
   const spotMap = {};
 
@@ -192,7 +198,6 @@
   const filterWindowCloseBtn = document.getElementById("filter-window-close-btn");
 
   const isUserAuthenticated = "{{user.is_authenticated}}" === "True" ? true : false;
-
 
   // #region Google Maps Callback
   /**
@@ -226,19 +231,15 @@
 
       occupancyStatusInput.addEventListener("input", function (e) {
         let enteredValue = parseInt(occupancyStatusInput.value);
-        
-        
+
         if (enteredValue < 0 || isNaN(enteredValue)) {
           e.target.value = 0;
-        }
-        else {
+        } else {
           e.target.value = floorTo(10, enteredValue);
           if (enteredValue > 100) {
             e.target.value = 100;
           }
         }
-        
-        
       });
     });
 
@@ -255,7 +256,6 @@
     }
     return Math.floor(value / multiple) * multiple;
   }
-
 
   // #endregion Google Maps Callback
 
@@ -318,10 +318,10 @@
 
     const pinBackground = new PinElement({
       scale: 1.25,
-      background: 'red',
-      borderColor: 'red',
-      glyph: 'New',
-      glyphColor: 'white',
+      background: "red",
+      borderColor: "red",
+      glyph: "New",
+      glyphColor: "white",
     });
 
     addSpotMarker = new AdvancedMarkerElement({
@@ -336,7 +336,7 @@
     // Disable target cursor (i.e. spot adding mode)
     map.setOptions({ draggableCursor: null });
 
-    // Remove the click event listener 
+    // Remove the click event listener
     google.maps.event.clearListeners(map, "click");
 
     const openAddSpotModalBtn = document.getElementById("open-add-spot-modal-btn");
@@ -344,7 +344,6 @@
     addSpotModal.classList.add("show");
   }
 
-    
   /**
    * Helper function for addMarker()
    * Creates an AdvancedMarkerElement (custom color marker) based on type
@@ -412,7 +411,7 @@
    * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
    * @returns {string} HTML content - info on Business parking spot
    */
-   function getBusinessInfo(spot) {
+  function getBusinessInfo(spot) {
     const spotId = spot.parking_spot_id;
 
     return (
@@ -506,7 +505,6 @@
     return glyphColor;
   }
 
-
   function getParkingSpotNameHTML(spot) {
     let parking_spot_name;
 
@@ -515,49 +513,37 @@
     } else {
       parking_spot_name = spot.parking_spot_name;
     }
-    return '<div class="mb-3">' +
-      '<h1 class="h3 mb-1">' +
-      parking_spot_name +
-      "</h1>" +
-      "</div>";
+    return '<div class="mb-3">' + '<h1 class="h3 mb-1">' + parking_spot_name + "</h1>" + "</div>";
   }
-    
-   function getTypeHTML(spot) {
+
+  function getTypeHTML(spot) {
     if (spot.type) {
-      return '<div class="mb-3">Type: ' +
-      spot.type +
-      "</div>";
+      return '<div class="mb-3">Type: ' + spot.type + "</div>";
     }
     return "";
   }
 
   function getBoroughHTML(spot) {
     if (spot.borough) {
-      return '<div class="mb-3">Borough: ' +
-      spot.borough +
-      "</div>";
+      return '<div class="mb-3">Borough: ' + spot.borough + "</div>";
     }
     return "";
   }
 
   function getDetailsHTML(spot) {
     if (spot.detail) {
-      return '<div class="mb-3">Details: ' +
-      spot.detail +
-      "</div>";
+      return '<div class="mb-3">Details: ' + spot.detail + "</div>";
     }
     return "";
   }
 
   function getOperationalHoursHTML(spot) {
     if (spot.operation_hours) {
-      return '<div class="mb-3">Operational Hours: ' +
-      spot.operation_hours +
-      "</div>";
+      return '<div class="mb-3">Operational Hours: ' + spot.operation_hours + "</div>";
     }
     return "";
   }
-    
+
   /*
    * Sets up HTML info for street based markers (format different from other spots)
    * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
@@ -792,7 +778,7 @@
 
     return cookieValue;
   }
- 
+
   /*
    * Redirects to make post page, when user clicks on
    * button inside info window of parking spot on map
@@ -918,13 +904,13 @@
       removeAddSpotMarker();
     });
 
-    confirmAddSpotBtn.addEventListener("click", function(e) {
+    confirmAddSpotBtn.addEventListener("click", function (e) {
       // Redirect to the "Add Spot" page
       const lat = addSpotMarker.position.lat;
       const lon = addSpotMarker.position.lng;
-      const username = "{{ request.user.username }}"
+      const username = "{{ request.user.username }}";
       window.location.href = `/map/parking/add-spot/${username}/?lat=${lat}&lon=${lon}`;
-    })
+    });
   }
 
   // setup event listners
@@ -938,4 +924,3 @@
   src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap"
 ></script>
 {% endblock %}
-
