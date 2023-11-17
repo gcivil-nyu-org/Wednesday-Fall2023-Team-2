@@ -96,6 +96,18 @@ class ParkingSpaceChangeOccupancyAPIView(APIView):
             response_data = {"message": "Bad Request: Missing percent or id parameters"}
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
+        if not occupancy_percent.isdigit():
+            response_data = {"message": "Bad Request: Percent can only have digits"}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+        occupancy_percent = int(occupancy_percent)
+        if occupancy_percent > 100:
+            response_data = {"message": "Bad Request: Percent is >100"}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+        if occupancy_percent % 10 != 0:
+            response_data = {"message": "Bad Request: Percent is not a multiple of 10"}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             # * Retrieve the ParkingSpace instance
             parking_space = ParkingSpace.objects.get(parking_spot_id=parking_spot_id)

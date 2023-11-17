@@ -251,7 +251,7 @@
 
   function floorTo(multiple, value) {
     if (value >= 0 && value <= 9) {
-      return value;
+      return value * 10;
     }
     return Math.floor(value / multiple) * multiple;
   }
