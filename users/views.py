@@ -64,8 +64,10 @@ class UserRegisterView(View):
         """
         profanity.add_censor_words(custom_badwords)
         form = self.form_class(request.POST.copy())
-        form.data["username"] = profanity.censor(form.data["username"])
         if form.is_valid():
+            form.cleaned_data["username"] = profanity.censor(
+                form.cleaned_data["username"]
+            )
             user = form.save(commit=False)
             user.username = user.username.lower()
             user.email = request.POST.get("email").lower()
