@@ -44,9 +44,8 @@ class CreatePostTests(TestCase):
         """checks if post page returns a 200 status code
         and the template 'map/post.html' is used
         """
-        response = self.client.get(
-            reverse(POST_PATH_NAME, args=[PARKING_SPOT_ID, USERNAME])
-        )
+        self.client.login(username=USERNAME, password=PASSWORD)
+        response = self.client.get(reverse(POST_PATH_NAME, args=[PARKING_SPOT_ID]))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, POST_TEMPLATE)
 
@@ -54,18 +53,20 @@ class CreatePostTests(TestCase):
         """checks if post is made successfully
         and redirects (Status 302) to Map Page
         """
+        self.client.login(username=USERNAME, password=PASSWORD)
         post_data = {"title": TITLE, "post": POST, "created_at": DATE}
         response = self.client.post(
-            reverse(POST_PATH_NAME, args=[PARKING_SPOT_ID, USERNAME]), post_data
+            reverse(POST_PATH_NAME, args=[PARKING_SPOT_ID]), post_data
         )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(Post.objects.filter(title=TITLE).exists())
 
     def test_unsuccessful_post_invalid_data(self):
         """check if user tries to submit empty post form"""
+        self.client.login(username=USERNAME, password=PASSWORD)
         post_data = {"title": "", "post": "", "created_at": DATE}
         response = self.client.post(
-            reverse(POST_PATH_NAME, args=[PARKING_SPOT_ID, USERNAME]), post_data
+            reverse(POST_PATH_NAME, args=[PARKING_SPOT_ID]), post_data
         )
         self.assertEqual(response.status_code, 200)
         self.assertFormError(response, "form", "title", "This field is required.")

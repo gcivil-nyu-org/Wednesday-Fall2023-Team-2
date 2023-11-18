@@ -300,7 +300,7 @@
         if (enteredValue < 0 || isNaN(enteredValue)) {
           e.target.value = 0;
         } else {
-          e.target.value = floorTo(10, enteredValue);
+          e.target.value = __floorTo(10, enteredValue);
           if (enteredValue > 100) {
             e.target.value = 100;
           }
@@ -315,7 +315,7 @@
     });
   }
 
-  function floorTo(multiple, value) {
+  function __floorTo(multiple, value) {
     if (value >= 0 && value <= 9) {
       return value * 10;
     }
@@ -605,7 +605,7 @@
    * @returns {string} HTML content - "Make Post" button OR nothing
    */
   function getMakePostHTML(spotId) {
-    const makePostURL = `/map/post/${spotId}/{{user.username}}`;
+    const makePostURL = `/map/post/${spotId}`;
 
     if (isUserAuthenticated) {
       return `<div class="w-75 mx-auto p-2">
@@ -962,8 +962,7 @@
       // Redirect to the "Add Spot" page
       const lat = addSpotMarker.position.lat;
       const lon = addSpotMarker.position.lng;
-      const username = "{{ request.user.username }}";
-      window.location.href = `/map/parking/add-spot/${username}/?lat=${lat}&lon=${lon}`;
+      window.location.href = `/map/parking/add-spot/?lat=${lat}&lon=${lon}`;
     });
 
     occupancyRangeSlider.addEventListener("input", function () {

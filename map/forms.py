@@ -1,4 +1,4 @@
-"""user forms
+"""map forms
 
 Creating Model Forms
 https://docs.djangoproject.com/en/4.2/topics/forms/modelforms/
@@ -8,11 +8,10 @@ https://stackoverflow.com/questions/5481713/whats-the-difference-between-django-
 """
 
 from django import forms
+import django.core.validators
 
 from users.models import Post
 from map.models import ParkingSpace
-
-import django.core.validators
 
 
 class CreatePostForm(forms.ModelForm):
