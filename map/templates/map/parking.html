@@ -64,8 +64,57 @@
         <h3>Filters</h3>
         <hr />
       </div>
-      <div class="container">
+      <div class="container py-2">
+        <!-- Occupancy Range Slider -->
         <div class="form-group">
+          <div class="text-center">
+            <label>Occupancy Percent Less Than...</label>
+          </div>
+          <div class="slider-value text-center" id="occupancy-range-value">50</div>
+          <div class="slider-container">
+            <input
+              type="range"
+              class="form-range"
+              min="0"
+              max="100"
+              step="10"
+              value="50"
+              data-value="50"
+              id="occupancy-percent-slider"
+            />
+          </div>
+        </div>
+        <!-- END Occupancy Range Slider -->
+        <!-- Occupancy Filter : Yes / No for ones without percentage -->
+        <div class="form-group py-2">
+          <label>Show Spots with Occupancy Data:</label>
+          <div class="btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-secondary">
+              <input
+                type="radio"
+                name="no-number"
+                id="no-number-yes"
+                autocomplete="off"
+                value="yes"
+              />
+              Yes
+            </label>
+            <label class="btn btn-secondary">
+              <input
+                type="radio"
+                name="no-number"
+                id="no-number-no"
+                autocomplete="off"
+                value="no"
+                checked="checked"
+              />
+              No
+            </label>
+          </div>
+        </div>
+        <!-- END Occupancy Filter : Yes / No for ones without percentage -->
+        <hr />
+        <div class="form-group py-2">
           <label>Parking Types:</label>
           <div class="btn-group-toggle" data-toggle="buttons">
             <!--Each input should have a "filter-checkbox" class for JS to apply filtering-->
@@ -196,6 +245,9 @@
   const filterSlidingWindow = document.getElementById("filter-sliding-window");
   const filterWindowOpenBtn = document.getElementById("filter-window-open-btn");
   const filterWindowCloseBtn = document.getElementById("filter-window-close-btn");
+
+  const occupancyRangeSlider = document.getElementById("occupancy-percent-slider");
+  const occupancyRangeValue = document.getElementById("occupancy-range-value");
 
   const isUserAuthenticated = "{{user.is_authenticated}}" === "True" ? true : false;
 
@@ -857,6 +909,12 @@
       });
   }
 
+  function updateRangeValue() {
+    let value = occupancyRangeSlider.value;
+    occupancyRangeValue.textContent = value;
+    occupancyRangeSlider.setAttribute("data-value", value);
+  }
+
   /**
    * Sets up the following on webpage, on load
    *      Add click event listener to "Load Parking Spots" button
@@ -888,7 +946,7 @@
       closePostSidebar();
     });
 
-    addSpotBtn.addEventListener("click", function (e) {
+    addSpotBtn?.addEventListener("click", function (e) {
       addSpot();
     });
 
@@ -911,6 +969,13 @@
       const username = "{{ request.user.username }}";
       window.location.href = `/map/parking/add-spot/${username}/?lat=${lat}&lon=${lon}`;
     });
+
+    occupancyRangeSlider.addEventListener("input", function () {
+      updateRangeValue();
+    });
+
+    // Initial update
+    updateRangeValue();
   }
 
   // setup event listners
