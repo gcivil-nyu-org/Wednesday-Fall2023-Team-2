@@ -68,7 +68,7 @@ class UserRegisterView(View):
         if form.is_valid():
             user = form.save(commit=False)
             user.username = user.username.lower()
-            user.email = request.POST.get("email")
+            user.email = request.POST.get("email").lower()
             user.set_password(request.POST.get("password1"))
             user.save()
             return redirect("users:welcome")
@@ -109,7 +109,7 @@ class UserLoginView(View):
         remember_me = request.POST.get("remember_me")
 
         user = emailOrUsernameAuthenticationBackend.authenticate(
-            request, username=username, password=password
+            request, username=username.lower(), password=password
         )
         if not user:
             messages.error(
