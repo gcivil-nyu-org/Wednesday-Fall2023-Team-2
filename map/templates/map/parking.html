@@ -434,14 +434,18 @@
   function getClaimBusinessHTML(spot) {
     if (!spot.user?.username) {
       return `<div class="mb-3">
-        This business has not yet been claimed.  
+        This business has not yet been claimed.
       </div>
       <div class="mb-3">
         Reach out to an admin with this Parking Space's ID.
       </div>
       `;
     }
-    return "";
+    return (
+      "<div class='w-75 mx-auto p-2'><button class='btn btn-outline-primary btn-sm' onClick=\"window.location.href='/users/profile/" +
+      spot.user.username +
+      "'\">View Business</button></div>"
+    );
   }
 
   /**
@@ -609,9 +613,9 @@
           prev +
           `<li class="list-group-item">
             ${cur.content}
-            <div class="text-end">--by ${cur.author?.username || "unknown user"} at ${new Date(
-            cur.created_at,
-          ).toLocaleString()}</div>
+            <div class="text-end">--by <a href="/users/profile/${cur.author?.username}">${
+            cur.author?.username || "unknown user"
+          }</a> at ${new Date(cur.created_at).toLocaleString()}</div>
           </li>`,
         "",
       )}
@@ -635,9 +639,9 @@
           <div class="card-text">
             ${cur.post || "Empty post"}
             <div class="text-end">
-              -- by ${cur.author?.username || "unknown user"} at ${new Date(
-            cur.created_at,
-          ).toLocaleString()}
+              -- by <a href="/users/profile/${cur.author?.username}">${
+            cur.author?.username || "unknown user"
+          }</a> at ${new Date(cur.created_at).toLocaleString()}
             </div>
           </div>
         </div>
