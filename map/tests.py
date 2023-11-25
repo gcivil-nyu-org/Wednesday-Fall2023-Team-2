@@ -58,7 +58,7 @@ class CreatePostTests(TestCase):
         response = self.client.post(
             reverse(POST_PATH_NAME, args=[PARKING_SPOT_ID, USERNAME]), post_data
         )
-        self.assertRedirects(response, reverse(MAP_PATH_NAME))
+        self.assertEqual(response.status_code, 200)
         self.assertTrue(Post.objects.filter(title=TITLE).exists())
 
     def test_unsuccessful_post_invalid_data(self):

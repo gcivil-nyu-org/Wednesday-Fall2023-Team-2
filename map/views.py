@@ -88,14 +88,13 @@ class PostView(View):
 
             map_context = {
                 "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
-                # "parking_space": parking_space,
                 "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
                 "spot": spot,
                 "recenter_after_post": True,
             }
 
             return render(request, map_template_name, map_context)
-            # return redirect("map:parking")
+
         return render(request, self.template_name, {"form": form})
 
 
