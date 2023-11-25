@@ -29,10 +29,8 @@ class MapView(View):
         Returns:
             HttpResponse: rendered map view response
         """
-        parking_space = ParkingSpace.objects.all()
         context = {
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
-            "parking_space": parking_space,
             "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
         }
         return render(request, self.template_name, context)
@@ -75,6 +73,7 @@ class PostView(View):
         Returns:
             HttpResponse: redirect or register view with error hints
         """
+        map_template_name = "map/parking.html"
         spot = get_object_or_404(ParkingSpace, parking_spot_id=parking_spot_id)
         author = get_object_or_404(User, username=username)
         form = self.form_class(request.POST)
@@ -86,7 +85,17 @@ class PostView(View):
             new_post.title = profanity.censor(form.cleaned_data["title"])
             new_post.post = profanity.censor(form.cleaned_data["post"])
             new_post.save()
-            return redirect("map:parking")
+
+            map_context = {
+                "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+                # "parking_space": parking_space,
+                "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
+                "spot": spot,
+                "recenter_after_post": True,
+            }
+
+            return render(request, map_template_name, map_context)
+            # return redirect("map:parking")
         return render(request, self.template_name, {"form": form})
 
 

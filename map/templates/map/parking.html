@@ -296,6 +296,7 @@
         };
       })(marker, spot.parking_spot_id),
     );
+    return marker;
   }
 
   function addSpot() {
@@ -861,6 +862,27 @@
       });
   }
 
+  async function fetchParkingSpotAroundOneParkingSpot() {
+ 
+    axios
+      .get(`/api/spots/?lat={{spot.latitude}}&lon={{spot.longitude}}`)
+      .then(async function (response) {
+        const spotsData = response.data;
+        for (const spot of spotsData) {
+          let marker = await addMarker(spot);
+          if (spot.parking_spot_id === "{{spot.parking_spot_id}}") {
+            console.log(spot.parking_spot_id);
+            console.log(marker);
+            google.maps.event.trigger(marker, 'click' );
+            viewPost("{{spot.parking_spot_id}}");
+          }
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
+
   /**
    * Sets up the following on webpage, on load
    *      Add click event listener to "Load Parking Spots" button
@@ -919,6 +941,10 @@
 
   // setup event listners
   setup();
+
+  if ("{{recenter_after_post}}" === "True" ? true : false) {
+    fetchParkingSpotAroundOneParkingSpot();
+  }
 
   // #endregion setup & evt listners
 </script>
