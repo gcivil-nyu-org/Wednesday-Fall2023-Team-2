@@ -68,7 +68,7 @@
         <!-- Occupancy Range Slider -->
         <div class="form-group">
           <div class="text-center">
-            <label>Occupancy Percent Less Than...</label>
+            <label>Occupancy Percent Less Than or Equal to...</label>
           </div>
           <div class="slider-value text-center" id="occupancy-range-value">50</div>
           <div class="slider-container">
@@ -93,7 +93,7 @@
               <input
                 type="radio"
                 name="no-number"
-                id="no-number-yes"
+                id="occupancy-data-yes"
                 autocomplete="off"
                 value="yes"
               />
@@ -103,7 +103,7 @@
               <input
                 type="radio"
                 name="no-number"
-                id="no-number-no"
+                id="occupancy-data-no"
                 autocomplete="off"
                 value="no"
                 checked="checked"
@@ -248,6 +248,7 @@
 
   const occupancyRangeSlider = document.getElementById("occupancy-percent-slider");
   const occupancyRangeValue = document.getElementById("occupancy-range-value");
+  const occupancyDataYes = document.getElementById("occupancy-data-yes");
 
   const isUserAuthenticated = "{{user.is_authenticated}}" === "True" ? true : false;
 
@@ -439,6 +440,7 @@
     });
     //To identify a marker when filtering
     marker.type = spot.type;
+    marker.occupancy_percent = spot.occupancy_percent;
     //To retrieve the glyph (map marker center dot) info
     marker.pin = pinBackground;
     return marker;
@@ -494,54 +496,6 @@
       `;
     }
     return "";
-  }
-
-  /**
-   * Helper function for addMarker()
-   * Creates an AdvancedMarkerElement (custom color marker) based on type
-   * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
-   * @returns {Object} AdvancedMarkerElement - see link below (Google Maps API)
-   * https://developers.google.com/maps/documentation/javascript/advanced-markers/basic-customization
-   */
-  async function getMarkerByType(spot) {
-    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
-
-    const typeToColor = {
-      Business: "black",
-      Street: "indigo",
-    };
-
-    const color = typeToColor[spot.type];
-
-    //Retrieve and process occupancy_percent from
-    //backend to display percent on Marker
-    const occupancy_percent =
-      spot.occupancy_percent !== null ? String(spot.occupancy_percent) + "%" : null;
-
-    const glyphColor = getGlyphColor(spot.occupancy_percent);
-
-    const pinBackground = new PinElement({
-      scale: 1.25,
-      background: color,
-      borderColor: color,
-      glyph: occupancy_percent,
-      glyphColor: glyphColor,
-    });
-
-    let marker = new AdvancedMarkerElement({
-      map,
-      position: {
-        lat: parseFloat(spot.latitude),
-        lng: parseFloat(spot.longitude),
-      },
-      content: pinBackground.element,
-      title: spot.parking_spot_name,
-    });
-    //To identify a marker when filtering
-    marker.type = spot.type;
-    //To retrieve the glyph (map marker center dot) info
-    marker.pin = pinBackground;
-    return marker;
   }
 
   /**
@@ -854,13 +808,18 @@
       .filter((checkbox) => checkbox.checked)
       .map((checkbox) => checkbox.value);
 
+    const maxOccupancyPercent = occupancyRangeSlider.value;
+    const isSpotsWithOccupancyYes = occupancyDataYes.checked;
     //Iterates through all markers and properly
     //sets the 'map' property accordingly
     markers.forEach((marker) => {
-      if (!selectedFilters.includes(marker.type)) {
-        marker.map = null;
-      } else {
+      const includesType = selectedFilters.includes(marker.type);
+      const isOccupancyNull = marker.occupancy_percent == null;
+      const belowMaxOccupancy = !isOccupancyNull && marker.occupancy_percent <= maxOccupancyPercent;
+      if (includesType && (belowMaxOccupancy || (isSpotsWithOccupancyYes && isOccupancyNull))) {
         marker.map = map;
+      } else {
+        marker.map = null;
       }
     });
   }
