@@ -871,8 +871,6 @@
         for (const spot of spotsData) {
           let marker = await addMarker(spot);
           if (spot.parking_spot_id === "{{spot.parking_spot_id}}") {
-            console.log(spot.parking_spot_id);
-            console.log(marker);
             google.maps.event.trigger(marker, 'click' );
             viewPost("{{spot.parking_spot_id}}");
           }
