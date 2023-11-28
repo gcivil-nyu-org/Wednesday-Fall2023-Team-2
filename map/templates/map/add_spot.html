@@ -76,4 +76,15 @@
   </div>
 </div>
 </div>
+<script>
+  document.getElementById("id_occupancy_percent").addEventListener("input", function () {
+      if (!isNaN(this.value)) {
+          const roundedValue = Math.round(this.value / 10) * 10;
+          const adjustedValue = Math.max(0, Math.min(100, roundedValue));
+          this.value = adjustedValue;
+      }
+
+  });
+  document.getElementById("id_occupancy_percent").step = 10;
+</script>
 {%endblock%}
