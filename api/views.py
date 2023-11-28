@@ -54,6 +54,11 @@ class ParkingSpaceNearCenterAPIView(generics.ListAPIView):
                 center_point, (float(spot.latitude), float(spot.longitude))
             )
         ]
+
+        for spot in filtered_spots:
+            if spot.occupancy_percent:
+                spot.occupancy_percent = round(spot.occupancy_percent / 10) * 10
+
         serializer = self.serializer_class(filtered_spots, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)

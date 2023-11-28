@@ -64,18 +64,79 @@
         <h3>Filters</h3>
         <hr />
       </div>
-      <div class="container">
+      <div class="container py-2">
+        <!-- Occupancy Range Slider -->
         <div class="form-group">
+          <div class="text-center">
+            <label>Occupancy Percent Less Than or Equal to...</label>
+          </div>
+          <div class="slider-value text-center" id="occupancy-range-value">50</div>
+          <div class="slider-container">
+            <input
+              type="range"
+              class="form-range"
+              min="0"
+              max="100"
+              step="10"
+              value="50"
+              data-value="50"
+              id="occupancy-percent-slider"
+            />
+          </div>
+        </div>
+        <!-- END Occupancy Range Slider -->
+        <!-- Occupancy Filter : Yes / No for ones without percentage -->
+        <div class="form-group py-2">
+          <label>Show Spots without Occupancy Data:</label>
+          <div class="btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-secondary">
+              <input
+                type="radio"
+                name="no-number"
+                id="occupancy-data-yes"
+                autocomplete="off"
+                value="yes"
+              />
+              Yes
+            </label>
+            <label class="btn btn-secondary">
+              <input
+                type="radio"
+                name="no-number"
+                id="occupancy-data-no"
+                autocomplete="off"
+                value="no"
+                checked="checked"
+              />
+              No
+            </label>
+          </div>
+        </div>
+        <!-- END Occupancy Filter : Yes / No for ones without percentage -->
+        <hr />
+        <div class="form-group py-2">
           <label>Parking Types:</label>
           <div class="btn-group-toggle" data-toggle="buttons">
             <!--Each input should have a "filter-checkbox" class for JS to apply filtering-->
             <!--Values for each input checkbox should be specified (match DB type)-->
             <label class="btn btn-secondary">
-              <input class="filter-checkbox" type="checkbox" autocomplete="off" value="Business" />
+              <input
+                class="filter-checkbox"
+                type="checkbox"
+                autocomplete="off"
+                value="Business"
+                checked
+              />
               Business
             </label>
             <label class="btn btn-secondary">
-              <input class="filter-checkbox" type="checkbox" autocomplete="off" value="Street" />
+              <input
+                class="filter-checkbox"
+                type="checkbox"
+                autocomplete="off"
+                value="Street"
+                checked
+              />
               Street
             </label>
           </div>
@@ -196,6 +257,10 @@
   const filterSlidingWindow = document.getElementById("filter-sliding-window");
   const filterWindowOpenBtn = document.getElementById("filter-window-open-btn");
   const filterWindowCloseBtn = document.getElementById("filter-window-close-btn");
+
+  const occupancyRangeSlider = document.getElementById("occupancy-percent-slider");
+  const occupancyRangeValue = document.getElementById("occupancy-range-value");
+  const occupancyDataYes = document.getElementById("occupancy-data-yes");
 
   const isUserAuthenticated = "{{user.is_authenticated}}" === "True" ? true : false;
 
@@ -388,6 +453,7 @@
     });
     //To identify a marker when filtering
     marker.type = spot.type;
+    marker.occupancy_percent = spot.occupancy_percent;
     //To retrieve the glyph (map marker center dot) info
     marker.pin = pinBackground;
     return marker;
@@ -447,54 +513,6 @@
       spot.user.username +
       "'\">View Business</button></div>"
     );
-  }
-
-  /**
-   * Helper function for addMarker()
-   * Creates an AdvancedMarkerElement (custom color marker) based on type
-   * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
-   * @returns {Object} AdvancedMarkerElement - see link below (Google Maps API)
-   * https://developers.google.com/maps/documentation/javascript/advanced-markers/basic-customization
-   */
-  async function getMarkerByType(spot) {
-    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
-
-    const typeToColor = {
-      Business: "black",
-      Street: "indigo",
-    };
-
-    const color = typeToColor[spot.type];
-
-    //Retrieve and process occupancy_percent from
-    //backend to display percent on Marker
-    const occupancy_percent =
-      spot.occupancy_percent !== null ? String(spot.occupancy_percent) + "%" : null;
-
-    const glyphColor = getGlyphColor(spot.occupancy_percent);
-
-    const pinBackground = new PinElement({
-      scale: 1.25,
-      background: color,
-      borderColor: color,
-      glyph: occupancy_percent,
-      glyphColor: glyphColor,
-    });
-
-    let marker = new AdvancedMarkerElement({
-      map,
-      position: {
-        lat: parseFloat(spot.latitude),
-        lng: parseFloat(spot.longitude),
-      },
-      content: pinBackground.element,
-      title: spot.parking_spot_name,
-    });
-    //To identify a marker when filtering
-    marker.type = spot.type;
-    //To retrieve the glyph (map marker center dot) info
-    marker.pin = pinBackground;
-    return marker;
   }
 
   /**
@@ -807,13 +825,18 @@
       .filter((checkbox) => checkbox.checked)
       .map((checkbox) => checkbox.value);
 
+    const maxOccupancyPercent = occupancyRangeSlider.value;
+    const isSpotsWithOccupancyYes = occupancyDataYes.checked;
     //Iterates through all markers and properly
     //sets the 'map' property accordingly
     markers.forEach((marker) => {
-      if (!selectedFilters.includes(marker.type)) {
-        marker.map = null;
-      } else {
+      const includesType = selectedFilters.includes(marker.type);
+      const isOccupancyNull = marker.occupancy_percent == null;
+      const belowMaxOccupancy = !isOccupancyNull && marker.occupancy_percent <= maxOccupancyPercent;
+      if (includesType && (belowMaxOccupancy || (isSpotsWithOccupancyYes && isOccupancyNull))) {
         marker.map = map;
+      } else {
+        marker.map = null;
       }
     });
   }
@@ -862,6 +885,13 @@
       });
   }
 
+
+  function updateRangeValue() {
+    let value = occupancyRangeSlider.value;
+    occupancyRangeValue.textContent = value;
+    occupancyRangeSlider.setAttribute("data-value", value);
+  }
+  
   async function fetchParkingSpotAroundOneParkingSpot() {
  
     axios
@@ -912,7 +942,7 @@
       closePostSidebar();
     });
 
-    addSpotBtn.addEventListener("click", function (e) {
+    addSpotBtn?.addEventListener("click", function (e) {
       addSpot();
     });
 
@@ -935,6 +965,13 @@
       const username = "{{ request.user.username }}";
       window.location.href = `/map/parking/add-spot/${username}/?lat=${lat}&lon=${lon}`;
     });
+
+    occupancyRangeSlider.addEventListener("input", function () {
+      updateRangeValue();
+    });
+
+    // Initial update
+    updateRangeValue();
   }
 
   // setup event listners
