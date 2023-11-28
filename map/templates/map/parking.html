@@ -361,6 +361,7 @@
         };
       })(marker, spot.parking_spot_id),
     );
+    return marker;
   }
 
   function addSpot() {
@@ -500,14 +501,18 @@
   function getClaimBusinessHTML(spot) {
     if (!spot.user?.username) {
       return `<div class="mb-3">
-        This business has not yet been claimed.  
+        This business has not yet been claimed.
       </div>
       <div class="mb-3">
         Reach out to an admin with this Parking Space's ID.
       </div>
       `;
     }
-    return "";
+    return (
+      "<div class='w-75 mx-auto p-2'><button class='btn btn-outline-primary btn-sm' onClick=\"window.location.href='/users/profile/" +
+      spot.user.username +
+      "'\">View Business</button></div>"
+    );
   }
 
   /**
@@ -627,9 +632,9 @@
           prev +
           `<li class="list-group-item">
             ${cur.content}
-            <div class="text-end">--by ${cur.author?.username || "unknown user"} at ${new Date(
-            cur.created_at,
-          ).toLocaleString()}</div>
+            <div class="text-end">--by <a href="/users/profile/${cur.author?.username}">${
+            cur.author?.username || "unknown user"
+          }</a> at ${new Date(cur.created_at).toLocaleString()}</div>
           </li>`,
         "",
       )}
@@ -653,9 +658,9 @@
           <div class="card-text">
             ${cur.post || "Empty post"}
             <div class="text-end">
-              -- by ${cur.author?.username || "unknown user"} at ${new Date(
-            cur.created_at,
-          ).toLocaleString()}
+              -- by <a href="/users/profile/${cur.author?.username}">${
+            cur.author?.username || "unknown user"
+          }</a> at ${new Date(cur.created_at).toLocaleString()}
             </div>
           </div>
         </div>
@@ -880,10 +885,30 @@
       });
   }
 
+
   function updateRangeValue() {
     let value = occupancyRangeSlider.value;
     occupancyRangeValue.textContent = value;
     occupancyRangeSlider.setAttribute("data-value", value);
+  }
+  
+  async function fetchParkingSpotAroundOneParkingSpot() {
+ 
+    axios
+      .get(`/api/spots/?lat={{spot.latitude}}&lon={{spot.longitude}}`)
+      .then(async function (response) {
+        const spotsData = response.data;
+        for (const spot of spotsData) {
+          let marker = await addMarker(spot);
+          if (spot.parking_spot_id === "{{spot.parking_spot_id}}") {
+            google.maps.event.trigger(marker, 'click' );
+            viewPost("{{spot.parking_spot_id}}");
+          }
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
   }
 
   /**
@@ -951,6 +976,10 @@
 
   // setup event listners
   setup();
+
+  if ("{{recenter_after_post}}" === "True" ? true : false) {
+    fetchParkingSpotAroundOneParkingSpot();
+  }
 
   // #endregion setup & evt listners
 </script>
