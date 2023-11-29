@@ -1,6 +1,7 @@
 from rest_framework import status
 from django.utils import timezone
 from django.http import HttpRequest
+from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from haversine import haversine, Unit
 from rest_framework.views import APIView
@@ -8,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication
 
-from map.models import ParkingSpace
+from map.models import ParkingSpace, OccupancyHistory
 from users.models import Post, Comment
 from .serializers import ParkingSpaceSerializer, PostSerializer
 
@@ -118,7 +119,18 @@ class ParkingSpaceChangeOccupancyAPIView(APIView):
 
             # Update the occupancy_percent field
             parking_space.occupancy_percent = occupancy_percent
+
+            # Create New Occupancy History
+            history = OccupancyHistory()
+            history.user = request.user
+            history.parking_space = get_object_or_404(
+                ParkingSpace, parking_spot_id=parking_spot_id
+            )
+            history.updated_at = timezone.now()
+            history.occupancy_percent = occupancy_percent
+
             parking_space.save()
+            history.save()
 
             return Response(
                 {"message": "Occupancy percent updated successfully."},

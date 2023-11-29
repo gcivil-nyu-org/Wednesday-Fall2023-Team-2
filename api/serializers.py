@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from users.models import Post, Comment
 from users.models import ParkingSpace, User
+from map.models import OccupancyHistory
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -10,8 +11,22 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["username"]
 
 
+class OccupancyHistorySerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = OccupancyHistory
+        fields = [
+            "user",
+            "parking_space",
+            "updated_at",
+            "occupancy_percent",
+        ]
+
+
 class ParkingSpaceSerializer(serializers.ModelSerializer):
     user = UserSerializer()
+    occupancy_history = OccupancyHistorySerializer(many=True, read_only=True)
 
     class Meta:
         model = ParkingSpace
@@ -25,6 +40,7 @@ class ParkingSpaceSerializer(serializers.ModelSerializer):
             "detail",
             "occupancy_percent",
             "user",
+            "occupancy_history",
         ]
 
 
