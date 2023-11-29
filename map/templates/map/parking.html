@@ -749,10 +749,29 @@
         '<label for="occupancy-status">Occupancy Percent:</label>' +
         '<input type="number" class="form-control" id="occupancy-status-input" name="occupancy-status" min="0" max="100" step="10">' +
         `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy('${spot.parking_spot_id}')">Submit</button>` +
+        '<br /><br /><b2>Last Changed By: ' + getLatestUpdatedBy(spot) + '</b2>' +
         "</div>"
       );
     }
     return "";
+  }
+
+  /**
+   * Helper function for getOccupancyPercentHTML()
+   * Queries the OccupancyHistory table for the most recent occupancy update
+   * Returns the username of the user who performed said update
+   * @param {Object} ParkingSpace - reference spot param in getOccupancyPercentHTML()
+   * @returns {string} String - username of user who updated the occupancy of the given spot most recently or "None"
+   */
+  function getLatestUpdatedBy(spot){
+    occupancy_history = spot.occupancy_history
+    if (occupancy_history.length > 0){
+      // Display the username of the final entry
+      return occupancy_history[occupancy_history.length - 1].user.username
+    }
+    else{
+      return "None"
+    }
   }
 
   /**

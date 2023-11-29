@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 # Create your models here.
@@ -19,3 +20,15 @@ class ParkingSpace(models.Model):
     # * can be written instead.  Here it is the custom user model
     # * from users
     user = models.ForeignKey("users.user", on_delete=models.CASCADE, null=True)
+
+
+class OccupancyHistory(models.Model):
+    user = models.ForeignKey("users.user", on_delete=models.CASCADE, null=True)
+    parking_space = models.ForeignKey(
+        "map.ParkingSpace",
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="occupancy_history",
+    )
+    updated_at = models.DateTimeField(null=True)
+    occupancy_percent = models.IntegerField(blank=True, null=True)
