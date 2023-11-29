@@ -1,6 +1,7 @@
 from rest_framework import status
 from django.utils import timezone
 from django.http import HttpRequest
+from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from haversine import haversine, Unit
 from rest_framework.views import APIView
@@ -8,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication
 
-from map.models import ParkingSpace
+from map.models import ParkingSpace, OccupancyHistory
 from users.models import Post, Comment
 from .serializers import ParkingSpaceSerializer, PostSerializer
 
@@ -54,6 +55,11 @@ class ParkingSpaceNearCenterAPIView(generics.ListAPIView):
                 center_point, (float(spot.latitude), float(spot.longitude))
             )
         ]
+
+        for spot in filtered_spots:
+            if spot.occupancy_percent:
+                spot.occupancy_percent = round(spot.occupancy_percent / 10) * 10
+
         serializer = self.serializer_class(filtered_spots, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -91,9 +97,20 @@ class ParkingSpaceChangeOccupancyAPIView(APIView):
         """
         occupancy_percent = request.data.get("percent")
         parking_spot_id = request.data.get("id")
-
-        if not (occupancy_percent and parking_spot_id):
+        if not ((occupancy_percent is not None) and parking_spot_id):
             response_data = {"message": "Bad Request: Missing percent or id parameters"}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+        if isinstance(occupancy_percent, str) and not occupancy_percent.isdigit():
+            response_data = {"message": "Bad Request: Percent can only have digits"}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+        occupancy_percent = int(occupancy_percent)
+        if occupancy_percent > 100:
+            response_data = {"message": "Bad Request: Percent is >100"}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+        if occupancy_percent % 10 != 0:
+            response_data = {"message": "Bad Request: Percent is not a multiple of 10"}
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -102,7 +119,18 @@ class ParkingSpaceChangeOccupancyAPIView(APIView):
 
             # Update the occupancy_percent field
             parking_space.occupancy_percent = occupancy_percent
+
+            # Create New Occupancy History
+            history = OccupancyHistory()
+            history.user = request.user
+            history.parking_space = get_object_or_404(
+                ParkingSpace, parking_spot_id=parking_spot_id
+            )
+            history.updated_at = timezone.now()
+            history.occupancy_percent = occupancy_percent
+
             parking_space.save()
+            history.save()
 
             return Response(
                 {"message": "Occupancy percent updated successfully."},

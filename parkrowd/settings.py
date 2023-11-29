@@ -81,6 +81,8 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ]
 }
+
+APPEND_SLASH = True
 # endregion: django default (likely remain unchanged)
 
 # region: production related (likely to be changed)
@@ -92,7 +94,7 @@ GOOGLE_MAP_ID = os.getenv("GOOGLE_MAP_ID")
 
 # * Allowed hosts settings
 ALLOWED_HOSTS = (
-    ["127.0.0.1"]
+    ["127.0.0.1", "localhost"]
     if os.getenv("PROD") == "false"
     else [
         "parkrowd-prod.us-west-2.elasticbeanstalk.com",

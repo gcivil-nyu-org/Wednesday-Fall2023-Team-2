@@ -44,6 +44,9 @@ db.sqlite3
 # * .env
 **/.env
 
+# * testing files
+media/verification_files/*
+
 # * .pylintrc
 **/.pylintrc
 

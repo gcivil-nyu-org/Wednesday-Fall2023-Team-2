@@ -38,8 +38,7 @@
     left: 0;
   }
 </style>
-{% endblock %} {% block navbarEnd %}
-{% if request.user.is_authenticated %}
+{% endblock %} {% block navbarEnd %} {% if request.user.is_authenticated %}
 <button id="add-spot-btn" class="btn btn-dark btn-sm" style="margin-right: 15px">Add Spot</button>
 {% endif %}
 <button id="filter-window-open-btn" class="btn btn-info btn-sm" style="margin-right: 15px">
@@ -65,18 +64,79 @@
         <h3>Filters</h3>
         <hr />
       </div>
-      <div class="container">
+      <div class="container py-2">
+        <!-- Occupancy Range Slider -->
         <div class="form-group">
+          <div class="text-center">
+            <label>Occupancy Percent Less Than or Equal to...</label>
+          </div>
+          <div class="slider-value text-center" id="occupancy-range-value">50</div>
+          <div class="slider-container">
+            <input
+              type="range"
+              class="form-range"
+              min="0"
+              max="100"
+              step="10"
+              value="50"
+              data-value="50"
+              id="occupancy-percent-slider"
+            />
+          </div>
+        </div>
+        <!-- END Occupancy Range Slider -->
+        <!-- Occupancy Filter : Yes / No for ones without percentage -->
+        <div class="form-group py-2">
+          <label>Show Spots without Occupancy Data:</label>
+          <div class="btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-secondary">
+              <input
+                type="radio"
+                name="no-number"
+                id="occupancy-data-yes"
+                autocomplete="off"
+                value="yes"
+              />
+              Yes
+            </label>
+            <label class="btn btn-secondary">
+              <input
+                type="radio"
+                name="no-number"
+                id="occupancy-data-no"
+                autocomplete="off"
+                value="no"
+                checked="checked"
+              />
+              No
+            </label>
+          </div>
+        </div>
+        <!-- END Occupancy Filter : Yes / No for ones without percentage -->
+        <hr />
+        <div class="form-group py-2">
           <label>Parking Types:</label>
           <div class="btn-group-toggle" data-toggle="buttons">
             <!--Each input should have a "filter-checkbox" class for JS to apply filtering-->
             <!--Values for each input checkbox should be specified (match DB type)-->
             <label class="btn btn-secondary">
-              <input class="filter-checkbox" type="checkbox" autocomplete="off" value="Business" />
+              <input
+                class="filter-checkbox"
+                type="checkbox"
+                autocomplete="off"
+                value="Business"
+                checked
+              />
               Business
             </label>
             <label class="btn btn-secondary">
-              <input class="filter-checkbox" type="checkbox" autocomplete="off" value="Street" />
+              <input
+                class="filter-checkbox"
+                type="checkbox"
+                autocomplete="off"
+                value="Street"
+                checked
+              />
               Street
             </label>
           </div>
@@ -89,9 +149,8 @@
         </div>
       </div>
     </div>
-     <!-- END Filter Sidebar -->
+    <!-- END Filter Sidebar -->
   </div>
- 
 
   <!-- Post & Comment Sidebar -->
   <div id="postSidebar" class="fixed-bottom close-window">
@@ -108,11 +167,10 @@
         <h3 id="postSidebarHeader">Posts & Comments</h3>
         <hr />
       </div>
-      <div class="container" id="postSidebarBody"></div>
+      <div class="container" id="postSidebarBody" style="max-height: 80vh; overflow-y: auto"></div>
     </div>
   </div>
   <!-- END Post & Comment Sidebar -->
-
 </div>
 <!-- Add Spot Modal Confirmation -->
 <div
@@ -131,8 +189,17 @@
       </div>
       <div class="modal-body">Are you sure you want to add a spot here?</div>
       <div class="modal-footer">
-        <button type="submit" id="confirm-add-spot-btn" name="add-spot" class="btn btn-primary">Yes</button>
-        <button type="button" id="cancel-add-spot-btn" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" id="confirm-add-spot-btn" name="add-spot" class="btn btn-primary">
+          Yes
+        </button>
+        <button
+          type="button"
+          id="cancel-add-spot-btn"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+        >
+          Cancel
+        </button>
       </div>
     </div>
   </div>
@@ -171,7 +238,7 @@
   let map;
   let infoWindow;
   let addSpotMarker;
-  
+
   const markers = [];
   const spotMap = {};
 
@@ -191,8 +258,11 @@
   const filterWindowOpenBtn = document.getElementById("filter-window-open-btn");
   const filterWindowCloseBtn = document.getElementById("filter-window-close-btn");
 
-  const isUserAuthenticated = "{{user.is_authenticated}}" === "True" ? true : false;
+  const occupancyRangeSlider = document.getElementById("occupancy-percent-slider");
+  const occupancyRangeValue = document.getElementById("occupancy-range-value");
+  const occupancyDataYes = document.getElementById("occupancy-data-yes");
 
+  const isUserAuthenticated = "{{user.is_authenticated}}" === "True" ? true : false;
 
   // #region Google Maps Callback
   /**
@@ -225,13 +295,15 @@
         infoWindow.marker.pin.glyph !== null ? parseInt(infoWindow.marker.pin.glyph) : 0;
 
       occupancyStatusInput.addEventListener("input", function (e) {
-        let enteredValue = parseInt(e.target.value);
+        let enteredValue = parseInt(occupancyStatusInput.value);
 
         if (enteredValue < 0 || isNaN(enteredValue)) {
           e.target.value = 0;
-        }
-        if (enteredValue > 100) {
-          e.target.value = 100;
+        } else {
+          e.target.value = __floorTo(10, enteredValue);
+          if (enteredValue > 100) {
+            e.target.value = 100;
+          }
         }
       });
     });
@@ -242,6 +314,14 @@
       closePostSidebar();
     });
   }
+
+  function __floorTo(multiple, value) {
+    if (value >= 0 && value <= 9) {
+      return value * 10;
+    }
+    return Math.floor(value / multiple) * multiple;
+  }
+
   // #endregion Google Maps Callback
 
   // #region Marker
@@ -281,6 +361,7 @@
         };
       })(marker, spot.parking_spot_id),
     );
+    return marker;
   }
 
   function addSpot() {
@@ -303,10 +384,10 @@
 
     const pinBackground = new PinElement({
       scale: 1.25,
-      background: 'red',
-      borderColor: 'red',
-      glyph: 'New',
-      glyphColor: 'white',
+      background: "red",
+      borderColor: "red",
+      glyph: "New",
+      glyphColor: "white",
     });
 
     addSpotMarker = new AdvancedMarkerElement({
@@ -321,7 +402,7 @@
     // Disable target cursor (i.e. spot adding mode)
     map.setOptions({ draggableCursor: null });
 
-    // Remove the click event listener 
+    // Remove the click event listener
     google.maps.event.clearListeners(map, "click");
 
     const openAddSpotModalBtn = document.getElementById("open-add-spot-modal-btn");
@@ -329,7 +410,6 @@
     addSpotModal.classList.add("show");
   }
 
-    
   /**
    * Helper function for addMarker()
    * Creates an AdvancedMarkerElement (custom color marker) based on type
@@ -373,6 +453,7 @@
     });
     //To identify a marker when filtering
     marker.type = spot.type;
+    marker.occupancy_percent = spot.occupancy_percent;
     //To retrieve the glyph (map marker center dot) info
     marker.pin = pinBackground;
     return marker;
@@ -397,7 +478,7 @@
    * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
    * @returns {string} HTML content - info on Business parking spot
    */
-   function getBusinessInfo(spot) {
+  function getBusinessInfo(spot) {
     const spotId = spot.parking_spot_id;
 
     return (
@@ -420,62 +501,18 @@
   function getClaimBusinessHTML(spot) {
     if (!spot.user?.username) {
       return `<div class="mb-3">
-        This business has not yet been claimed.  
+        This business has not yet been claimed.
       </div>
       <div class="mb-3">
         Reach out to an admin with this Parking Space's ID.
       </div>
       `;
     }
-    return "";
-  }
-
-  /**
-   * Helper function for addMarker()
-   * Creates an AdvancedMarkerElement (custom color marker) based on type
-   * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
-   * @returns {Object} AdvancedMarkerElement - see link below (Google Maps API)
-   * https://developers.google.com/maps/documentation/javascript/advanced-markers/basic-customization
-   */
-  async function getMarkerByType(spot) {
-    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
-
-    const typeToColor = {
-      Business: "black",
-      Street: "indigo",
-    };
-
-    const color = typeToColor[spot.type];
-
-    //Retrieve and process occupancy_percent from
-    //backend to display percent on Marker
-    const occupancy_percent =
-      spot.occupancy_percent !== null ? String(spot.occupancy_percent) + "%" : null;
-
-    const glyphColor = getGlyphColor(spot.occupancy_percent);
-
-    const pinBackground = new PinElement({
-      scale: 1.25,
-      background: color,
-      borderColor: color,
-      glyph: occupancy_percent,
-      glyphColor: glyphColor,
-    });
-
-    let marker = new AdvancedMarkerElement({
-      map,
-      position: {
-        lat: parseFloat(spot.latitude),
-        lng: parseFloat(spot.longitude),
-      },
-      content: pinBackground.element,
-      title: spot.parking_spot_name,
-    });
-    //To identify a marker when filtering
-    marker.type = spot.type;
-    //To retrieve the glyph (map marker center dot) info
-    marker.pin = pinBackground;
-    return marker;
+    return (
+      "<div class='w-75 mx-auto p-2'><button class='btn btn-outline-primary btn-sm' onClick=\"window.location.href='/users/profile/" +
+      spot.user.username +
+      "'\">View Business</button></div>"
+    );
   }
 
   /**
@@ -491,7 +528,6 @@
     return glyphColor;
   }
 
-
   function getParkingSpotNameHTML(spot) {
     let parking_spot_name;
 
@@ -500,49 +536,37 @@
     } else {
       parking_spot_name = spot.parking_spot_name;
     }
-    return '<div class="mb-3">' +
-      '<h1 class="h3 mb-1">' +
-      parking_spot_name +
-      "</h1>" +
-      "</div>";
+    return '<div class="mb-3">' + '<h1 class="h3 mb-1">' + parking_spot_name + "</h1>" + "</div>";
   }
-    
-   function getTypeHTML(spot) {
+
+  function getTypeHTML(spot) {
     if (spot.type) {
-      return '<div class="mb-3">Type: ' +
-      spot.type +
-      "</div>";
+      return '<div class="mb-3">Type: ' + spot.type + "</div>";
     }
     return "";
   }
 
   function getBoroughHTML(spot) {
     if (spot.borough) {
-      return '<div class="mb-3">Borough: ' +
-      spot.borough +
-      "</div>";
+      return '<div class="mb-3">Borough: ' + spot.borough + "</div>";
     }
     return "";
   }
 
   function getDetailsHTML(spot) {
     if (spot.detail) {
-      return '<div class="mb-3">Details: ' +
-      spot.detail +
-      "</div>";
+      return '<div class="mb-3">Details: ' + spot.detail + "</div>";
     }
     return "";
   }
 
   function getOperationalHoursHTML(spot) {
     if (spot.operation_hours) {
-      return '<div class="mb-3">Operational Hours: ' +
-      spot.operation_hours +
-      "</div>";
+      return '<div class="mb-3">Operational Hours: ' + spot.operation_hours + "</div>";
     }
     return "";
   }
-    
+
   /*
    * Sets up HTML info for street based markers (format different from other spots)
    * @param {Object} ParkingSpot - reference ParkingSpaceSerializer in api/serializers.py
@@ -581,7 +605,7 @@
    * @returns {string} HTML content - "Make Post" button OR nothing
    */
   function getMakePostHTML(spotId) {
-    const makePostURL = `/map/post/${spotId}/{{user.username}}`;
+    const makePostURL = `/map/post/${spotId}`;
 
     if (isUserAuthenticated) {
       return `<div class="w-75 mx-auto p-2">
@@ -608,9 +632,9 @@
           prev +
           `<li class="list-group-item">
             ${cur.content}
-            <div class="text-end">--by ${cur.author?.username || "unknown user"} at ${new Date(
-            cur.created_at,
-          ).toLocaleString()}</div>
+            <div class="text-end">--by <a href="/users/profile/${cur.author?.username}">${
+            cur.author?.username || "unknown user"
+          }</a> at ${new Date(cur.created_at).toLocaleString()}</div>
           </li>`,
         "",
       )}
@@ -634,9 +658,9 @@
           <div class="card-text">
             ${cur.post || "Empty post"}
             <div class="text-end">
-              -- by ${cur.author?.username || "unknown user"} at ${new Date(
-            cur.created_at,
-          ).toLocaleString()}
+              -- by <a href="/users/profile/${cur.author?.username}">${
+            cur.author?.username || "unknown user"
+          }</a> at ${new Date(cur.created_at).toLocaleString()}
             </div>
           </div>
         </div>
@@ -723,12 +747,31 @@
       return (
         '<div class="form-group mb-3">' +
         '<label for="occupancy-status">Occupancy Percent:</label>' +
-        '<input type="number" class="form-control" id="occupancy-status-input" name="occupancy-status" min="0" max="100">' +
+        '<input type="number" class="form-control" id="occupancy-status-input" name="occupancy-status" min="0" max="100" step="10">' +
         `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy('${spot.parking_spot_id}')">Submit</button>` +
+        '<br /><br /><b2>Last Changed By: ' + getLatestUpdatedBy(spot) + '</b2>' +
         "</div>"
       );
     }
     return "";
+  }
+
+  /**
+   * Helper function for getOccupancyPercentHTML()
+   * Queries the OccupancyHistory table for the most recent occupancy update
+   * Returns the username of the user who performed said update
+   * @param {Object} ParkingSpace - reference spot param in getOccupancyPercentHTML()
+   * @returns {string} String - username of user who updated the occupancy of the given spot most recently or "None"
+   */
+  function getLatestUpdatedBy(spot){
+    occupancy_history = spot.occupancy_history
+    if (occupancy_history.length > 0){
+      // Display the username of the final entry
+      return occupancy_history[occupancy_history.length - 1].user.username
+    }
+    else{
+      return "None"
+    }
   }
 
   /**
@@ -777,7 +820,7 @@
 
     return cookieValue;
   }
- 
+
   /*
    * Redirects to make post page, when user clicks on
    * button inside info window of parking spot on map
@@ -801,13 +844,18 @@
       .filter((checkbox) => checkbox.checked)
       .map((checkbox) => checkbox.value);
 
+    const maxOccupancyPercent = occupancyRangeSlider.value;
+    const isSpotsWithOccupancyYes = occupancyDataYes.checked;
     //Iterates through all markers and properly
     //sets the 'map' property accordingly
     markers.forEach((marker) => {
-      if (!selectedFilters.includes(marker.type)) {
-        marker.map = null;
-      } else {
+      const includesType = selectedFilters.includes(marker.type);
+      const isOccupancyNull = marker.occupancy_percent == null;
+      const belowMaxOccupancy = !isOccupancyNull && marker.occupancy_percent <= maxOccupancyPercent;
+      if (includesType && (belowMaxOccupancy || (isSpotsWithOccupancyYes && isOccupancyNull))) {
         marker.map = map;
+      } else {
+        marker.map = null;
       }
     });
   }
@@ -856,6 +904,32 @@
       });
   }
 
+
+  function updateRangeValue() {
+    let value = occupancyRangeSlider.value;
+    occupancyRangeValue.textContent = value;
+    occupancyRangeSlider.setAttribute("data-value", value);
+  }
+  
+  async function fetchParkingSpotAroundOneParkingSpot() {
+ 
+    axios
+      .get(`/api/spots/?lat={{spot.latitude}}&lon={{spot.longitude}}`)
+      .then(async function (response) {
+        const spotsData = response.data;
+        for (const spot of spotsData) {
+          let marker = await addMarker(spot);
+          if (spot.parking_spot_id === "{{spot.parking_spot_id}}") {
+            google.maps.event.trigger(marker, 'click' );
+            viewPost("{{spot.parking_spot_id}}");
+          }
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
+
   /**
    * Sets up the following on webpage, on load
    *      Add click event listener to "Load Parking Spots" button
@@ -887,7 +961,7 @@
       closePostSidebar();
     });
 
-    addSpotBtn.addEventListener("click", function (e) {
+    addSpotBtn?.addEventListener("click", function (e) {
       addSpot();
     });
 
@@ -903,17 +977,27 @@
       removeAddSpotMarker();
     });
 
-    confirmAddSpotBtn.addEventListener("click", function(e) {
+    confirmAddSpotBtn.addEventListener("click", function (e) {
       // Redirect to the "Add Spot" page
       const lat = addSpotMarker.position.lat;
       const lon = addSpotMarker.position.lng;
-      const username = "{{ request.user.username }}"
-      window.location.href = `/map/parking/add-spot/${username}/?lat=${lat}&lon=${lon}`;
-    })
+      window.location.href = `/map/parking/add-spot/?lat=${lat}&lon=${lon}`;
+    });
+
+    occupancyRangeSlider.addEventListener("input", function () {
+      updateRangeValue();
+    });
+
+    // Initial update
+    updateRangeValue();
   }
 
   // setup event listners
   setup();
+
+  if ("{{recenter_after_post}}" === "True" ? true : false) {
+    fetchParkingSpotAroundOneParkingSpot();
+  }
 
   // #endregion setup & evt listners
 </script>
@@ -923,4 +1007,3 @@
   src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap"
 ></script>
 {% endblock %}
-

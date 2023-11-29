@@ -77,7 +77,7 @@ class ParkingSpaceChangeOccupancyAPITest(APITestCase):
         # * test non-logged-in post
         response_not_authorized = self.client.post(
             reverse(PARKINGSPACE_CHANGE_OCCUPANCY_POST_PATH),
-            {"id": PARKING_SPOT_ID, "percent": 11},
+            {"id": PARKING_SPOT_ID, "percent": 10},
         )
         self.assertEqual(response_not_authorized.status_code, 403)
 
@@ -95,7 +95,7 @@ class ParkingSpaceChangeOccupancyAPITest(APITestCase):
 
         response_authorized_with_wrong_data = self.client.post(
             reverse(PARKINGSPACE_CHANGE_OCCUPANCY_POST_PATH),
-            {"id": FAKE_PARKING_SPOT_ID, "percent": 11},
+            {"id": FAKE_PARKING_SPOT_ID, "percent": 10},
         )
         self.assertEqual(response_authorized_with_wrong_data.status_code, 400)
         self.assertEqual(
@@ -103,9 +103,44 @@ class ParkingSpaceChangeOccupancyAPITest(APITestCase):
             "ParkingSpace with the specified id does not exist.",
         )
 
+        # * Entering occupancy_percent as string based decimal
+        response_authorized_with_string_based_decimal = self.client.post(
+            reverse(PARKINGSPACE_CHANGE_OCCUPANCY_POST_PATH),
+            {"id": PARKING_SPOT_ID, "percent": "0.5"},
+        )
+        self.assertEqual(response_authorized_with_string_based_decimal.status_code, 400)
+        self.assertEqual(
+            response_authorized_with_string_based_decimal.data["message"],
+            "Bad Request: Percent can only have digits",
+        )
+
+        # * Entering occupancy_percent with >100
+        response_authorized_with_greater_than_100_occupancy = self.client.post(
+            reverse(PARKINGSPACE_CHANGE_OCCUPANCY_POST_PATH),
+            {"id": PARKING_SPOT_ID, "percent": 1234},
+        )
+        self.assertEqual(
+            response_authorized_with_greater_than_100_occupancy.status_code, 400
+        )
+        self.assertEqual(
+            response_authorized_with_greater_than_100_occupancy.data["message"],
+            "Bad Request: Percent is >100",
+        )
+
+        # * Entering occupancy_percent as non-multiple of 10
+        response_authorized_with_non_multiple_of_10 = self.client.post(
+            reverse(PARKINGSPACE_CHANGE_OCCUPANCY_POST_PATH),
+            {"id": PARKING_SPOT_ID, "percent": 5},
+        )
+        self.assertEqual(response_authorized_with_non_multiple_of_10.status_code, 400)
+        self.assertEqual(
+            response_authorized_with_non_multiple_of_10.data["message"],
+            "Bad Request: Percent is not a multiple of 10",
+        )
+
         response_authorized_with_correct_data = self.client.post(
             reverse(PARKINGSPACE_CHANGE_OCCUPANCY_POST_PATH),
-            {"id": PARKING_SPOT_ID, "percent": 11},
+            {"id": PARKING_SPOT_ID, "percent": 10},
         )
         self.assertEqual(response_authorized_with_correct_data.status_code, 200)
         self.assertEqual(
@@ -113,7 +148,7 @@ class ParkingSpaceChangeOccupancyAPITest(APITestCase):
             "Occupancy percent updated successfully.",
         )
         updatedParkingSpot = ParkingSpace.objects.get(parking_spot_id=PARKING_SPOT_ID)
-        self.assertEqual(updatedParkingSpot.occupancy_percent, 11)
+        self.assertEqual(updatedParkingSpot.occupancy_percent, 10)
 
 
 class ParkingSpacePostsAndCommentsAPITest(APITestCase):

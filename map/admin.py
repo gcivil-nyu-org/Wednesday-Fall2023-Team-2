@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ParkingSpace
+from .models import ParkingSpace, OccupancyHistory
 
 
 # Register your models here.
@@ -15,3 +15,4 @@ class ParkingSpaceAdmin(admin.ModelAdmin):
 
 
 admin.site.register(ParkingSpace, ParkingSpaceAdmin)
+admin.site.register(OccupancyHistory)

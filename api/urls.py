@@ -22,7 +22,7 @@ urlpatterns = [
         name="get-spot-posts",
     ),
     path(
-        "spot/posts/add-comment/<int:postId>",
+        "spot/posts/add-comment/<int:postId>/",
         views.ParkingSpaceAddCommentAPIView.as_view(),
         name="add-comment",
     ),
