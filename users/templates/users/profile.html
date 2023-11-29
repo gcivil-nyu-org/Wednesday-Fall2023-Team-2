@@ -74,15 +74,9 @@
       {% if request.user.is_authenticated and is_user_owner_of_profile %}
       <div class="button mt-2 d-flex flex-row align-items-center justify-content-end">
         <!--Edit Profile-->
-        <a href="{% url 'users:profile-edit' request.user.username %}" class="btn btn-primary mx-1"
-          >Edit</a
-        >
+        <a href="{% url 'users:profile-edit' %}" class="btn btn-primary mx-1">Edit</a>
         <!--END Edit Profile-->
-        <a
-          href="{% url 'users:verification' request.user.username %}"
-          class="btn btn-outline-primary mx-2"
-          >Verify</a
-        >
+        <a href="{% url 'users:verification' %}" class="btn btn-outline-primary mx-2">Verify</a>
         <button
           type="button"
           class="btn btn-danger mx-2"
@@ -114,7 +108,7 @@
             </div>
             <div class="modal-body">Are you sure you want to delete your account?</div>
             <div class="modal-footer">
-              <form action="{% url 'users:profile-delete' request.user.username %}" method="POST">
+              <form action="{% url 'users:profile-delete' %}" method="POST">
                 {% csrf_token %}
                 <button type="submit" name="delete_profile" class="btn btn-danger">Yes</button>
               </form>
@@ -150,11 +144,7 @@
         <p>{{ post.post }}</p>
         <p>Posted on {{ post.created_at }}</p>
         {% if request.user == post.author %}
-        <a
-          href="{% url 'users:edit_post' username=user.username post_id=post.id %}"
-          class="btn btn-primary mx-1"
-          >Edit</a
-        >
+        <a href="{% url 'users:edit-post' post_id=post.id %}" class="btn btn-primary mx-1">Edit</a>
         {% endif %}
       </div>
       {% empty %}

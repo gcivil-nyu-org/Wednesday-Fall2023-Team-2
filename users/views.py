@@ -378,7 +378,7 @@ class UserProfileEditView(
     model = User
     template_name = "users/profile_edit.html"
 
-    def get(self, request: HttpRequest, username: str) -> HttpResponse:
+    def get(self, request: HttpRequest) -> HttpResponse:
         """return user profile edit page
 
         Args:
@@ -388,10 +388,10 @@ class UserProfileEditView(
         Returns:
             HttpResponse: rendered user profile edit page
         """
-        context = {"user": get_object_or_404(User, username=username)}
+        context = {"user": get_object_or_404(User, username=request.user.username)}
         return render(request, self.template_name, context)
 
-    def post(self, request: HttpRequest, username: str) -> HttpResponse:
+    def post(self, request: HttpRequest) -> HttpResponse:
         """handle user profile edit post req
 
         Args:
@@ -406,7 +406,7 @@ class UserProfileEditView(
         new_email = request.POST.get("input-email")
         new_avatar = request.FILES.get("input-avatar", request.user.avatar)
         new_description = profanity.censor(request.POST.get("input-description"))
-        user = get_object_or_404(User, username=username)
+        user = get_object_or_404(User, username=request.user.username)
         # * if username is already taken
         if (
             User.objects.filter(username=new_username).exists()
@@ -433,13 +433,7 @@ class UserProfileDeleteView(LoginRequiredMixin, View):
     using the "Delete Account" button
     """
 
-    # TODO: get method and tempalte is no longer in use
-    template_name = "users/profile_delete.html"
-
-    def get(self, request: HttpRequest, username: str) -> HttpResponse:
-        return render(request, self.template_name)
-
-    def post(self, request: HttpRequest, username: str) -> HttpResponse:
+    def post(self, request: HttpRequest) -> HttpResponse:
         """handle user profile delete post req
 
         Args:
@@ -469,13 +463,13 @@ class UserProfileDeleteView(LoginRequiredMixin, View):
         return render(request, self.template_name)
 
 
-class UserVerificationView(View):
+class UserVerificationView(View, LoginRequiredMixin):
     """user verification request view"""
 
     form_class = UserVerificationForm
     template_name = "users/verification.html"
 
-    def get(self, request: HttpRequest, username: str) -> HttpResponse:
+    def get(self, request: HttpRequest) -> HttpResponse:
         """return user profile edit page
 
         Args:
@@ -485,7 +479,7 @@ class UserVerificationView(View):
         Returns:
             HttpResponse: rendered user profile edit page
         """
-        user = get_object_or_404(User, username=username)
+        user = get_object_or_404(User, username=request.user.username)
         user_verification = UserVerification.objects.filter(username=user)
         non_active_status = ["verified", "cancelled"]
         active_verification = UserVerification.objects.filter(username=user).exclude(
@@ -499,7 +493,7 @@ class UserVerificationView(View):
         }
         return render(request, self.template_name, context)
 
-    def post(self, request: HttpRequest, username: str) -> HttpResponse:
+    def post(self, request: HttpRequest) -> HttpResponse:
         """handle user verification post request
         Args:
             request (HttpRequest): http request object
@@ -512,28 +506,30 @@ class UserVerificationView(View):
         form = self.form_class(request.POST, request.FILES)
         if form.is_valid():
             verification = form.save(commit=False)
-            verification.username = get_object_or_404(User, username=username)
+            verification.username = get_object_or_404(
+                User, username=request.user.username
+            )
             verification.business_name = request.POST.get("business_name")
             verification.business_type = form.cleaned_data["business_type"]
             verification.business_address = request.POST.get("business_address")
             verification.uploaded_file = form.cleaned_data.get("uploaded_file")
             verification.save()
-            return redirect("users:profile", username=username)
+            return redirect("users:profile", username=request.user.username)
         else:
             messages.error(
                 request, "Please resubmit the application with all necessary fields."
             )
-            return redirect("users:profile", username=username)
+            return redirect("users:profile", username=request.user.username)
 
 
-class EditPost(View):
+class EditPost(View, LoginRequiredMixin):
     """edit post view"""
 
     model = Post
     form_class = EditPostForm
     template_name = "users/edit_post.html"
 
-    def get(self, request: HttpRequest, username: str, post_id: int) -> HttpResponse:
+    def get(self, request: HttpRequest, post_id: int) -> HttpResponse:
         """return edit post page
 
         Args:
@@ -552,7 +548,7 @@ class EditPost(View):
         else:
             return HttpResponse(status=403)
 
-    def post(self, request: HttpRequest, username: str, post_id: str) -> HttpResponse:
+    def post(self, request: HttpRequest, post_id: str) -> HttpResponse:
         """handle edit post
 
         Args:
@@ -569,7 +565,7 @@ class EditPost(View):
         post = get_object_or_404(Post, id=post_id)
 
         if not new_post.strip():
-            return redirect("users:edit_post", username=username, post_id=post_id)
+            return redirect("users:edit-post", post_id=post_id)
 
         post.title = new_title
         post.post = new_post
@@ -580,7 +576,7 @@ class EditPost(View):
         #   return redirect("users:profile", username=username)
         # else:
         #   return redirect("map:parking")
-        return redirect("users:profile", username=username)
+        return redirect("users:profile", username=request.user.username)
 
 
 class VerificationCancelView(View):
@@ -596,7 +592,6 @@ class VerificationCancelView(View):
             HttpResponse: redirect user to verification page
         """
         verification = get_object_or_404(UserVerification, id=id)
-        username = verification.username.username
         verification.status = "cancelled"
         verification.save()
-        return redirect("users:verification", username=username)
+        return redirect("users:verification")

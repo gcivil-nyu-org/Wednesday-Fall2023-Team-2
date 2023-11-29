@@ -41,7 +41,7 @@ PASSWORD_RESET_PATH_NAME = "users:password-reset"
 PASSWORD_RESET_CONFIRM_PATH_NAME = "users:password-reset-confirm"
 PASSWORD_RESET_SUCCESS_PATH_NAME = "users:password-reset-success"
 PASSWORD_RESET_EMAIL_SENT_PATH_NAME = "users:password-reset-email-sent"
-EDIT_POST_PATH_NAME = "users:edit_post"
+EDIT_POST_PATH_NAME = "users:edit-post"
 
 LOGIN_TEMPLATE = "users/login.html"
 WELCOME_TEMPLATE = "users/welcome.html"
@@ -73,7 +73,8 @@ class UserVerificationViewTest(TestCase):
 
     def test_get_request(self):
         # Test GET request to the view
-        response = self.client.get(reverse(VERIFICATION_PATH_NAME, args=[USERNAME]))
+        self.client.login(username=USERNAME, password=PASSWORD)
+        response = self.client.get(reverse(VERIFICATION_PATH_NAME))
         self.assertEqual(response.status_code, 200)  # Ensure the response is OK
         self.assertTemplateUsed(
             response, VERIFICATION_TEMPLATE
@@ -84,15 +85,14 @@ class UserVerificationViewTest(TestCase):
 
     def test_post_valid_request(self):
         # Test POST request with valid data
+        self.client.login(username=USERNAME, password=PASSWORD)
         data = {
             "business_name": "Test Business",
             "business_type": "Public Parking Lot Owner",
             "business_address": "123 Test St",
             "uploaded_file": SimpleUploadedFile("testfile.pdf", b"Test file content"),
         }
-        response = self.client.post(
-            reverse(VERIFICATION_PATH_NAME, args=[USERNAME]), data, follow=True
-        )
+        response = self.client.post(reverse(VERIFICATION_PATH_NAME), data, follow=True)
         self.assertEqual(response.status_code, 200)  # Ensure the response is OK
         self.assertRedirects(
             response, reverse(PROFILE_PATH_NAME, args=[USERNAME])
@@ -105,14 +105,13 @@ class UserVerificationViewTest(TestCase):
 
     def test_post_invalid_request(self):
         # Test POST request with invalid data
+        self.client.login(username=USERNAME, password=PASSWORD)
         data = {
             "business_name": "Test Business",
             "business_type": "Public Parking Lot Owner",
             # Missing 'business_address' and 'uploaded_file'
         }
-        response = self.client.post(
-            reverse(VERIFICATION_PATH_NAME, args=[USERNAME]), data, follow=True
-        )
+        response = self.client.post(reverse(VERIFICATION_PATH_NAME), data, follow=True)
         self.assertEqual(response.status_code, 200)  # Ensure the response is OK
         self.assertRedirects(
             response, reverse(PROFILE_PATH_NAME, args=[USERNAME])
@@ -126,6 +125,7 @@ class UserVerificationViewTest(TestCase):
 
     def test_model_creation(self):
         # Test model creation based on valid form data
+        self.client.login(username=USERNAME, password=PASSWORD)
         data = {
             "business_name": "Test Business",
             "business_type": "Public Parking Lot Owner",
@@ -265,7 +265,7 @@ class ProfileTests(TestCase):
         self.client.login(username=USERNAME, password=PASSWORD)
 
         response = self.client.post(
-            reverse(PROFILE_DELETE_PATH_NAME, args=[USERNAME]), {"delete_profile": True}
+            reverse(PROFILE_DELETE_PATH_NAME), {"delete_profile": True}
         )
         self.assertFalse(User.objects.filter(username=USERNAME).exists())
 
@@ -552,19 +552,20 @@ class EditPostTest(TestCase):
         """
         self.client.login(username=USERNAME, password=PASSWORD)
         response = self.client.get(
-            reverse(EDIT_POST_PATH_NAME, args=[USERNAME, self.test_post.pk])
+            reverse(EDIT_POST_PATH_NAME, args=[self.test_post.pk])
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, EDIT_POST_TEMPLATE)
 
     def test_post_valid_request(self):
-        # Test POST request with valid data
+        # Test POST request with valid dat
+        self.client.login(username=USERNAME, password=PASSWORD)
         data = {
             "title": "test title",
             "post": "test post",
         }
         response = self.client.post(
-            reverse(EDIT_POST_PATH_NAME, args=[USERNAME, self.test_post.pk]),
+            reverse(EDIT_POST_PATH_NAME, args=[self.test_post.pk]),
             data,
             follow=True,
         )
@@ -589,13 +590,13 @@ class EditPostTest(TestCase):
             "post": "",
         }
         response = self.client.post(
-            reverse(EDIT_POST_PATH_NAME, args=[USERNAME, self.test_post.pk]),
+            reverse(EDIT_POST_PATH_NAME, args=[self.test_post.pk]),
             data,
             follow=True,
         )
         self.assertEqual(response.status_code, 200)  # Ensure the response is OK
         self.assertRedirects(
-            response, reverse(EDIT_POST_PATH_NAME, args=[USERNAME, self.test_post.pk])
+            response, reverse(EDIT_POST_PATH_NAME, args=[self.test_post.pk])
         )  # Ensure redirection
 
         # Ensure that the post has not changed
