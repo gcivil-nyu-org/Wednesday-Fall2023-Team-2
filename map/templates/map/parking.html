@@ -150,6 +150,15 @@
             id="search-by-user-input"
             name="search-by-user-input"
           />
+          <div class="form-check">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="exact-search-checkbox"
+              name="exact-search-checkbox"
+            />
+            <label class="form-check-label" for="exact-search-checkbox">Exact Search</label>
+          </div>
         </div>
       </div>
       <div class="container">
@@ -273,6 +282,7 @@
   const occupancyDataYes = document.getElementById("occupancy-data-yes");
 
   const searchByUserInput = document.getElementById("search-by-user-input");
+  const exactSearchCheckbox = document.getElementById("exact-search-checkbox");
 
   const isUserAuthenticated = "{{user.is_authenticated}}" === "True" ? true : false;
 
@@ -860,14 +870,20 @@
 
     const maxOccupancyPercent = occupancyRangeSlider.value;
     const isSpotsWithoutOccupancyYes = occupancyDataYes.checked;
-    const userToSearch = searchByUserInput.value.toLowerCase();
+    const exactSearchChecked = exactSearchCheckbox.checked;
+    const userToSearch = searchByUserInput.value.trim().toLowerCase();
     //Iterates through all markers and properly
     //sets the 'map' property accordingly
     markers.forEach((marker) => {
       const includesType = selectedFilters.includes(marker.type);
       const isOccupancyNull = marker.occupancy_percent == null;
       const belowMaxOccupancy = !isOccupancyNull && marker.occupancy_percent <= maxOccupancyPercent;
-      const createdByUser = userToSearch === "" ? true : marker.username === userToSearch;
+      const createdByUser =
+        userToSearch === ""
+          ? true
+          : exactSearchChecked
+          ? marker.username === userToSearch
+          : marker.username?.includes(userToSearch);
       if (
         includesType &&
         (belowMaxOccupancy || (isSpotsWithoutOccupancyYes && isOccupancyNull)) &&
