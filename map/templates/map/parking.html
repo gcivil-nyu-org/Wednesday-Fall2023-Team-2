@@ -96,6 +96,7 @@
                 id="occupancy-data-yes"
                 autocomplete="off"
                 value="yes"
+                checked="checked"
               />
               Yes
             </label>
@@ -106,7 +107,6 @@
                 id="occupancy-data-no"
                 autocomplete="off"
                 value="no"
-                checked="checked"
               />
               No
             </label>
@@ -140,6 +140,16 @@
               Street
             </label>
           </div>
+        </div>
+        <hr />
+        <div class="form-group py-2">
+          <label>Search by username: </label>
+          <input
+            type="text"
+            class="form-control"
+            id="search-by-user-input"
+            name="search-by-user-input"
+          />
         </div>
       </div>
       <div class="container">
@@ -261,6 +271,8 @@
   const occupancyRangeSlider = document.getElementById("occupancy-percent-slider");
   const occupancyRangeValue = document.getElementById("occupancy-range-value");
   const occupancyDataYes = document.getElementById("occupancy-data-yes");
+
+  const searchByUserInput = document.getElementById("search-by-user-input");
 
   const isUserAuthenticated = "{{user.is_authenticated}}" === "True" ? true : false;
 
@@ -454,6 +466,7 @@
     //To identify a marker when filtering
     marker.type = spot.type;
     marker.occupancy_percent = spot.occupancy_percent;
+    marker.username = spot.user?.username;
     //To retrieve the glyph (map marker center dot) info
     marker.pin = pinBackground;
     return marker;
@@ -749,7 +762,9 @@
         '<label for="occupancy-status">Occupancy Percent:</label>' +
         '<input type="number" class="form-control" id="occupancy-status-input" name="occupancy-status" min="0" max="100" step="10">' +
         `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy('${spot.parking_spot_id}')">Submit</button>` +
-        '<br /><br /><b2>Last Changed By: ' + getLatestUpdatedBy(spot) + '</b2>' +
+        "<br /><br /><b2>Last Changed By: " +
+        getLatestUpdatedBy(spot) +
+        "</b2>" +
         "</div>"
       );
     }
@@ -763,14 +778,13 @@
    * @param {Object} ParkingSpace - reference spot param in getOccupancyPercentHTML()
    * @returns {string} String - username of user who updated the occupancy of the given spot most recently or "None"
    */
-  function getLatestUpdatedBy(spot){
-    occupancy_history = spot.occupancy_history
-    if (occupancy_history.length > 0){
+  function getLatestUpdatedBy(spot) {
+    occupancy_history = spot.occupancy_history;
+    if (occupancy_history.length > 0) {
       // Display the username of the final entry
-      return occupancy_history[occupancy_history.length - 1].user.username
-    }
-    else{
-      return "None"
+      return occupancy_history[occupancy_history.length - 1].user.username;
+    } else {
+      return "None";
     }
   }
 
@@ -845,14 +859,20 @@
       .map((checkbox) => checkbox.value);
 
     const maxOccupancyPercent = occupancyRangeSlider.value;
-    const isSpotsWithOccupancyYes = occupancyDataYes.checked;
+    const isSpotsWithoutOccupancyYes = occupancyDataYes.checked;
+    const userToSearch = searchByUserInput.value.toLowerCase();
     //Iterates through all markers and properly
     //sets the 'map' property accordingly
     markers.forEach((marker) => {
       const includesType = selectedFilters.includes(marker.type);
       const isOccupancyNull = marker.occupancy_percent == null;
       const belowMaxOccupancy = !isOccupancyNull && marker.occupancy_percent <= maxOccupancyPercent;
-      if (includesType && (belowMaxOccupancy || (isSpotsWithOccupancyYes && isOccupancyNull))) {
+      const createdByUser = userToSearch === "" ? true : marker.username === userToSearch;
+      if (
+        includesType &&
+        (belowMaxOccupancy || (isSpotsWithoutOccupancyYes && isOccupancyNull)) &&
+        createdByUser
+      ) {
         marker.map = map;
       } else {
         marker.map = null;
@@ -904,15 +924,13 @@
       });
   }
 
-
   function updateRangeValue() {
     let value = occupancyRangeSlider.value;
     occupancyRangeValue.textContent = value;
     occupancyRangeSlider.setAttribute("data-value", value);
   }
-  
+
   async function fetchParkingSpotAroundOneParkingSpot() {
- 
     axios
       .get(`/api/spots/?lat={{spot.latitude}}&lon={{spot.longitude}}`)
       .then(async function (response) {
@@ -920,7 +938,7 @@
         for (const spot of spotsData) {
           let marker = await addMarker(spot);
           if (spot.parking_spot_id === "{{spot.parking_spot_id}}") {
-            google.maps.event.trigger(marker, 'click' );
+            google.maps.event.trigger(marker, "click");
             viewPost("{{spot.parking_spot_id}}");
           }
         }
