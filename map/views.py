@@ -170,6 +170,7 @@ class ParkingSpaceView(View, LoginRequiredMixin):
             )
 
         form = self.form_class(request.POST)
+        map_template_name = "map/parking.html"
         if form.is_valid():
             new_spot = form.save(commit=False)
             new_spot.parking_spot_id = self.__get_next_parkingspace_id()
@@ -177,5 +178,12 @@ class ParkingSpaceView(View, LoginRequiredMixin):
             new_spot.latitude = lat
             new_spot.user = user
             new_spot.save()
-            return redirect("map:parking")
+            map_context = {
+                "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+                "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
+                "spot": new_spot,
+                "recenter_after_post": True,
+            }
+
+            return render(request, map_template_name, map_context)
         return render(request, self.template_name, {"form": form})
