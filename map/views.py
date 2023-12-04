@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render, redirect
 
 
-from users.models import User
+from users.models import User, UserVerification
 from .models import ParkingSpace
 from .forms import CreatePostForm, CreateParkingSpaceForm
 
@@ -124,10 +124,12 @@ class ParkingSpaceView(View, LoginRequiredMixin):
     def __render_page_with_optional_error(
         self, request: HttpRequest, error: Optional[str] = None
     ) -> HttpResponse:
+        user_verification = UserVerification.objects.filter(username=request.user).first()
         context = {
             "error": error,
             "form": self.form_class(None),
             "username": request.user.username,
+            "user_verification": user_verification,
         }
         return render(request, self.template_name, context)
 

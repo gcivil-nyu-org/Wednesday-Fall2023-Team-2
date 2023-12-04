@@ -347,7 +347,7 @@ class UserProfileView(View):
         """
         user = get_object_or_404(User, username=username)
         user_posts = Post.objects.filter(author=user)
-        user_verification = UserVerification.objects.filter(username=user).last()
+        user_verification = UserVerification.objects.filter(username=user).first()
 
         # * conditionally render the delete button
         # * only if the user is logged-in and viewing his/her own profile

@@ -139,6 +139,16 @@
               />
               Street
             </label>
+            <label class="btn btn-secondary">
+              <input
+                class="filter-checkbox"
+                type="checkbox"
+                autocomplete="off"
+                value="Private"
+                checked
+              />
+              Private
+            </label>
           </div>
         </div>
         <hr />
@@ -583,6 +593,13 @@
     return "";
   }
 
+  function getVehicleSpacesCapacityHTML(spot) {
+    if (spot.vehicle_spaces_capacity) {
+      return '<div class="mb-3">Vehicle spaces capacity: ' + spot.vehicle_spaces_capacity + "</div>";
+    }
+    return "";
+  }
+
   function getOperationalHoursHTML(spot) {
     if (spot.operation_hours) {
       return '<div class="mb-3">Operational Hours: ' + spot.operation_hours + "</div>";
@@ -600,6 +617,21 @@
     const spotId = spot.parking_spot_id;
     const hours = spot.operation_hours !== null ? spot.operation_hours : "N/A";
 
+    if (spot.type === 'Private') {
+      return `<div class="d-flex flex-column text-center p-2">
+      ${getParkingSpotNameHTML(spot)}
+      <div class="mb-3">ID: ${spotId}</div>
+      ${getOccupancyPercentHTML(spot)}
+      ${getOwner(spot)}
+      ${getTypeHTML(spot)}
+      ${getVehicleSpacesCapacityHTML(spot)}
+      ${getDetailsHTML(spot)}
+      ${getBoroughHTML(spot)}
+      ${getOperationalHoursHTML(spot)}
+      ${getMakePostHTML(spotId)}
+      ${getViewPostHTML(spotId)}
+    </div>`;
+    }
     return `<div class="d-flex flex-column text-center p-2">
       ${getParkingSpotNameHTML(spot)}
       <div class="mb-3">ID: ${spotId}</div>
@@ -764,14 +796,27 @@
     const userIsOwnerOfBusiness = spot.user?.username === loggedInUser;
 
     if (
-      (spot.type === "Street" || (spot.type === "Business" && userIsOwnerOfBusiness)) &&
+      (spot.type === "Street" || ((spot.type === "Business" || spot.type === "Private") && userIsOwnerOfBusiness)) &&
       isUserAuthenticated
     ) {
+      
+      if (spot.type === "Private") {
+        return (
+        '<div class="form-group mb-3">' +
+        '<label for="occupancy-status">Available Vehicle Spaces:</label>' +
+        `<input type="number" class="form-control" id="available-vehicle-spaces-input" name="available-vehicle-spaces" min="0" max="${spot.vehicle_spaces_capacity}" step="1">` +
+        `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy('${spot.parking_spot_id}', '${spot.type}', '${spot.vehicle_spaces_capacity}')">Submit</button>` +
+        "<br /><br /><b2>Last Changed By: " +
+        getLatestUpdatedBy(spot) +
+        "</b2>" +
+        "</div>"
+      );
+      }
       return (
         '<div class="form-group mb-3">' +
         '<label for="occupancy-status">Occupancy Percent:</label>' +
         '<input type="number" class="form-control" id="occupancy-status-input" name="occupancy-status" min="0" max="100" step="10">' +
-        `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy('${spot.parking_spot_id}')">Submit</button>` +
+        `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy('${spot.parking_spot_id}', '${spot.type}', '${spot.vehicle_spaces_capacity}')">Submit</button>` +
         "<br /><br /><b2>Last Changed By: " +
         getLatestUpdatedBy(spot) +
         "</b2>" +
@@ -804,9 +849,17 @@
    * on backend.
    * @param {string} spotId - ParkingSpace PK : parking_spot_id field
    */
-  function submitOccupancy(spotId) {
-    const occupancyStatusInput = document.getElementById("occupancy-status-input");
-    const occupancy_percent = parseInt(occupancyStatusInput.value);
+  function submitOccupancy(spotId, type, vehicle_spaces_capacity) {
+    
+    if (type === "Private") {
+      const availableSpacesInput = document.getElementById("available-vehicle-spaces-input");
+      var occupancy_percent = Math.round(
+        10*(1-parseInt(availableSpacesInput.value)/parseInt(vehicle_spaces_capacity))
+        )*10;
+    } else {
+      const occupancyStatusInput = document.getElementById("occupancy-status-input");
+      var occupancy_percent = parseInt(occupancyStatusInput.value);
+    }
 
     //See ParkingSpaceChangeOccupancyAPIView in api/views.py
     //for API endpoint

@@ -36,6 +36,11 @@
             <option value="Street">
               Street
             </option>
+            {% if user_verification.status == 'verified' and user_verification.business_type == 'Private Parking Lot Owner'%}
+            <option value="Private">
+              Private
+            </option>
+            {% endif %}
           </select>
         </div>
         <div class="form-group py-1">
@@ -61,6 +66,10 @@
             </option>
           </select>
         </div>
+        <div class="form-group py-1">
+          <label for="vehicle_spaces_capacity">Vehicle Spaces Capacity</label>
+          {{ form.vehicle_spaces_capacity }}
+      </div>
         <div class="form-group py-1">
             <label for="detail">Details</label>
             {{ form.detail }}
