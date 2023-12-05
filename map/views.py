@@ -93,11 +93,18 @@ class PostView(View, LoginRequiredMixin):
             new_post.post = profanity.censor(form.cleaned_data["post"])
             new_post.save()
 
+            user_verification = None
+            if request.user.is_authenticated:
+                user_verification = UserVerification.objects.filter(
+                    username=request.user
+                ).first()
+
             map_context = {
                 "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
                 "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
                 "spot": spot,
                 "recenter_after_post": True,
+                "user_verification": user_verification,
             }
 
             return render(request, map_template_name, map_context)
