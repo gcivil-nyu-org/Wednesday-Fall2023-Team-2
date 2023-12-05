@@ -26,7 +26,7 @@
         </div>
         <div class="form-group py-1">
           <label for="type">Type</label>
-          <select name="type" id="type" class="form-control">
+          <select name="type" id="type" class="form-control" onchange="updateAddSpotForm()">
             <option value="" selected disabled>
               Select a Parking Space type...
             </option>
@@ -66,10 +66,14 @@
             </option>
           </select>
         </div>
-        <div class="form-group py-1">
+        <div class="form-group py-1" id="id_vehicle_spaces_capacity_block" style="display:none">
           <label for="vehicle_spaces_capacity">Vehicle Spaces Capacity</label>
           {{ form.vehicle_spaces_capacity }}
       </div>
+      <div class="form-group py-1" id="id_available_vehicle_spaces_block" style="display:none">
+        <label for="available_vehicle_spaces">Available Vehicle Spaces</label>
+        {{ form.available_vehicle_spaces }}
+    </div>
         <div class="form-group py-1">
             <label for="detail">Details</label>
             {{ form.detail }}
@@ -78,7 +82,7 @@
             <label for="operation_hours">Operational Hours</label>
             {{ form.operation_hours }}
         </div>
-        <div class="form-group py-1">
+        <div class="form-group py-1" id="id_occupancy_percent_block">
             <label for="occupancy_percent">Percent Occupancy (Nearby spots for Street Parking)</label>
             {{ form.occupancy_percent }}
         </div>
@@ -94,6 +98,22 @@
 </div>
 </div>
 <script>
+  function updateAddSpotForm() {
+      var selectedType = document.getElementById("type").value;
+      if(selectedType === "Private") {
+        document.getElementById("id_vehicle_spaces_capacity_block").style.display = "block";
+
+        // hide the occupancy percent block and set default Private parking occupancy percent to 0
+        document.getElementById("id_occupancy_percent_block").style.display = "none";
+        document.getElementById("id_occupancy_percent").value = 0;
+      } 
+  }
+
+  // set the available_vehicle_spaces to the vehicle_spaces_capacity
+  document.getElementById("id_vehicle_spaces_capacity").addEventListener("input", function(e) {
+    document.getElementById("id_available_vehicle_spaces").value = this.value;
+  });
+
   document.getElementById("id_occupancy_percent").addEventListener("input", function () {
       if (!isNaN(this.value)) {
           const roundedValue = Math.round(this.value / 10) * 10;

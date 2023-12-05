@@ -21,6 +21,7 @@ class ParkingSpace(models.Model):
     # * from users
     user = models.ForeignKey("users.user", on_delete=models.CASCADE, null=True)
     vehicle_spaces_capacity = models.IntegerField(blank=True, null=True)
+    available_vehicle_spaces = models.IntegerField(blank=True, null=True)
 
 
 class OccupancyHistory(models.Model):

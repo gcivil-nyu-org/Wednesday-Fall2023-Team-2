@@ -42,6 +42,7 @@ class ParkingSpaceSerializer(serializers.ModelSerializer):
             "user",
             "occupancy_history",
             "vehicle_spaces_capacity",
+            "available_vehicle_spaces",
         ]
 
 

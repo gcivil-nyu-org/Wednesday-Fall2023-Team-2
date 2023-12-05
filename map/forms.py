@@ -52,7 +52,11 @@ class CreateParkingSpaceForm(forms.ModelForm):
     )
     """
 
-    PARKING_SPACE_TYPES = [("Business", "Business"), ("Street", "Street"), ("Private", "Private")]
+    PARKING_SPACE_TYPES = [
+        ("Business", "Business"),
+        ("Street", "Street"),
+        ("Private", "Private"),
+    ]
 
     BOROUGHS = [
         ("Manhattan", "Manhattan"),
@@ -128,6 +132,15 @@ class CreateParkingSpaceForm(forms.ModelForm):
         ),
     )
 
+    available_vehicle_spaces = forms.IntegerField(
+        widget=forms.NumberInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Currently available vehicle parking spaces",
+            }
+        ),
+    )
+
     class Meta:
         model = ParkingSpace
         fields = [
@@ -137,5 +150,6 @@ class CreateParkingSpaceForm(forms.ModelForm):
             "detail",
             "operation_hours",
             "occupancy_percent",
-            "vehicle_spaces_capacity"
+            "vehicle_spaces_capacity",
+            "available_vehicle_spaces",
         ]

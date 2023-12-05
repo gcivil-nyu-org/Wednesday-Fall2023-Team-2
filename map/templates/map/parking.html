@@ -804,7 +804,7 @@
         return (
         '<div class="form-group mb-3">' +
         '<label for="occupancy-status">Available Vehicle Spaces:</label>' +
-        `<input type="number" class="form-control" id="available-vehicle-spaces-input" name="available-vehicle-spaces" min="0" max="${spot.vehicle_spaces_capacity}" step="1">` +
+        `<input type="number" class="form-control" id="available-vehicle-spaces-input" name="available-vehicle-spaces" value="${spot.available_vehicle_spaces}" min="0" max="${spot.vehicle_spaces_capacity}" step="1">` +
         `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy('${spot.parking_spot_id}', '${spot.type}', '${spot.vehicle_spaces_capacity}')">Submit</button>` +
         "<br /><br /><b2>Last Changed By: " +
         getLatestUpdatedBy(spot) +
@@ -856,17 +856,27 @@
       var occupancy_percent = Math.round(
         10*(1-parseInt(availableSpacesInput.value)/parseInt(vehicle_spaces_capacity))
         )*10;
+      
+      //See ParkingSpaceChangeOccupancyAPIView in api/views.py
+      //for API endpoint
+      var formData = {
+        percent: occupancy_percent,
+        id: spotId,
+        available_vehicle_spaces: availableSpacesInput.value
+      };
     } else {
       const occupancyStatusInput = document.getElementById("occupancy-status-input");
       var occupancy_percent = parseInt(occupancyStatusInput.value);
+      
+      //See ParkingSpaceChangeOccupancyAPIView in api/views.py
+      //for API endpoint
+      var formData = {
+        percent: occupancy_percent,
+        id: spotId,
+      };
     }
 
-    //See ParkingSpaceChangeOccupancyAPIView in api/views.py
-    //for API endpoint
-    const formData = {
-      percent: occupancy_percent,
-      id: spotId,
-    };
+    
 
     axios
       .post(`/api/spot/occupancy/`, formData, {
