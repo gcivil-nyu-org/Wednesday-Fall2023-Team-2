@@ -106,11 +106,17 @@
         // hide the occupancy percent block and set default Private parking occupancy percent to 0
         document.getElementById("id_occupancy_percent_block").style.display = "none";
         document.getElementById("id_occupancy_percent").value = 0;
-      } 
+      } else {
+        document.getElementById("id_vehicle_spaces_capacity_block").style.display = "none";
+        document.getElementById("id_occupancy_percent_block").style.display = "block";
+        document.getElementById("id_occupancy_percent").value = ""; 
+      }
   }
 
   // set the available_vehicle_spaces to the vehicle_spaces_capacity
   document.getElementById("id_vehicle_spaces_capacity").addEventListener("input", function(e) {
+    const adjustedCapacity = Math.max(0, this.value);
+    this.value = adjustedCapacity;
     document.getElementById("id_available_vehicle_spaces").value = this.value;
   });
 
