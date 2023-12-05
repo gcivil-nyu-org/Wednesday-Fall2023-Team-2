@@ -124,7 +124,9 @@ class ParkingSpaceView(View, LoginRequiredMixin):
     def __render_page_with_optional_error(
         self, request: HttpRequest, error: Optional[str] = None
     ) -> HttpResponse:
-        user_verification = UserVerification.objects.filter(username=request.user).first()
+        user_verification = UserVerification.objects.filter(
+            username=request.user
+        ).first()
         context = {
             "error": error,
             "form": self.form_class(None),
