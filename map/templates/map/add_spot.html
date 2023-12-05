@@ -30,9 +30,15 @@
             <option value="" selected disabled>
               Select a Parking Space type...
             </option>
+            {% if user_verification.status == 'verified' and user_verification.business_type == 'Public Parking Lot Owner' %}
             <option value="Business">
               Business
             </option>
+            {% elif user_verification.status == 'verified' and user_verification.business_type == 'Street Business Owner' %}
+            <option value="Business">
+              Business
+            </option>
+            {% endif %}
             <option value="Street">
               Street
             </option>
