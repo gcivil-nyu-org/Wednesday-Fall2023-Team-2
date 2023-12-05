@@ -188,11 +188,18 @@ class ParkingSpaceView(View, LoginRequiredMixin):
             new_spot.latitude = lat
             new_spot.user = user
             new_spot.save()
+
+            user_verification = None
+            if request.user.is_authenticated:
+                user_verification = UserVerification.objects.filter(
+                    username=request.user
+                ).first()
             map_context = {
                 "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
                 "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
                 "spot": new_spot,
                 "recenter_after_post": True,
+                "user_verification": user_verification,
             }
 
             return render(request, map_template_name, map_context)
