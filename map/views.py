@@ -34,11 +34,13 @@ class MapView(View):
         """
         user_verification = None
         if request.user.is_authenticated:
-            user_verification = UserVerification.objects.filter(username=request.user).first()
+            user_verification = UserVerification.objects.filter(
+                username=request.user
+            ).first()
         context = {
             "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
-            "user_verification": user_verification
+            "user_verification": user_verification,
         }
         return render(request, self.template_name, context)
 
