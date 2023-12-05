@@ -627,6 +627,7 @@
   }
 
   function createCommentHTMLList(comments) {
+    comments = comments.sort((a, b) => (new Date(a.created_at) > new Date(b.created_at) ? -1 : 1));
     return `<ul class="list-group list-group-flush">
       ${comments.reduce(
       (prev, cur) =>
@@ -649,7 +650,10 @@
     openPostSidebar();
 
     axios.get(`/api/spot/posts/${spotId}`).then((res) => {
-      const newPostSidebarBody = res.data.reduce(
+      const posts = res.data.sort((a, b) =>
+        new Date(a.created_at) > new Date(b.created_at) ? -1 : 1,
+      );
+      const newPostSidebarBody = posts.reduce(
         (prev, cur) =>
           prev +
           `<div class="card mb-5">
