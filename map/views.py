@@ -187,3 +187,25 @@ class ParkingSpaceView(View, LoginRequiredMixin):
 
             return render(request, map_template_name, map_context)
         return render(request, self.template_name, {"form": form})
+
+
+class ProfileSpotRedirectView(View):
+    """Spot Redirect view"""
+
+    def get(self, request: HttpRequest, parking_spot_id: str) -> HttpResponse:
+        """Args:
+            request (HttpRequest): http request object
+            parking_spot_id (str): id of a given spot
+
+        Returns:
+            HttpResponse: redirects user to the selected spot on the map
+        """
+        map_template_name = "map/parking.html"
+        redirect_spot = ParkingSpace.objects.get(parking_spot_id=parking_spot_id)
+        map_context = {
+            "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+            "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
+            "spot": redirect_spot,
+            "recenter_after_post": True,
+        }
+        return render(request, map_template_name, map_context)
