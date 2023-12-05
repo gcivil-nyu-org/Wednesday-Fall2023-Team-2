@@ -217,6 +217,13 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">Are you sure you want to add a spot here?</div>
+      {% if user_verification.status != 'verified' %}
+      <div class="modal-body">
+        NOTE: Your business is not verified.  You will only be able to create
+        "Street" based parking only.  Please contact an admin to verify
+        your "Business" or "Private" lot.
+      </div>
+      {% endif %}
       <div class="modal-footer">
         <button type="submit" id="confirm-add-spot-btn" name="add-spot" class="btn btn-primary">
           Yes
