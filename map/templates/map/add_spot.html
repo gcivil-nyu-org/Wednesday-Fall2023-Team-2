@@ -1,5 +1,6 @@
-{% extends "parkrowd/main.html" %}
-{% block content %}
+<!-- @format -->
+
+{% extends "parkrowd/main.html" %} {% block content %}
 <div class="container">
   <div class="row justify-content-center py-4">
     <div class="col-md-9">
@@ -7,11 +8,11 @@
       <div class="alert alert-warning" role="alert">
         <h4 class="alert-heading">Error</h4>
         <p>Something went wrong with your create spot request and it could not be completed now.</p>
-        <hr>
+        <hr />
         <p class="mb-0">{{ error }}</p>
       </div>
       {% endif %}
-      <h3 class="text-center">New Post</h3>
+      <h3 class="text-center">Add New Spot</h3>
       <form method="post">
         {% csrf_token %}
         <!-- Currently unused
@@ -26,52 +27,49 @@
         </div>
         <div class="form-group py-1">
           <label for="type">Type</label>
-          <select name="type" id="type" class="form-control">
-            <option value="" selected disabled>
-              Select a Parking Space type...
-            </option>
-            <option value="Business">
-              Business
-            </option>
-            <option value="Street">
-              Street
-            </option>
+          <select name="type" id="type" class="form-control" onchange="updateAddSpotForm()">
+            <option value="" selected disabled>Select a Parking Space type...</option>
+            {% if user_verification.status == 'verified' and user_verification.business_type == 'Public Parking Lot Owner' %}
+              <option value="Business">Business</option>
+            {% elif user_verification.status == 'verified' and user_verification.business_type == 'Street Business Owner' %}
+              <option value="Business">Business</option>
+            {% endif %}
+              <option value="Street">Street</option>
+            {% if user_verification.status == 'verified' and user_verification.business_type == 'Private Parking Lot Owner'%}
+              <option value="Private">Private</option>
+            {% endif %}
           </select>
         </div>
         <div class="form-group py-1">
           <label for="borough">Borough</label>
           <select name="borough" id="borough" class="form-control">
-            <option value="" selected disabled>
-              Select a borough...
-            </option>
-            <option value="Manhattan">
-              Manhattan
-            </option>
-            <option value="Brooklyn">
-              Brooklyn
-            </option>
-            <option value="Queens">
-              Queens
-            </option>
-            <option value="Bronx">
-              Bronx
-            </option>
-            <option value="Staten Island">
-              Staten Island
-            </option>
+            <option value="" selected disabled>Select a borough...</option>
+            <option value="Manhattan">Manhattan</option>
+            <option value="Brooklyn">Brooklyn</option>
+            <option value="Queens">Queens</option>
+            <option value="Bronx">Bronx</option>
+            <option value="Staten Island">Staten Island</option>
           </select>
         </div>
-        <div class="form-group py-1">
-            <label for="detail">Details</label>
-            {{ form.detail }}
+        <div class="form-group py-1" id="id_vehicle_spaces_capacity_block" style="display: none">
+          <label for="vehicle_spaces_capacity">Vehicle Spaces Capacity</label>
+          {{ form.vehicle_spaces_capacity }}
+        </div>
+        <div class="form-group py-1" id="id_available_vehicle_spaces_block" style="display: none">
+          <label for="available_vehicle_spaces">Available Vehicle Spaces</label>
+          {{ form.available_vehicle_spaces }}
+        </div>
+        <div class="form-group py-1" id="id_occupancy_percent_block">
+          <label for="occupancy_percent">Percent Occupancy (Nearby spots for Street Parking)</label>
+          {{ form.occupancy_percent }}
         </div>
         <div class="form-group py-1">
-            <label for="operation_hours">Operational Hours</label>
-            {{ form.operation_hours }}
+          <label for="detail">Details</label>
+          {{ form.detail }}
         </div>
         <div class="form-group py-1">
-            <label for="occupancy_percent">Percent Occupancy (Nearby spots for Street Parking)</label>
-            {{ form.occupancy_percent }}
+          <label for="operation_hours">Operational Hours</label>
+          {{ form.operation_hours }}
         </div>
         <div class="row py-4 justify-content-center">
           <div class="col-md-2">
@@ -83,15 +81,35 @@
     </div>
   </div>
 </div>
-</div>
 <script>
-  document.getElementById("id_occupancy_percent").addEventListener("input", function () {
-      if (!isNaN(this.value)) {
-          const roundedValue = Math.round(this.value / 10) * 10;
-          const adjustedValue = Math.max(0, Math.min(100, roundedValue));
-          this.value = adjustedValue;
-      }
+  function updateAddSpotForm() {
+    var selectedType = document.getElementById("type").value;
+    if (selectedType === "Private") {
+      document.getElementById("id_vehicle_spaces_capacity_block").style.display = "block";
 
+      // hide the occupancy percent block and set default Private parking occupancy percent to 0
+      document.getElementById("id_occupancy_percent_block").style.display = "none";
+      document.getElementById("id_occupancy_percent").value = 0;
+    } else {
+      document.getElementById("id_vehicle_spaces_capacity_block").style.display = "none";
+      document.getElementById("id_occupancy_percent_block").style.display = "block";
+      document.getElementById("id_occupancy_percent").value = "";
+    }
+  }
+
+  // set the available_vehicle_spaces to the vehicle_spaces_capacity
+  document.getElementById("id_vehicle_spaces_capacity").addEventListener("input", function (e) {
+    const adjustedCapacity = Math.max(1, this.value);
+    this.value = adjustedCapacity;
+    document.getElementById("id_available_vehicle_spaces").value = this.value;
+  });
+
+  document.getElementById("id_occupancy_percent").addEventListener("input", function () {
+    if (!isNaN(this.value)) {
+      const roundedValue = Math.round(this.value / 10) * 10;
+      const adjustedValue = Math.max(0, Math.min(100, roundedValue));
+      this.value = adjustedValue;
+    }
   });
   document.getElementById("id_occupancy_percent").step = 10;
 </script>

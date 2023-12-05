@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render, redirect
 
 
-from users.models import User
+from users.models import User, UserVerification
 from .models import ParkingSpace
 from .forms import CreatePostForm, CreateParkingSpaceForm
 
@@ -32,9 +32,15 @@ class MapView(View):
         Returns:
             HttpResponse: rendered map view response
         """
+        user_verification = None
+        if request.user.is_authenticated:
+            user_verification = UserVerification.objects.filter(
+                username=request.user
+            ).first()
         context = {
             "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+            "user_verification": user_verification,
         }
         return render(request, self.template_name, context)
 
@@ -87,11 +93,18 @@ class PostView(View, LoginRequiredMixin):
             new_post.post = profanity.censor(form.cleaned_data["post"])
             new_post.save()
 
+            user_verification = None
+            if request.user.is_authenticated:
+                user_verification = UserVerification.objects.filter(
+                    username=request.user
+                ).first()
+
             map_context = {
                 "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
                 "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
                 "spot": spot,
                 "recenter_after_post": True,
+                "user_verification": user_verification,
             }
 
             return render(request, map_template_name, map_context)
@@ -124,10 +137,14 @@ class ParkingSpaceView(View, LoginRequiredMixin):
     def __render_page_with_optional_error(
         self, request: HttpRequest, error: Optional[str] = None
     ) -> HttpResponse:
+        user_verification = UserVerification.objects.filter(
+            username=request.user
+        ).first()
         context = {
             "error": error,
             "form": self.form_class(None),
             "username": request.user.username,
+            "user_verification": user_verification,
         }
         return render(request, self.template_name, context)
 
@@ -178,11 +195,18 @@ class ParkingSpaceView(View, LoginRequiredMixin):
             new_spot.latitude = lat
             new_spot.user = user
             new_spot.save()
+
+            user_verification = None
+            if request.user.is_authenticated:
+                user_verification = UserVerification.objects.filter(
+                    username=request.user
+                ).first()
             map_context = {
                 "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
                 "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
                 "spot": new_spot,
                 "recenter_after_post": True,
+                "user_verification": user_verification,
             }
 
             return render(request, map_template_name, map_context)

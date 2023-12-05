@@ -97,6 +97,8 @@ class ParkingSpaceChangeOccupancyAPIView(APIView):
         """
         occupancy_percent = request.data.get("percent")
         parking_spot_id = request.data.get("id")
+        available_vehicle_spaces = request.data.get("available_vehicle_spaces")
+
         if not ((occupancy_percent is not None) and parking_spot_id):
             response_data = {"message": "Bad Request: Missing percent or id parameters"}
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
@@ -119,6 +121,9 @@ class ParkingSpaceChangeOccupancyAPIView(APIView):
 
             # Update the occupancy_percent field
             parking_space.occupancy_percent = occupancy_percent
+
+            # Update the available_vehicle_spaces
+            parking_space.available_vehicle_spaces = available_vehicle_spaces
 
             # Create New Occupancy History
             history = OccupancyHistory()

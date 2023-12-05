@@ -139,6 +139,16 @@
               />
               Street
             </label>
+            <label class="btn btn-secondary">
+              <input
+                class="filter-checkbox"
+                type="checkbox"
+                autocomplete="off"
+                value="Private"
+                checked
+              />
+              Private
+            </label>
           </div>
         </div>
         <hr />
@@ -207,6 +217,12 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">Are you sure you want to add a spot here?</div>
+      {% if user_verification.status != 'verified' %}
+      <div class="modal-body">
+        NOTE: Your business is not verified. You will only be able to create "Street" based parking
+        only. Please contact an admin to verify your "Business" or "Private" lot.
+      </div>
+      {% endif %}
       <div class="modal-footer">
         <button type="submit" id="confirm-add-spot-btn" name="add-spot" class="btn btn-primary">
           Yes
@@ -308,26 +324,38 @@
     //i.e. non-numerical, negative values, and values over 100
     infoWindow.addListener("domready", function (e) {
       const occupancyStatusInput = document.getElementById("occupancy-status-input");
+      const availableSpacesInput = document.getElementById("available-vehicle-spaces-input");
 
-      if (!occupancyStatusInput) {
-        return;
-      }
+      if (occupancyStatusInput) {
+        occupancyStatusInput.value =
+          infoWindow.marker.pin.glyph !== null ? parseInt(infoWindow.marker.pin.glyph) : 0;
 
-      occupancyStatusInput.value =
-        infoWindow.marker.pin.glyph !== null ? parseInt(infoWindow.marker.pin.glyph) : 0;
+        occupancyStatusInput.addEventListener("input", function (e) {
+          let enteredValue = parseInt(occupancyStatusInput.value);
 
-      occupancyStatusInput.addEventListener("input", function (e) {
-        let enteredValue = parseInt(occupancyStatusInput.value);
-
-        if (enteredValue < 0 || isNaN(enteredValue)) {
-          e.target.value = 0;
-        } else {
-          e.target.value = __floorTo(10, enteredValue);
-          if (enteredValue > 100) {
-            e.target.value = 100;
+          if (enteredValue < 0 || isNaN(enteredValue)) {
+            e.target.value = 0;
+          } else {
+            e.target.value = __floorTo(10, enteredValue);
+            if (enteredValue > 100) {
+              e.target.value = 100;
+            }
           }
-        }
-      });
+        });
+      } else if (availableSpacesInput) {
+        availableSpacesInput.addEventListener("input", function (e) {
+          const capacity = infoWindow.marker.spot.vehicle_spaces_capacity;
+          let enteredValue = parseInt(availableSpacesInput.value);
+
+          if (enteredValue < 0 || isNaN(enteredValue)) {
+            e.target.value = 0;
+          } else {
+            if (enteredValue > capacity) {
+              e.target.value = capacity;
+            }
+          }
+        });
+      }
     });
 
     //When dragging map, close Filter/PostSidebar Window
@@ -477,6 +505,8 @@
     marker.type = spot.type;
     marker.occupancy_percent = spot.occupancy_percent;
     marker.username = spot.user?.username;
+    //To get spot info easily
+    marker.spot = spot;
     //To retrieve the glyph (map marker center dot) info
     marker.pin = pinBackground;
     return marker;
@@ -583,6 +613,15 @@
     return "";
   }
 
+  function getVehicleSpacesCapacityHTML(spot) {
+    if (spot.vehicle_spaces_capacity) {
+      return (
+        '<div class="mb-3">Vehicle spaces capacity: ' + spot.vehicle_spaces_capacity + "</div>"
+      );
+    }
+    return "";
+  }
+
   function getOperationalHoursHTML(spot) {
     if (spot.operation_hours) {
       return '<div class="mb-3">Operational Hours: ' + spot.operation_hours + "</div>";
@@ -600,6 +639,21 @@
     const spotId = spot.parking_spot_id;
     const hours = spot.operation_hours !== null ? spot.operation_hours : "N/A";
 
+    if (spot.type === "Private") {
+      return `<div class="d-flex flex-column text-center p-2">
+      ${getParkingSpotNameHTML(spot)}
+      <div class="mb-3">ID: ${spotId}</div>
+      ${getOccupancyPercentHTML(spot)}
+      ${getOwner(spot)}
+      ${getTypeHTML(spot)}
+      ${getVehicleSpacesCapacityHTML(spot)}
+      ${getDetailsHTML(spot)}
+      ${getBoroughHTML(spot)}
+      ${getOperationalHoursHTML(spot)}
+      ${getMakePostHTML(spotId)}
+      ${getViewPostHTML(spotId)}
+    </div>`;
+    }
     return `<div class="d-flex flex-column text-center p-2">
       ${getParkingSpotNameHTML(spot)}
       <div class="mb-3">ID: ${spotId}</div>
@@ -764,14 +818,27 @@
     const userIsOwnerOfBusiness = spot.user?.username === loggedInUser;
 
     if (
-      (spot.type === "Street" || (spot.type === "Business" && userIsOwnerOfBusiness)) &&
+      (spot.type === "Street" ||
+        ((spot.type === "Business" || spot.type === "Private") && userIsOwnerOfBusiness)) &&
       isUserAuthenticated
     ) {
+      if (spot.type === "Private") {
+        return (
+          '<div class="form-group mb-3">' +
+          '<label for="occupancy-status">Available Vehicle Spaces:</label>' +
+          `<input type="number" class="form-control" id="available-vehicle-spaces-input" name="available-vehicle-spaces" value="${spot.available_vehicle_spaces}" min="0" max="${spot.vehicle_spaces_capacity}" step="1">` +
+          `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy('${spot.parking_spot_id}', '${spot.type}', '${spot.vehicle_spaces_capacity}')">Submit</button>` +
+          "<br /><br /><b2>Last Changed By: " +
+          getLatestUpdatedBy(spot) +
+          "</b2>" +
+          "</div>"
+        );
+      }
       return (
         '<div class="form-group mb-3">' +
         '<label for="occupancy-status">Occupancy Percent:</label>' +
         '<input type="number" class="form-control" id="occupancy-status-input" name="occupancy-status" min="0" max="100" step="10">' +
-        `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy('${spot.parking_spot_id}')">Submit</button>` +
+        `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy('${spot.parking_spot_id}', '${spot.type}', '${spot.vehicle_spaces_capacity}')">Submit</button>` +
         "<br /><br /><b2>Last Changed By: " +
         getLatestUpdatedBy(spot) +
         "</b2>" +
@@ -804,16 +871,32 @@
    * on backend.
    * @param {string} spotId - ParkingSpace PK : parking_spot_id field
    */
-  function submitOccupancy(spotId) {
-    const occupancyStatusInput = document.getElementById("occupancy-status-input");
-    const occupancy_percent = parseInt(occupancyStatusInput.value);
+  function submitOccupancy(spotId, type, vehicle_spaces_capacity) {
+    if (type === "Private") {
+      const availableSpacesInput = document.getElementById("available-vehicle-spaces-input");
+      var occupancy_percent =
+        Math.round(
+          10 * (1 - parseInt(availableSpacesInput.value) / parseInt(vehicle_spaces_capacity)),
+        ) * 10;
 
-    //See ParkingSpaceChangeOccupancyAPIView in api/views.py
-    //for API endpoint
-    const formData = {
-      percent: occupancy_percent,
-      id: spotId,
-    };
+      //See ParkingSpaceChangeOccupancyAPIView in api/views.py
+      //for API endpoint
+      var formData = {
+        percent: occupancy_percent,
+        id: spotId,
+        available_vehicle_spaces: availableSpacesInput.value,
+      };
+    } else {
+      const occupancyStatusInput = document.getElementById("occupancy-status-input");
+      var occupancy_percent = parseInt(occupancyStatusInput.value);
+
+      //See ParkingSpaceChangeOccupancyAPIView in api/views.py
+      //for API endpoint
+      var formData = {
+        percent: occupancy_percent,
+        id: spotId,
+      };
+    }
 
     axios
       .post(`/api/spot/occupancy/`, formData, {
