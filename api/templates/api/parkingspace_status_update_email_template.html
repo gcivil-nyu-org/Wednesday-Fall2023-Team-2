@@ -1,0 +1,13 @@
+{% autoescape off %}
+Hello {{ user.username }},
+
+We have an update for a spot you are interested in. Check it out on our website!
+
+{{ protocol }}://{{domain}}/{% url 'map:parking' %}.
+
+If you did not make this request, you can safely ignore this email.
+
+Sincerely,
+Parkrowd Team
+
+{% endautoescape %}

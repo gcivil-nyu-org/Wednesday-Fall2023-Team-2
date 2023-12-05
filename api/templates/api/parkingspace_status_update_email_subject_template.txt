@@ -1,0 +1,1 @@
+{{ site_name }} Update on a Spot You've Been Watching On
