@@ -644,6 +644,7 @@
       ${getParkingSpotNameHTML(spot)}
       <div class="mb-3">ID: ${spotId}</div>
       ${getOccupancyPercentHTML(spot)}
+      ${getLatestUpdatedBy(spot)}
       ${getOwner(spot)}
       ${getTypeHTML(spot)}
       ${getVehicleSpacesCapacityHTML(spot)}
@@ -658,6 +659,7 @@
       ${getParkingSpotNameHTML(spot)}
       <div class="mb-3">ID: ${spotId}</div>
       ${getOccupancyPercentHTML(spot)}
+      ${getLatestUpdatedBy(spot)}
       ${getOwner(spot)}
       ${getTypeHTML(spot)}
       ${getDetailsHTML(spot)}
@@ -828,9 +830,6 @@
           '<label for="occupancy-status">Available Vehicle Spaces:</label>' +
           `<input type="number" class="form-control" id="available-vehicle-spaces-input" name="available-vehicle-spaces" value="${spot.available_vehicle_spaces}" min="0" max="${spot.vehicle_spaces_capacity}" step="1">` +
           `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy('${spot.parking_spot_id}', '${spot.type}', '${spot.vehicle_spaces_capacity}')">Submit</button>` +
-          "<br /><br /><b2>Last Changed By: " +
-          getLatestUpdatedBy(spot) +
-          "</b2>" +
           "</div>"
         );
       }
@@ -839,9 +838,6 @@
         '<label for="occupancy-status">Occupancy Percent:</label>' +
         '<input type="number" class="form-control" id="occupancy-status-input" name="occupancy-status" min="0" max="100" step="10">' +
         `<button type="submit" class="btn btn-primary btn-sm" onclick="submitOccupancy('${spot.parking_spot_id}', '${spot.type}', '${spot.vehicle_spaces_capacity}')">Submit</button>` +
-        "<br /><br /><b2>Last Changed By: " +
-        getLatestUpdatedBy(spot) +
-        "</b2>" +
         "</div>"
       );
     }
@@ -849,17 +845,19 @@
   }
 
   /**
-   * Helper function for getOccupancyPercentHTML()
+   * Helper function for getStreetInfo() (Currently not for getBusinessInfo as)
    * Queries the OccupancyHistory table for the most recent occupancy update
    * Returns the username of the user who performed said update
-   * @param {Object} ParkingSpace - reference spot param in getOccupancyPercentHTML()
+   * @param {Object} ParkingSpace - reference spot param in getStreetInfo()
    * @returns {string} String - username of user who updated the occupancy of the given spot most recently or "None"
    */
   function getLatestUpdatedBy(spot) {
     occupancy_history = spot.occupancy_history;
     if (occupancy_history.length > 0) {
-      // Display the username of the final entry
-      return occupancy_history[occupancy_history.length - 1].user.username;
+      // Get the user information of the final entry
+      last_user = occupancy_history[occupancy_history.length - 1].user
+      return `<div class="mb-3">Last Updated By:
+        <a href="/users/profile/${last_user.username}">${last_user.username}</a></div>`
     } else {
       return "None";
     }
