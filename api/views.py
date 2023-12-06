@@ -299,12 +299,14 @@ class RemoveWatchOnParkingSpaceAPIView(APIView):
         except ParkingSpace.DoesNotExist:
             return Response("Invalid parking spot id", 400)
         try:
-            watchRecord = self.model.objects.get(user=request.user)
+            watchRecord = self.model.objects.get(
+                user=request.user, parking_space=parkingSpace
+            )
         except self.model.DoesNotExist:
             return Response("No watch found on this parking space", 400)
         watchRecord.delete()
 
-        return Response(f"Watch on spot {parkingSpace['parking_spot_id']} removed", 200)
+        return Response(f"Watch on spot {parkingSpace.parking_spot_id} removed", 200)
 
 
 class WatchOnParkingSpaceAPIView(APIView):
