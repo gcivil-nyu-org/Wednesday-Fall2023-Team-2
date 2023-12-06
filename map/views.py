@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render, redirect
 
 
-from users.models import User, UserVerification
+from users.models import User, UserVerification, UserWatchedParkingSpace
 from .models import ParkingSpace
 from .forms import CreatePostForm, CreateParkingSpaceForm
 
@@ -37,6 +37,7 @@ class MapView(View):
             user_verification = UserVerification.objects.filter(
                 username=request.user
             ).first()
+
         context = {
             "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,

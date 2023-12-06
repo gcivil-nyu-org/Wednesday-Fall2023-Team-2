@@ -195,9 +195,11 @@
   let map;
   let infoWindow;
   let addSpotMarker;
+  let userWatchOnSpots = {};
 
   const markers = [];
   const spotMap = {};
+  const defaultWatchThreshold = 80;
 
   const addSpotBtn = document.getElementById("add-spot-btn");
   const addSpotModal = document.getElementById("add-spot-modal");
@@ -511,7 +513,16 @@
     } else {
       parking_spot_name = spot.parking_spot_name;
     }
-    return '<div class="mb-3">' + '<h1 class="h3 mb-1">' + parking_spot_name + "</h1>" + "</div>";
+    return (
+      '<div class="mb-3">' +
+      '<h1 class="h3 mb-1">' +
+      parking_spot_name +
+      "</h1>" +
+      (userWatchOnSpots[spot.parking_spot_id]
+        ? `<button type="button" class="btn btn-outline-info" onclick="toggleWatchOnSpot('${spot.parking_spot_id}')"><i class="bi bi-bookmark-fill" id="watch-mark-${spot.parking_spot_id}"></i></button>`
+        : `<button type="button" class="btn btn-outline-info" onclick="toggleWatchOnSpot('${spot.parking_spot_id}')"><i class="bi bi-bookmark" id="watch-mark-${spot.parking_spot_id}"></i></button>`) +
+      "</div>"
+    );
   }
 
   function getTypeHTML(spot) {
@@ -929,6 +940,35 @@
 
   // #region setup & evt listeners
 
+  function toggleWatchOnSpot(spotId) {
+    const isWatching = userWatchOnSpots[spotId] !== undefined;
+    axios
+      .post(
+        `/api/spot/${isWatching ? "remove" : "add"}-watch-on-spot/`,
+        {
+          parking_spot_id: spotId,
+          threshold: defaultWatchThreshold,
+        },
+        {
+          headers: {
+            "X-CSRFToken": getCSRFToken(),
+          },
+        },
+      )
+      .then((res) => {
+        if (res.status === 200) {
+          if (isWatching) delete userWatchOnSpots[spotId];
+          else userWatchOnSpots[spotId] = defaultWatchThreshold;
+          document
+            .getElementById(`watch-mark-${spotId}`)
+            .classList.replace(
+              isWatching ? "bi-bookmark-fill" : "bi-bookmark",
+              isWatching ? "bi-bookmark" : "bi-bookmark-fill",
+            );
+        }
+      });
+  }
+
   /**
    * Retrieve Parking Spots around center of map
    * via an API endpoint with lat and lon as query parameters
@@ -939,18 +979,26 @@
     const center = map.getCenter();
     const lat = center.lat();
     const lng = center.lng();
-
     axios
-      .get(`/api/spots/?lat=${lat}&lon=${lng}`)
-      .then(function (response) {
-        const spotsData = response.data;
-        spotsData.forEach((spot) => {
-          addMarker(spot);
-        });
+      .get("/api/spot/watches-on-spots/")
+      .then((res) => {
+        userWatchOnSpots = res.data.reduce((prev, cur) => {
+          prev[cur.parking_space] = cur.threshold;
+          return prev;
+        }, {});
+        axios
+          .get(`/api/spots/?lat=${lat}&lon=${lng}`)
+          .then(function (response) {
+            const spotsData = response.data;
+            spotsData.forEach((spot) => {
+              addMarker(spot);
+            });
+          })
+          .catch(function (error) {
+            console.error(error);
+          });
       })
-      .catch(function (error) {
-        console.log(error);
-      });
+      .catch((err) => console.error(err));
   }
 
   function updateRangeValue() {

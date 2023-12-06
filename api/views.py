@@ -15,7 +15,11 @@ from rest_framework.authentication import SessionAuthentication
 
 from map.models import ParkingSpace, OccupancyHistory
 from users.models import Post, Comment, UserWatchedParkingSpace
-from .serializers import ParkingSpaceSerializer, PostSerializer
+from .serializers import (
+    ParkingSpaceSerializer,
+    PostSerializer,
+    UserWatchedParkingSpaceSerializer,
+)
 
 from better_profanity import profanity
 
@@ -170,6 +174,7 @@ class ParkingSpaceChangeOccupancyAPIView(APIView):
                     None,
                     user_email,
                 )
+                record.delete()
 
             return Response(
                 {"message": "Occupancy percent updated successfully."},
@@ -266,7 +271,7 @@ class AddWatchOnParkingSpaceAPIView(APIView):
     def post(self, request: HttpRequest) -> Response:
         user = request.user
         try:
-            parkingSpace = ParkingSpace.objects.get(
+            parking_space = ParkingSpace.objects.get(
                 parking_spot_id=request.data["parking_spot_id"]
             )
         except ParkingSpace.DoesNotExist:
@@ -274,8 +279,44 @@ class AddWatchOnParkingSpaceAPIView(APIView):
 
         threshold = request.data["threshold"] if request.data["threshold"] else None
         newUserWatchedParkingSpace = UserWatchedParkingSpace(
-            user=user, parkingSpace=parkingSpace, threshold=threshold
+            user=user, parking_space=parking_space, threshold=threshold
         )
         newUserWatchedParkingSpace.save()
 
-        return Response(f"Watch on spot {parkingSpace['parking_spot_id']} added", 200)
+        return Response(f"Watch on spot {parking_space.parking_spot_id} added", 200)
+
+
+class RemoveWatchOnParkingSpaceAPIView(APIView):
+    model = UserWatchedParkingSpace
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication]
+
+    def post(self, request: HttpRequest) -> Response:
+        try:
+            parkingSpace = ParkingSpace.objects.get(
+                parking_spot_id=request.data["parking_spot_id"]
+            )
+        except ParkingSpace.DoesNotExist:
+            return Response("Invalid parking spot id", 400)
+        try:
+            watchRecord = self.model.objects.get(user=request.user)
+        except self.model.DoesNotExist:
+            return Response("No watch found on this parking space", 400)
+        watchRecord.delete()
+
+        return Response(f"Watch on spot {parkingSpace['parking_spot_id']} removed", 200)
+
+
+class WatchOnParkingSpaceAPIView(APIView):
+    model = UserWatchedParkingSpace
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication]
+    serializer_class = UserWatchedParkingSpaceSerializer
+
+    def get(self, request: HttpRequest) -> Response:
+        return Response(
+            self.serializer_class(
+                self.model.objects.filter(user=request.user), many=True
+            ).data,
+            status.HTTP_200_OK,
+        )
