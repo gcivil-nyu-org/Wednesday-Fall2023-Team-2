@@ -1,14 +1,26 @@
 from rest_framework import serializers
 
 from users.models import Post, Comment
-from users.models import ParkingSpace, User
+from users.models import ParkingSpace, User, UserVerification
 from map.models import OccupancyHistory
 
 
+class UserVerificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserVerification
+        fields = [
+            "username",
+            "business_type",
+            "status",
+        ]
+
+
 class UserSerializer(serializers.ModelSerializer):
+    verification = UserVerificationSerializer(many=True, read_only=True)
+
     class Meta:
         model = User
-        fields = ["username"]
+        fields = ["username", "verification"]
 
 
 class OccupancyHistorySerializer(serializers.ModelSerializer):
