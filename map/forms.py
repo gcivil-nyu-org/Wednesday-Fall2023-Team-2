@@ -124,6 +124,7 @@ class CreateParkingSpaceForm(forms.ModelForm):
     )
 
     vehicle_spaces_capacity = forms.IntegerField(
+        required=False,
         widget=forms.NumberInput(
             attrs={
                 "class": "form-control",
@@ -133,6 +134,7 @@ class CreateParkingSpaceForm(forms.ModelForm):
     )
 
     available_vehicle_spaces = forms.IntegerField(
+        required=False,
         widget=forms.NumberInput(
             attrs={
                 "class": "form-control",
