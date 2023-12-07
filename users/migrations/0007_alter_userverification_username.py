@@ -7,7 +7,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("users", "0005_alter_userverification_options_and_more"),
+        ("users", "0006_userwatchedparkingspace"),
     ]
 
     operations = [

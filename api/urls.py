@@ -26,4 +26,19 @@ urlpatterns = [
         views.ParkingSpaceAddCommentAPIView.as_view(),
         name="add-comment",
     ),
+    path(
+        "spot/watches-on-spots/",
+        views.WatchOnParkingSpaceAPIView.as_view(),
+        name="watches-on-spots",
+    ),
+    path(
+        "spot/add-watch-on-spot/",
+        views.AddWatchOnParkingSpaceAPIView.as_view(),
+        name="add-watch-on-spot",
+    ),
+    path(
+        "spot/remove-watch-on-spot/",
+        views.RemoveWatchOnParkingSpaceAPIView.as_view(),
+        name="remove-watch-on-spot",
+    ),
 ]
