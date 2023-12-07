@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from users.models import User, Post
+from users.models import User, Post, UserVerification
 from .models import ParkingSpace
 
 
@@ -24,6 +24,41 @@ DATE = timezone.now()
 POST_PATH_NAME = "map:post"
 MAP_PATH_NAME = "map:parking"
 POST_TEMPLATE = "map/post.html"
+
+class MapViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username=USERNAME,
+            email=EMAIL,
+            password=PASSWORD
+        )
+        self.user_verification = UserVerification.objects.create(
+            username=self.user,
+            status='verified'
+        )
+
+    def test_non_authenticated_user(self):
+        response = self.client.get(
+            reverse(MAP_PATH_NAME)
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # * Check if the user_verification is NOT present in the context
+        self.assertIsNone(response.context.get('user_verification'))
+        
+    
+    def test_authenticated_user(self):
+        self.client.login(username=USERNAME, password=PASSWORD)
+        response = self.client.get(
+            reverse(MAP_PATH_NAME)
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # * Check if the user_verification is present in the context
+        self.assertIsNotNone(response.context.get('user_verification'))
+    
+# class ParkingSpaceViewTests(TestCase):
+
 
 
 class CreatePostTests(TestCase):
