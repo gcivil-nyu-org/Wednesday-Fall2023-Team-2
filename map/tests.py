@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from users.models import User, Post, UserVerification
 from .models import ParkingSpace
+from .views import ParkingSpaceView
 
 
 USERNAME = "parkrowd"
@@ -81,6 +82,16 @@ class ParkingSpaceViewTests(TestCase):
         self.assertEqual(response_with_lat_lon.status_code, 200)
         self.assertIsNone(response_with_lat_lon.context.get('error'))
         self.assertIsNotNone(response_with_lat_lon.context.get('user_verification'))
+
+    def test_get_next_parking_space_id(self):
+        parking_space_view = ParkingSpaceView()
+        id = parking_space_view._ParkingSpaceView__get_next_parkingspace_id()
+        self.assertEqual(id, '1')
+
+        # * Test if adding new record generates new ID of 2
+        self.new_parking_spot = ParkingSpace.objects.create(parking_spot_id=1)
+        id = parking_space_view._ParkingSpaceView__get_next_parkingspace_id()
+        self.assertEqual(id, '2')
 
 
 class CreatePostTests(TestCase):
