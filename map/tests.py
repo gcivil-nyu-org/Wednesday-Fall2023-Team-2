@@ -22,6 +22,7 @@ POST = "After 3:15, I'll be gone."
 DATE = timezone.now()
 
 POST_PATH_NAME = "map:post"
+ADD_SPOT_PATH_NAME = "map:add-parking-space"
 MAP_PATH_NAME = "map:parking"
 POST_TEMPLATE = "map/post.html"
 
@@ -57,8 +58,29 @@ class MapViewTests(TestCase):
         # * Check if the user_verification is present in the context
         self.assertIsNotNone(response.context.get('user_verification'))
     
-# class ParkingSpaceViewTests(TestCase):
+class ParkingSpaceViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username=USERNAME,
+            email=EMAIL,
+            password=PASSWORD
+        )
+        self.user_verification = UserVerification.objects.create(
+            username=self.user,
+            status='verified'
+        )
 
+    def test_get_view(self):
+        self.client.login(username=USERNAME, password=PASSWORD)
+        response_no_lat_lon = self.client.get(reverse(ADD_SPOT_PATH_NAME))
+        self.assertEqual(response_no_lat_lon.status_code, 200)
+        self.assertEqual(response_no_lat_lon.context.get('error'), "Unable to collect longitude and latitude from URL. Please check if the URL is correct.")
+        self.assertIsNotNone(response_no_lat_lon.context.get('user_verification'))
+
+        response_with_lat_lon = self.client.get(reverse(ADD_SPOT_PATH_NAME) + '?lat=10.123&lon=20.456')
+        self.assertEqual(response_with_lat_lon.status_code, 200)
+        self.assertIsNone(response_with_lat_lon.context.get('error'))
+        self.assertIsNotNone(response_with_lat_lon.context.get('user_verification'))
 
 
 class CreatePostTests(TestCase):
