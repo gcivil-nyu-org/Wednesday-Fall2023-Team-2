@@ -22,4 +22,9 @@ urlpatterns = [
         views.ProfileSpotRedirectView.as_view(),
         name="spot-redirect",
     ),
+    path(
+        "peak-time/<str:parking_spot_id>/",
+        views.PeakTimeView.as_view(),
+        name="peak-time",
+    ),
 ]

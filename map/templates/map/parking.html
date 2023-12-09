@@ -52,7 +52,12 @@
   <!-- Filter Sidebar -->
   <div id="filter-sliding-window" class="fixed-bottom close-window">
     <div class="d-flex justify-content-end">
-      <button id="filter-window-close-btn" type="button" class="btn-close p-2" aria-label="Close"></button>
+      <button
+        id="filter-window-close-btn"
+        type="button"
+        class="btn-close p-2"
+        aria-label="Close"
+      ></button>
     </div>
     <div class="container mt-4">
       <div class="container">
@@ -67,8 +72,16 @@
           </div>
           <div class="slider-value text-center" id="occupancy-range-value">50</div>
           <div class="slider-container">
-            <input type="range" class="form-range" min="0" max="100" step="10" value="50" data-value="50"
-              id="occupancy-percent-slider" />
+            <input
+              type="range"
+              class="form-range"
+              min="0"
+              max="100"
+              step="10"
+              value="50"
+              data-value="50"
+              id="occupancy-percent-slider"
+            />
           </div>
         </div>
         <!-- END Occupancy Range Slider -->
@@ -77,12 +90,24 @@
           <label>Show Spots without Occupancy Data:</label>
           <div class="btn-group-toggle" data-toggle="buttons">
             <label class="btn btn-secondary">
-              <input type="radio" name="no-number" id="occupancy-data-yes" autocomplete="off" value="yes"
-                checked="checked" />
+              <input
+                type="radio"
+                name="no-number"
+                id="occupancy-data-yes"
+                autocomplete="off"
+                value="yes"
+                checked="checked"
+              />
               Yes
             </label>
             <label class="btn btn-secondary">
-              <input type="radio" name="no-number" id="occupancy-data-no" autocomplete="off" value="no" />
+              <input
+                type="radio"
+                name="no-number"
+                id="occupancy-data-no"
+                autocomplete="off"
+                value="no"
+              />
               No
             </label>
           </div>
@@ -95,15 +120,33 @@
             <!--Each input should have a "filter-checkbox" class for JS to apply filtering-->
             <!--Values for each input checkbox should be specified (match DB type)-->
             <label class="btn btn-secondary">
-              <input class="filter-checkbox" type="checkbox" autocomplete="off" value="Business" checked />
+              <input
+                class="filter-checkbox"
+                type="checkbox"
+                autocomplete="off"
+                value="Business"
+                checked
+              />
               Business
             </label>
             <label class="btn btn-secondary">
-              <input class="filter-checkbox" type="checkbox" autocomplete="off" value="Street" checked />
+              <input
+                class="filter-checkbox"
+                type="checkbox"
+                autocomplete="off"
+                value="Street"
+                checked
+              />
               Street
             </label>
             <label class="btn btn-secondary">
-              <input class="filter-checkbox" type="checkbox" autocomplete="off" value="Private" checked />
+              <input
+                class="filter-checkbox"
+                type="checkbox"
+                autocomplete="off"
+                value="Private"
+                checked
+              />
               Private
             </label>
           </div>
@@ -111,9 +154,19 @@
         <hr />
         <div class="form-group py-2">
           <label>Search by username: </label>
-          <input type="text" class="form-control" id="search-by-user-input" name="search-by-user-input" />
+          <input
+            type="text"
+            class="form-control"
+            id="search-by-user-input"
+            name="search-by-user-input"
+          />
           <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="exact-search-checkbox" name="exact-search-checkbox" />
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="exact-search-checkbox"
+              name="exact-search-checkbox"
+            />
             <label class="form-check-label" for="exact-search-checkbox">Exact Search</label>
           </div>
         </div>
@@ -131,7 +184,12 @@
   <!-- Post & Comment Sidebar -->
   <div id="postSidebar" class="fixed-bottom close-window">
     <div class="d-flex justify-content-end">
-      <button type="button" aria-label="Close" class="btn-close p-2" id="postSidebarCloseBtn"></button>
+      <button
+        type="button"
+        aria-label="Close"
+        class="btn-close p-2"
+        id="postSidebarCloseBtn"
+      ></button>
     </div>
     <div class="container mt-4">
       <div class="container">
@@ -144,8 +202,14 @@
   <!-- END Post & Comment Sidebar -->
 </div>
 <!-- Add Spot Modal Confirmation -->
-<div class="modal fade" id="add-spot-modal" tabindex="-1" role="dialog" aria-labelledby="add-spot-modal"
-  aria-hidden="true">
+<div
+  class="modal fade"
+  id="add-spot-modal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="add-spot-modal"
+  aria-hidden="true"
+>
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -163,7 +227,12 @@
         <button type="submit" id="confirm-add-spot-btn" name="add-spot" class="btn btn-primary">
           Yes
         </button>
-        <button type="button" id="cancel-add-spot-btn" class="btn btn-secondary" data-bs-dismiss="modal">
+        <button
+          type="button"
+          id="cancel-add-spot-btn"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+        >
           Cancel
         </button>
       </div>
@@ -174,7 +243,12 @@
   <!-- Post & Comment Sidebar -->
   <div id="postSidebar" class="fixed-bottom close-window">
     <div class="d-flex justify-content-end">
-      <button type="button" aria-label="Close" class="btn-close p-2" id="postSidebarCloseBtn"></button>
+      <button
+        type="button"
+        aria-label="Close"
+        class="btn-close p-2"
+        id="postSidebarCloseBtn"
+      ></button>
     </div>
     <div class="container mt-4">
       <div class="container">
@@ -188,8 +262,12 @@
 </div>
 <!-- END Spot Modal Confirmation -->
 <!-- Hidden Open Modal Button -->
-<button id="open-add-spot-modal-btn" data-bs-toggle="modal" data-bs-target="#add-spot-modal"
-  style="display: none"></button>
+<button
+  id="open-add-spot-modal-btn"
+  data-bs-toggle="modal"
+  data-bs-target="#add-spot-modal"
+  style="display: none"
+></button>
 <!-- END Hidden Open Modal Button -->
 <script>
   let map;
@@ -249,7 +327,7 @@
     infoWindow.addListener("domready", function (e) {
       const occupancyStatusInput = document.getElementById("occupancy-status-input");
       const availableSpacesInput = document.getElementById("available-vehicle-spaces-input");
-
+      getPeakTime(infoWindow.marker.spot);
       if (occupancyStatusInput) {
         occupancyStatusInput.value =
           infoWindow.marker.pin.glyph !== null ? parseInt(infoWindow.marker.pin.glyph) : 0;
@@ -468,6 +546,7 @@
       getBoroughHTML(spot) +
       getDetailsHTML(spot) +
       getOperationalHoursHTML(spot) +
+      '<div class="mb-3" id="peak-time"></div>' +
       getMakePostHTML(spotId) +
       getViewPostHTML(spotId) +
       getClaimBusinessHTML(spot) +
@@ -584,6 +663,7 @@
       ${getDetailsHTML(spot)}
       ${getBoroughHTML(spot)}
       ${getOperationalHoursHTML(spot)}
+      <div class="mb-3" id="peak-time"></div>
       ${getMakePostHTML(spotId)}
       ${getViewPostHTML(spotId)}
     </div>`;
@@ -598,9 +678,22 @@
       ${getDetailsHTML(spot)}
       ${getBoroughHTML(spot)}
       ${getOperationalHoursHTML(spot)}
+      <div class="mb-3" id="peak-time"></div>
       ${getMakePostHTML(spotId)}
       ${getViewPostHTML(spotId)}
     </div>`;
+  }
+
+  function getPeakTime(spot) {
+    axios
+      .get(`/map/peak-time/${spot.parking_spot_id}`)
+      .then((response) => {
+        document.getElementById("peak-time").innerHTML = "Peak Time: " + response.data.peak_time;
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        document.getElementById("peak-time").innerHTML = "Error retrieving data.";
+      });
   }
 
   function getOwner(spot) {
@@ -641,15 +734,16 @@
     comments = comments.sort((a, b) => (new Date(a.created_at) > new Date(b.created_at) ? -1 : 1));
     return `<ul class="list-group list-group-flush">
       ${comments.reduce(
-      (prev, cur) =>
-        prev +
-        `<li class="list-group-item">
+        (prev, cur) =>
+          prev +
+          `<li class="list-group-item">
             ${cur.content}
-            <div class="text-end">--by <a href="/users/profile/${cur.author?.username}">${cur.author?.username || "unknown user"
-        }</a> at ${new Date(cur.created_at).toLocaleString()}</div>
+            <div class="text-end">--by <a href="/users/profile/${cur.author?.username}">${
+            cur.author?.username || "unknown user"
+          }</a> at ${new Date(cur.created_at).toLocaleString()}</div>
           </li>`,
-      "",
-    )}
+        "",
+      )}
     </ul>`;
   }
 
@@ -673,7 +767,8 @@
           <div class="card-text">
             ${cur.post || "Empty post"}
             <div class="text-end">
-              -- by <a href="/users/profile/${cur.author?.username}">${cur.author?.username || "unknown user"
+              -- by <a href="/users/profile/${cur.author?.username}">${
+            cur.author?.username || "unknown user"
           }</a> at ${new Date(cur.created_at).toLocaleString()}
             </div>
           </div>
@@ -681,15 +776,18 @@
         ${createCommentHTMLList(cur.comments)}
         <ul class="list-group list-group-flush">
           <li class="list-group-item text-end">
-            <button class="btn btn-primary btn-sm" onClick="addComment('${cur.id
-          }')">Add Comment</button>
+            <button class="btn btn-primary btn-sm" onClick="addComment('${
+              cur.id
+            }')">Add Comment</button>
             <div class="mb-3 text-start" style="display:none" id="commentInputDiv-${cur.id}">
               <label class="form-label">New Comment</label>
-              <textarea class="form-control" id="commentInput-${cur.id
-          }" rows="3" required></textarea>
+              <textarea class="form-control" id="commentInput-${
+                cur.id
+              }" rows="3" required></textarea>
               <div class="text-end mt-2">
-                <button type="submit" class="btn btn-outline-primary" onClick="submitComment('${cur.id
-          }', '${spotId}')">Submit</button>
+                <button type="submit" class="btn btn-outline-primary" onClick="submitComment('${
+                  cur.id
+                }', '${spotId}')">Submit</button>
               </div>
             </div>
             <div class="mt-2 text-start" id="errorMsg-${cur.id}"/>
@@ -786,22 +884,25 @@
   function getLatestUpdatedBy(spot) {
     occupancy_history = spot.occupancy_history;
 
-    returnHTML = `<div class="mb-3">Last Updated By: `
+    returnHTML = `<div class="mb-3">Last Updated By: `;
     if (occupancy_history.length > 0) {
       // Get the user information of the final entry
-      last_user = occupancy_history[occupancy_history.length - 1].user
-      console.log(last_user)
+      last_user = occupancy_history[occupancy_history.length - 1].user;
+      console.log(last_user);
       // Not needed: const loggedInUser = "{{ request.user.username }}";
       // don't think this works: const isAuthorVerified = "{{last_user.is_authenticated}}" === "True" ? true : false;
 
-      returnHTML += `<a href="/users/profile/${last_user.username}">${last_user.username}</a>`
-      const isHistoryUserVerified = last_user.verification.filter(ele => ele.status === "verified" && ele.business_type === "Street Business Owner")[0]
+      returnHTML += `<a href="/users/profile/${last_user.username}">${last_user.username}</a>`;
+      const isHistoryUserVerified = last_user.verification.filter(
+        (ele) => ele.status === "verified" && ele.business_type === "Street Business Owner",
+      )[0];
       if (spot.type === "Street" && isHistoryUserVerified) {
-        returnHTML += "<img src=/static/Badges/VerifiedRetailerBadge.JPG alt='VerifiedUser' width=20 height=20>"
+        returnHTML +=
+          "<img src=/static/Badges/VerifiedRetailerBadge.JPG alt='VerifiedUser' width=20 height=20>";
       }
-      returnHTML += "</div>"
+      returnHTML += "</div>";
     } else {
-      returnHTML += "None</div>"
+      returnHTML += "None</div>";
     }
     return returnHTML;
   }
@@ -906,8 +1007,8 @@
         userToSearch === ""
           ? true
           : exactSearchChecked
-            ? marker.username === userToSearch
-            : marker.username?.includes(userToSearch);
+          ? marker.username === userToSearch
+          : marker.username?.includes(userToSearch);
       if (
         includesType &&
         (belowMaxOccupancy || (isSpotsWithoutOccupancyYes && isOccupancyNull)) &&
@@ -1096,6 +1197,9 @@
 
   // #endregion setup & evt listners
 </script>
-<script async defer
-  src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap"></script>
+<script
+  async
+  defer
+  src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap"
+></script>
 {% endblock %}
