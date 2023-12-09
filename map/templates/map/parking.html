@@ -710,7 +710,7 @@
   function submitComment(postId, spotId) {
     axios
       .post(
-        `/api/spot/posts/add-comment/${postId}`,
+        `/api/spot/posts/add-comment/${postId}/`,
         {
           commentContent: document.getElementById(`commentInput-${postId}`).value,
         },
@@ -1091,6 +1091,7 @@
   setup();
 
   if ("{{recenter_after_post}}" === "True" ? true : false) {
+    window.history.pushState({}, '', '/map/parking/');
     fetchParkingSpotAroundOneParkingSpot();
   }
 
