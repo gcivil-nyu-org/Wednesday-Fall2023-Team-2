@@ -8,5 +8,6 @@ omit =
     mysite/asgi.py
     manage.py
     utils/*
+    users/backends.py
     parkrowd/*
     manage.py
