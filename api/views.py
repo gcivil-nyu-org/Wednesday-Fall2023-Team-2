@@ -277,7 +277,7 @@ class AddWatchOnParkingSpaceAPIView(APIView):
         except ParkingSpace.DoesNotExist:
             return Response("Invalid parking spot id", 400)
 
-        threshold = request.data["threshold"] if request.data["threshold"] else None
+        threshold = request.data.get("threshold", 80)
         newUserWatchedParkingSpace = UserWatchedParkingSpace(
             user=user, parking_space=parking_space, threshold=threshold
         )

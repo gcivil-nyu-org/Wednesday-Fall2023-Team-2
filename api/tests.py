@@ -1,11 +1,14 @@
+import os
+
+from django.core import mail
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 
 from map.models import ParkingSpace
-from users.models import Post, Comment
 from map.scripts import load_parking_lot_data
+from users.models import Post, Comment, UserWatchedParkingSpace
 
 
 User = get_user_model()
@@ -33,6 +36,10 @@ POST = "After 3:15, I'll be gone."
 DATE = timezone.now()
 COMMENT_CONTENT = "This is a comment"
 PARKING_SPACE_COMMENT_POST_PATH = "api:add-comment"
+
+EMAIL_HOST_USER = os.getenv("GOOGLE_SMTP_USERNAME")
+PARKINGSPACE_ADD_WATCH_POST_PATH = "api:add-watch-on-spot"
+PARKINGSPACE_REMOVE_WATCH_POST_PATH = "api:remove-watch-on-spot"
 
 
 class ParkingSpaceNearCenterAPITest(APITestCase):
@@ -72,12 +79,16 @@ class ParkingSpaceChangeOccupancyAPITest(APITestCase):
             latitude=LATITUDE,
             parking_spot_name=PARKING_SPOT_NAME,
         )
+        # * add a watch on the test spot, and see if occupancy change triggers email sending
+        self.test_spot_watch = UserWatchedParkingSpace.objects.create(
+            user=self.test_user, parking_space=self.test_spot
+        )
 
     def test_change_occupancy(self):
         # * test non-logged-in post
         response_not_authorized = self.client.post(
             reverse(PARKINGSPACE_CHANGE_OCCUPANCY_POST_PATH),
-            {"id": PARKING_SPOT_ID, "percent": 10},
+            {"id": PARKING_SPOT_ID, "percent": 90},
         )
         self.assertEqual(response_not_authorized.status_code, 403)
 
@@ -85,7 +96,7 @@ class ParkingSpaceChangeOccupancyAPITest(APITestCase):
         self.client.login(username=USERNAME, password=PASSWORD)
 
         response_authorized_missing_data = self.client.post(
-            reverse(PARKINGSPACE_CHANGE_OCCUPANCY_POST_PATH), {"percent": 11}
+            reverse(PARKINGSPACE_CHANGE_OCCUPANCY_POST_PATH), {"percent": 90}
         )
         self.assertEqual(response_authorized_missing_data.status_code, 400)
         self.assertEqual(
@@ -95,7 +106,7 @@ class ParkingSpaceChangeOccupancyAPITest(APITestCase):
 
         response_authorized_with_wrong_data = self.client.post(
             reverse(PARKINGSPACE_CHANGE_OCCUPANCY_POST_PATH),
-            {"id": FAKE_PARKING_SPOT_ID, "percent": 10},
+            {"id": FAKE_PARKING_SPOT_ID, "percent": 90},
         )
         self.assertEqual(response_authorized_with_wrong_data.status_code, 400)
         self.assertEqual(
@@ -138,9 +149,10 @@ class ParkingSpaceChangeOccupancyAPITest(APITestCase):
             "Bad Request: Percent is not a multiple of 10",
         )
 
+        # * test correct update
         response_authorized_with_correct_data = self.client.post(
             reverse(PARKINGSPACE_CHANGE_OCCUPANCY_POST_PATH),
-            {"id": PARKING_SPOT_ID, "percent": 10},
+            {"id": PARKING_SPOT_ID, "percent": 90},
         )
         self.assertEqual(response_authorized_with_correct_data.status_code, 200)
         self.assertEqual(
@@ -148,7 +160,134 @@ class ParkingSpaceChangeOccupancyAPITest(APITestCase):
             "Occupancy percent updated successfully.",
         )
         updatedParkingSpot = ParkingSpace.objects.get(parking_spot_id=PARKING_SPOT_ID)
-        self.assertEqual(updatedParkingSpot.occupancy_percent, 10)
+        self.assertEqual(updatedParkingSpot.occupancy_percent, 90)
+
+    def test_spot_watch(self):
+        # * test logged-in post
+        self.client.login(username=USERNAME, password=PASSWORD)
+        # * change the occupancy to above threshold
+        self.client.post(
+            reverse(PARKINGSPACE_CHANGE_OCCUPANCY_POST_PATH),
+            {"id": PARKING_SPOT_ID, "percent": 100},
+        )
+        self.assertEqual(len(mail.outbox), 0)
+
+        # * change the occupancy to below threshold
+        self.client.post(
+            reverse(PARKINGSPACE_CHANGE_OCCUPANCY_POST_PATH),
+            {"id": PARKING_SPOT_ID, "percent": 50},
+        )
+        self.assertEqual(len(UserWatchedParkingSpace.objects.all()), 0)
+
+
+class AddWatchOnParkingSpaceAPITest(APITestCase):
+    """tests for adding watch on parking space's API"""
+
+    def setUp(self):
+        # Create a test user and test spot
+        self.test_user = User.objects.create_user(
+            username=USERNAME, email=EMAIL, password=PASSWORD
+        )
+        self.test_spot = ParkingSpace.objects.create(
+            parking_spot_id=PARKING_SPOT_ID,
+            address_zip=ADDRESS_ZIP,
+            longitude=LONGITUDE,
+            latitude=LATITUDE,
+            parking_spot_name=PARKING_SPOT_NAME,
+        )
+
+    def test_add_spot_watch(self):
+        # * test non-logged-in post
+        response_not_authorized = self.client.post(
+            reverse(PARKINGSPACE_ADD_WATCH_POST_PATH),
+            {"parking_spot_id": PARKING_SPOT_ID},
+        )
+        self.assertEqual(response_not_authorized.status_code, 403)
+
+        # * test logged-in post
+        self.client.login(username=USERNAME, password=PASSWORD)
+
+        # * parking space does not exist
+        response_parking_space_not_found = self.client.post(
+            reverse(PARKINGSPACE_ADD_WATCH_POST_PATH),
+            {"parking_spot_id": FAKE_PARKING_SPOT_ID},
+        )
+        self.assertEqual(response_parking_space_not_found.status_code, 400)
+
+        # * success request
+        response_success = self.client.post(
+            reverse(PARKINGSPACE_ADD_WATCH_POST_PATH),
+            {"parking_spot_id": PARKING_SPOT_ID},
+        )
+        self.assertEqual(response_success.status_code, 200)
+        self.assertEqual(
+            response_success.data,
+            f"Watch on spot {self.test_spot.parking_spot_id} added",
+        )
+        self.assertEqual(
+            len(UserWatchedParkingSpace.objects.filter(user=self.test_user)), 1
+        )
+        spot_watch_record = UserWatchedParkingSpace.objects.filter(user=self.test_user)[
+            0
+        ]
+        self.assertEqual(spot_watch_record.user, self.test_user)
+        self.assertEqual(spot_watch_record.parking_space, self.test_spot)
+
+
+class RemoveWatchOnParkingSpaceAPITest(APITestCase):
+    """tests for removing watch on parking space's API"""
+
+    def setUp(self):
+        # Create a test user and test spot
+        self.test_user = User.objects.create_user(
+            username=USERNAME, email=EMAIL, password=PASSWORD
+        )
+        self.test_spot = ParkingSpace.objects.create(
+            parking_spot_id=PARKING_SPOT_ID,
+            address_zip=ADDRESS_ZIP,
+            longitude=LONGITUDE,
+            latitude=LATITUDE,
+            parking_spot_name=PARKING_SPOT_NAME,
+        )
+        self.test_spot_watch = UserWatchedParkingSpace.objects.create(
+            user=self.test_user, parking_space=self.test_spot
+        )
+
+    def test_add_spot_watch(self):
+        # * make sure test_spot_watch created
+        self.assertEqual(
+            len(UserWatchedParkingSpace.objects.filter(user=self.test_user)), 1
+        )
+
+        # * test non-logged-in post
+        response_not_authorized = self.client.post(
+            reverse(PARKINGSPACE_REMOVE_WATCH_POST_PATH),
+            {"parking_spot_id": PARKING_SPOT_ID},
+        )
+        self.assertEqual(response_not_authorized.status_code, 403)
+
+        # * test logged-in post
+        self.client.login(username=USERNAME, password=PASSWORD)
+        # * parking space does not exist
+        response_parking_space_not_found = self.client.post(
+            reverse(PARKINGSPACE_REMOVE_WATCH_POST_PATH),
+            {"parking_spot_id": FAKE_PARKING_SPOT_ID},
+        )
+        self.assertEqual(response_parking_space_not_found.status_code, 400)
+
+        # * success request
+        response_success = self.client.post(
+            reverse(PARKINGSPACE_REMOVE_WATCH_POST_PATH),
+            {"parking_spot_id": PARKING_SPOT_ID},
+        )
+        self.assertEqual(response_success.status_code, 200)
+        self.assertEqual(
+            response_success.data,
+            f"Watch on spot {self.test_spot.parking_spot_id} removed",
+        )
+        self.assertEqual(
+            len(UserWatchedParkingSpace.objects.filter(user=self.test_user)), 0
+        )
 
 
 class ParkingSpacePostsAndCommentsAPITest(APITestCase):
