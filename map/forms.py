@@ -58,13 +58,13 @@ class CreateParkingSpaceForm(forms.ModelForm):
         ("Private", "Private"),
     ]
 
-    BOROUGHS = [
-        ("Manhattan", "Manhattan"),
-        ("Brooklyn", "Brooklyn"),
-        ("Queens", "Queens"),
-        ("Bronx", "Bronx"),
-        ("Staten Island", "Staten Island"),
-    ]
+    # BOROUGHS = [
+    #     ("Manhattan", "Manhattan"),
+    #     ("Brooklyn", "Brooklyn"),
+    #     ("Queens", "Queens"),
+    #     ("Bronx", "Bronx"),
+    #     ("Staten Island", "Staten Island"),
+    # ]
 
     parking_spot_name = forms.CharField(
         widget=forms.TextInput(
@@ -85,15 +85,15 @@ class CreateParkingSpaceForm(forms.ModelForm):
         ),
     )
 
-    borough = forms.ChoiceField(
-        choices=BOROUGHS,
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "Borough goes here",
-            }
-        ),
-    )
+    # borough = forms.ChoiceField(
+    #     choices=BOROUGHS,
+    #     widget=forms.TextInput(
+    #         attrs={
+    #             "class": "form-control",
+    #             "placeholder": "Borough goes here",
+    #         }
+    #     ),
+    # )
 
     detail = forms.CharField(
         widget=forms.Textarea(
@@ -148,10 +148,10 @@ class CreateParkingSpaceForm(forms.ModelForm):
         fields = [
             "parking_spot_name",
             "type",
-            "borough",
             "detail",
             "operation_hours",
             "occupancy_percent",
             "vehicle_spaces_capacity",
             "available_vehicle_spaces",
         ]
+        # Previously contained "boroughs"
