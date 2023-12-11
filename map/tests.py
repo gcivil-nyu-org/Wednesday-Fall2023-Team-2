@@ -5,6 +5,7 @@ from django.utils import timezone
 from users.models import User, Post, UserVerification
 from .models import ParkingSpace
 from .views import ParkingSpaceView
+from .forms import CreateParkingSpaceForm
 
 
 USERNAME = "parkrowd"
@@ -93,6 +94,44 @@ class ParkingSpaceViewTests(TestCase):
         id = parking_space_view._ParkingSpaceView__get_next_parkingspace_id()
         self.assertEqual(id, '2')
 
+    def test_post_view(self):
+        post_data = {"parking_spot_name": "TEST NAME", "type": "Street", "detail": "TEST DETAIL", "operation_hours": "TEST OP HRS", "occupancy_percent": 10}
+        # * Test without login
+        response_without_logging_in = self.client.post(
+            reverse(ADD_SPOT_PATH_NAME) + '?lat=10.123&lon=20.456', post_data
+        )
+        self.assertEqual(response_without_logging_in.status_code, 404)
+
+        # * Test with login but no lon and lat
+        self.client.login(username=USERNAME, password=PASSWORD)
+        with self.assertRaises(TypeError):
+            response_no_lon_lat = self.client.post(
+                reverse(ADD_SPOT_PATH_NAME)
+            )
+            self.assertEqual(response_no_lon_lat.context.get('error'), "We failed to obtain the longitude and latitude of the new spot you want to create. Please double check your URL to include valid longitude and latitude")
+        
+        # * Test with login and valid post_data
+        response_with_valid_data = self.client.post(
+                reverse(ADD_SPOT_PATH_NAME) + '?lat=10.123&lon=20.456', post_data
+            )
+        self.assertTrue(CreateParkingSpaceForm(data=post_data).is_valid())
+        self.assertEqual(ParkingSpace.objects.count(), 1)
+        saved_parking_spot = ParkingSpace.objects.first()
+        self.assertEqual(saved_parking_spot.parking_spot_id, '1')
+        self.assertEqual(saved_parking_spot.longitude, '20.456')
+        self.assertEqual(saved_parking_spot.latitude, '10.123')
+        self.assertEqual(saved_parking_spot.user.id, self.user.id)
+        self.assertEqual(response_with_valid_data.status_code, 200)
+        self.assertIsNotNone(response_with_valid_data.context.get('user_verification'))
+
+        # * Test with login and INVALID post_data
+        invalid_post_data = {"parking_spot_name": "TEST NAME"}
+        response_with_invalid_data = self.client.post(
+                reverse(ADD_SPOT_PATH_NAME) + '?lat=10.123&lon=20.456', invalid_post_data
+            )
+        self.assertFalse(CreateParkingSpaceForm(data=invalid_post_data).is_valid())
+        self.assertIsNotNone(response_with_invalid_data.context.get('form'))
+        
 
 class CreatePostTests(TestCase):
     def setUp(self):
