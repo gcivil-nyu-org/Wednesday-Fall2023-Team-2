@@ -25,113 +25,139 @@ DATE = timezone.now()
 
 POST_PATH_NAME = "map:post"
 ADD_SPOT_PATH_NAME = "map:add-parking-space"
+REDIRECT_SPOT_PATH_NAME = "map:spot-redirect"
 MAP_PATH_NAME = "map:parking"
 POST_TEMPLATE = "map/post.html"
+
 
 class MapViewTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            username=USERNAME,
-            email=EMAIL,
-            password=PASSWORD
+            username=USERNAME, email=EMAIL, password=PASSWORD
         )
         self.user_verification = UserVerification.objects.create(
-            username=self.user,
-            status='verified'
+            username=self.user, status="verified"
         )
 
     def test_non_authenticated_user(self):
-        response = self.client.get(
-            reverse(MAP_PATH_NAME)
-        )
+        response = self.client.get(reverse(MAP_PATH_NAME))
         self.assertEqual(response.status_code, 200)
 
         # * Check if the user_verification is NOT present in the context
-        self.assertIsNone(response.context.get('user_verification'))
-        
-    
+        self.assertIsNone(response.context.get("user_verification"))
+
     def test_authenticated_user(self):
         self.client.login(username=USERNAME, password=PASSWORD)
-        response = self.client.get(
-            reverse(MAP_PATH_NAME)
-        )
+        response = self.client.get(reverse(MAP_PATH_NAME))
         self.assertEqual(response.status_code, 200)
 
         # * Check if the user_verification is present in the context
-        self.assertIsNotNone(response.context.get('user_verification'))
-    
+        self.assertIsNotNone(response.context.get("user_verification"))
+
+
 class ParkingSpaceViewTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            username=USERNAME,
-            email=EMAIL,
-            password=PASSWORD
+            username=USERNAME, email=EMAIL, password=PASSWORD
         )
         self.user_verification = UserVerification.objects.create(
-            username=self.user,
-            status='verified'
+            username=self.user, status="verified"
         )
 
     def test_get_view(self):
         self.client.login(username=USERNAME, password=PASSWORD)
         response_no_lat_lon = self.client.get(reverse(ADD_SPOT_PATH_NAME))
         self.assertEqual(response_no_lat_lon.status_code, 200)
-        self.assertEqual(response_no_lat_lon.context.get('error'), "Unable to collect longitude and latitude from URL. Please check if the URL is correct.")
-        self.assertIsNotNone(response_no_lat_lon.context.get('user_verification'))
+        self.assertEqual(
+            response_no_lat_lon.context.get("error"),
+            "Unable to collect longitude and latitude from URL. Please check if the URL is correct.",
+        )
+        self.assertIsNotNone(response_no_lat_lon.context.get("user_verification"))
 
-        response_with_lat_lon = self.client.get(reverse(ADD_SPOT_PATH_NAME) + '?lat=10.123&lon=20.456')
+        response_with_lat_lon = self.client.get(
+            reverse(ADD_SPOT_PATH_NAME) + "?lat=10.123&lon=20.456"
+        )
         self.assertEqual(response_with_lat_lon.status_code, 200)
-        self.assertIsNone(response_with_lat_lon.context.get('error'))
-        self.assertIsNotNone(response_with_lat_lon.context.get('user_verification'))
+        self.assertIsNone(response_with_lat_lon.context.get("error"))
+        self.assertIsNotNone(response_with_lat_lon.context.get("user_verification"))
 
     def test_get_next_parking_space_id(self):
         parking_space_view = ParkingSpaceView()
         id = parking_space_view._ParkingSpaceView__get_next_parkingspace_id()
-        self.assertEqual(id, '1')
+        self.assertEqual(id, "1")
 
         # * Test if adding new record generates new ID of 2
         self.new_parking_spot = ParkingSpace.objects.create(parking_spot_id=1)
         id = parking_space_view._ParkingSpaceView__get_next_parkingspace_id()
-        self.assertEqual(id, '2')
+        self.assertEqual(id, "2")
 
     def test_post_view(self):
-        post_data = {"parking_spot_name": "TEST NAME", "type": "Street", "detail": "TEST DETAIL", "operation_hours": "TEST OP HRS", "occupancy_percent": 10}
+        post_data = {
+            "parking_spot_name": "TEST NAME",
+            "type": "Street",
+            "detail": "TEST DETAIL",
+            "operation_hours": "TEST OP HRS",
+            "occupancy_percent": 10,
+        }
         # * Test without login
         response_without_logging_in = self.client.post(
-            reverse(ADD_SPOT_PATH_NAME) + '?lat=10.123&lon=20.456', post_data
+            reverse(ADD_SPOT_PATH_NAME) + "?lat=10.123&lon=20.456", post_data
         )
         self.assertEqual(response_without_logging_in.status_code, 404)
 
         # * Test with login but no lon and lat
         self.client.login(username=USERNAME, password=PASSWORD)
         with self.assertRaises(TypeError):
-            response_no_lon_lat = self.client.post(
-                reverse(ADD_SPOT_PATH_NAME)
+            response_no_lon_lat = self.client.post(reverse(ADD_SPOT_PATH_NAME))
+            self.assertEqual(
+                response_no_lon_lat.context.get("error"),
+                "We failed to obtain the longitude and latitude of the new spot you want to create. Please double check your URL to include valid longitude and latitude",
             )
-            self.assertEqual(response_no_lon_lat.context.get('error'), "We failed to obtain the longitude and latitude of the new spot you want to create. Please double check your URL to include valid longitude and latitude")
-        
+
         # * Test with login and valid post_data
         response_with_valid_data = self.client.post(
-                reverse(ADD_SPOT_PATH_NAME) + '?lat=10.123&lon=20.456', post_data
-            )
+            reverse(ADD_SPOT_PATH_NAME) + "?lat=10.123&lon=20.456", post_data
+        )
         self.assertTrue(CreateParkingSpaceForm(data=post_data).is_valid())
         self.assertEqual(ParkingSpace.objects.count(), 1)
         saved_parking_spot = ParkingSpace.objects.first()
-        self.assertEqual(saved_parking_spot.parking_spot_id, '1')
-        self.assertEqual(saved_parking_spot.longitude, '20.456')
-        self.assertEqual(saved_parking_spot.latitude, '10.123')
+        self.assertEqual(saved_parking_spot.parking_spot_id, "1")
+        self.assertEqual(saved_parking_spot.longitude, "20.456")
+        self.assertEqual(saved_parking_spot.latitude, "10.123")
         self.assertEqual(saved_parking_spot.user.id, self.user.id)
         self.assertEqual(response_with_valid_data.status_code, 200)
-        self.assertIsNotNone(response_with_valid_data.context.get('user_verification'))
+        self.assertIsNotNone(response_with_valid_data.context.get("user_verification"))
 
         # * Test with login and INVALID post_data
         invalid_post_data = {"parking_spot_name": "TEST NAME"}
         response_with_invalid_data = self.client.post(
-                reverse(ADD_SPOT_PATH_NAME) + '?lat=10.123&lon=20.456', invalid_post_data
-            )
+            reverse(ADD_SPOT_PATH_NAME) + "?lat=10.123&lon=20.456", invalid_post_data
+        )
         self.assertFalse(CreateParkingSpaceForm(data=invalid_post_data).is_valid())
-        self.assertIsNotNone(response_with_invalid_data.context.get('form'))
-        
+        self.assertIsNotNone(response_with_invalid_data.context.get("form"))
+
+
+class ProfileSpotRedirectViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username=USERNAME, email=EMAIL, password=PASSWORD
+        )
+        self.test_spot = ParkingSpace.objects.create(
+            parking_spot_id=PARKING_SPOT_ID,
+            address_zip=ADDRESS_ZIP,
+            longitude=LONGITUDE,
+            latitude=LATITUDE,
+            parking_spot_name=PARKING_SPOT_NAME,
+        )
+
+    def test_get_view(self):
+        self.client.login(username=USERNAME, password=PASSWORD)
+        response = self.client.get(
+            reverse(REDIRECT_SPOT_PATH_NAME, args=[PARKING_SPOT_ID])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.context.get("spot"))
+
 
 class CreatePostTests(TestCase):
     def setUp(self):
