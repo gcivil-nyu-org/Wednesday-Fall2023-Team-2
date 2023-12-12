@@ -3,13 +3,13 @@ from django.views import View
 from django.conf import settings
 from django.db.models import Max
 from better_profanity import profanity
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render, redirect
 
 
 from users.models import User, UserVerification, UserWatchedParkingSpace
-from .models import ParkingSpace
+from .models import OccupancyHistory, ParkingSpace
 from .forms import CreatePostForm, CreateParkingSpaceForm
 
 
@@ -234,3 +234,36 @@ class ProfileSpotRedirectView(View):
             "recenter_after_post": True,
         }
         return render(request, map_template_name, map_context)
+
+
+class PeakTimeView(View):
+    """Peak Time view"""
+
+    def get(self, request: HttpRequest, parking_spot_id: str) -> HttpResponse:
+        """Args:
+            request (HttpRequest): http request object
+            parking_spot_id (str): id of a given spot
+
+        Returns:
+            HttpResponse: returns the peak time of a spot
+        """
+        history = OccupancyHistory.objects.filter(parking_space=parking_spot_id)
+        times = {}
+
+        if history:
+            for entry in history:
+                date = entry.updated_at
+                date = date.strptime(str(date), "%Y-%m-%d %H:%M:%S.%f")
+
+                hour = date.strftime("%H")
+
+                if hour in times:
+                    times[hour] += 1
+                else:
+                    times[hour] = 1
+
+            return JsonResponse(
+                {"peak_time": str(max(times, key=times.get) + " o'clock")}
+            )
+        else:
+            return JsonResponse({"peak_time": "Not enough past data."})

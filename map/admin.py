@@ -14,5 +14,11 @@ class ParkingSpaceAdmin(admin.ModelAdmin):
     search_fields = ["parking_spot_id"]
 
 
+class OccupancyHistoryAdmin(admin.ModelAdmin):
+    """Occupancy History Admin Page Manager"""
+
+    autocomplete_fields = ["parking_space", "user"]
+
+
 admin.site.register(ParkingSpace, ParkingSpaceAdmin)
-admin.site.register(OccupancyHistory)
+admin.site.register(OccupancyHistory, OccupancyHistoryAdmin)
