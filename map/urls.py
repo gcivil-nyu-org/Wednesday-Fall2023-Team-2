@@ -17,4 +17,14 @@ urlpatterns = [
         views.ParkingSpaceView.as_view(),
         name="add-parking-space",
     ),
+    path(
+        "spot-redirect/<str:parking_spot_id>/",
+        views.ProfileSpotRedirectView.as_view(),
+        name="spot-redirect",
+    ),
+    path(
+        "peak-time/<str:parking_spot_id>/",
+        views.PeakTimeView.as_view(),
+        name="peak-time",
+    ),
 ]

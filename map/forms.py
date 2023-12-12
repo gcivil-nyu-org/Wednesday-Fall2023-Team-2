@@ -52,15 +52,19 @@ class CreateParkingSpaceForm(forms.ModelForm):
     )
     """
 
-    PARKING_SPACE_TYPES = [("Business", "Business"), ("Street", "Street")]
-
-    BOROUGHS = [
-        ("Manhattan", "Manhattan"),
-        ("Brooklyn", "Brooklyn"),
-        ("Queens", "Queens"),
-        ("Bronx", "Bronx"),
-        ("Staten Island", "Staten Island"),
+    PARKING_SPACE_TYPES = [
+        ("Business", "Business"),
+        ("Street", "Street"),
+        ("Private", "Private"),
     ]
+
+    # BOROUGHS = [
+    #     ("Manhattan", "Manhattan"),
+    #     ("Brooklyn", "Brooklyn"),
+    #     ("Queens", "Queens"),
+    #     ("Bronx", "Bronx"),
+    #     ("Staten Island", "Staten Island"),
+    # ]
 
     parking_spot_name = forms.CharField(
         widget=forms.TextInput(
@@ -81,15 +85,15 @@ class CreateParkingSpaceForm(forms.ModelForm):
         ),
     )
 
-    borough = forms.ChoiceField(
-        choices=BOROUGHS,
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "Borough goes here",
-            }
-        ),
-    )
+    # borough = forms.ChoiceField(
+    #     choices=BOROUGHS,
+    #     widget=forms.TextInput(
+    #         attrs={
+    #             "class": "form-control",
+    #             "placeholder": "Borough goes here",
+    #         }
+    #     ),
+    # )
 
     detail = forms.CharField(
         widget=forms.Textarea(
@@ -119,13 +123,35 @@ class CreateParkingSpaceForm(forms.ModelForm):
         ),
     )
 
+    vehicle_spaces_capacity = forms.IntegerField(
+        required=False,
+        widget=forms.NumberInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Max number of vehicle parking spaces",
+            }
+        ),
+    )
+
+    available_vehicle_spaces = forms.IntegerField(
+        required=False,
+        widget=forms.NumberInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Currently available vehicle parking spaces",
+            }
+        ),
+    )
+
     class Meta:
         model = ParkingSpace
         fields = [
             "parking_spot_name",
             "type",
-            "borough",
             "detail",
             "operation_hours",
             "occupancy_percent",
+            "vehicle_spaces_capacity",
+            "available_vehicle_spaces",
         ]
+        # Previously contained "boroughs"

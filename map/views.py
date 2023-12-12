@@ -3,13 +3,13 @@ from django.views import View
 from django.conf import settings
 from django.db.models import Max
 from better_profanity import profanity
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render, redirect
 
 
-from users.models import User
-from .models import ParkingSpace
+from users.models import User, UserVerification, UserWatchedParkingSpace
+from .models import OccupancyHistory, ParkingSpace
 from .forms import CreatePostForm, CreateParkingSpaceForm
 
 
@@ -32,9 +32,16 @@ class MapView(View):
         Returns:
             HttpResponse: rendered map view response
         """
+        user_verification = None
+        if request.user.is_authenticated:
+            user_verification = UserVerification.objects.filter(
+                username=request.user
+            ).first()
+
         context = {
             "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+            "user_verification": user_verification,
         }
         return render(request, self.template_name, context)
 
@@ -87,11 +94,18 @@ class PostView(View, LoginRequiredMixin):
             new_post.post = profanity.censor(form.cleaned_data["post"])
             new_post.save()
 
+            user_verification = None
+            if request.user.is_authenticated:
+                user_verification = UserVerification.objects.filter(
+                    username=request.user
+                ).first()
+
             map_context = {
                 "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
                 "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
                 "spot": spot,
                 "recenter_after_post": True,
+                "user_verification": user_verification,
             }
 
             return render(request, map_template_name, map_context)
@@ -124,10 +138,14 @@ class ParkingSpaceView(View, LoginRequiredMixin):
     def __render_page_with_optional_error(
         self, request: HttpRequest, error: Optional[str] = None
     ) -> HttpResponse:
+        user_verification = UserVerification.objects.filter(
+            username=request.user
+        ).first()
         context = {
             "error": error,
             "form": self.form_class(None),
             "username": request.user.username,
+            "user_verification": user_verification,
         }
         return render(request, self.template_name, context)
 
@@ -170,6 +188,7 @@ class ParkingSpaceView(View, LoginRequiredMixin):
             )
 
         form = self.form_class(request.POST)
+        map_template_name = "map/parking.html"
         if form.is_valid():
             new_spot = form.save(commit=False)
             new_spot.parking_spot_id = self.__get_next_parkingspace_id()
@@ -177,5 +196,74 @@ class ParkingSpaceView(View, LoginRequiredMixin):
             new_spot.latitude = lat
             new_spot.user = user
             new_spot.save()
-            return redirect("map:parking")
+
+            user_verification = None
+            if request.user.is_authenticated:
+                user_verification = UserVerification.objects.filter(
+                    username=request.user
+                ).first()
+            map_context = {
+                "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+                "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
+                "spot": new_spot,
+                "recenter_after_post": True,
+                "user_verification": user_verification,
+            }
+
+            return render(request, map_template_name, map_context)
         return render(request, self.template_name, {"form": form})
+
+
+class ProfileSpotRedirectView(View):
+    """Spot Redirect view"""
+
+    def get(self, request: HttpRequest, parking_spot_id: str) -> HttpResponse:
+        """Args:
+            request (HttpRequest): http request object
+            parking_spot_id (str): id of a given spot
+
+        Returns:
+            HttpResponse: redirects user to the selected spot on the map
+        """
+        map_template_name = "map/parking.html"
+        redirect_spot = ParkingSpace.objects.get(parking_spot_id=parking_spot_id)
+        map_context = {
+            "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+            "GOOGLE_MAP_ID": settings.GOOGLE_MAP_ID,
+            "spot": redirect_spot,
+            "recenter_after_post": True,
+        }
+        return render(request, map_template_name, map_context)
+
+
+class PeakTimeView(View):
+    """Peak Time view"""
+
+    def get(self, request: HttpRequest, parking_spot_id: str) -> HttpResponse:
+        """Args:
+            request (HttpRequest): http request object
+            parking_spot_id (str): id of a given spot
+
+        Returns:
+            HttpResponse: returns the peak time of a spot
+        """
+        history = OccupancyHistory.objects.filter(parking_space=parking_spot_id)
+        times = {}
+
+        if history:
+            for entry in history:
+                date = entry.updated_at
+                date = date.strptime(str(date), "%Y-%m-%d %H:%M:%S.%f")
+
+                hour = date.strftime("%H")
+
+                if hour in times:
+                    times[hour] += 1
+                else:
+                    times[hour] = 1
+
+            return JsonResponse(
+                {"peak_time": str(max(times, key=times.get) + " o'clock")}
+            )
+        else:
+            return JsonResponse({"peak_time": "Not enough past data."})

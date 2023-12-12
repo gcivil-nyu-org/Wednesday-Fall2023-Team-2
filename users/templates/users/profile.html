@@ -131,27 +131,46 @@
   </div>
 
   <hr class="mt-4" />
-
-  <!--Posts-->
+  <!--Spots-->
   <div class="row mt-4">
-    <h2>User's Posts</h2>
+    <h2>User's Spots</h2>
   </div>
   <div class="row">
-    <div class="d-flex flex-wrap">
-      {% for post in user_posts %}
-      <div class="post-box border rounded p-3 m-2">
-        <h3>{{ post.title }}</h3>
-        <p>{{ post.post }}</p>
-        <p>Posted on {{ post.created_at }}</p>
-        {% if request.user == post.author %}
-        <a href="{% url 'users:edit-post' post_id=post.id %}" class="btn btn-primary mx-1">Edit</a>
-        {% endif %}
+    {% for spot in user_spots %}
+    <div class="col-md-4">
+      <div class="spot-box border rounded p-2 m-2">
+        <h3>{{ spot.parking_spot_name }}</h3>
+        <a href="{% url 'map:spot-redirect' parking_spot_id=spot.parking_spot_id %}" class="btn btn-primary">View Spot</a>
       </div>
-      {% empty %}
-      <p>No posts found for this user.</p>
-      {% endfor %}
     </div>
+    {% empty %}
+    <div class="col-md-12">
+      <p>This user has no spots.</p>
+    </div>
+    {% endfor %}
   </div>
-  <!--END Posts-->
+    <!--END Spots-->
+    <!--Posts-->
+    <div class="row mt-4">
+      <h2>User's Posts</h2>
+    </div>
+    <div class="row">
+      <div class="d-flex flex-wrap">
+        {% for post in user_posts %}
+        <div class="post-box border rounded p-3 m-2">
+          <h3>{{ post.title }}</h3>
+          <p>{{ post.post }}</p>
+          <p>Posted on {{ post.created_at }}</p>
+          {% if request.user == post.author %}
+          <a href="{% url 'users:edit-post' post_id=post.id %}" class="btn btn-primary mx-1">Edit</a>
+          {% endif %}
+        </div>
+        {% empty %}
+        <p>No posts found for this user.</p>
+        {% endfor %}
+      </div>
+    </div>
+    <!--END Posts-->
+  </div>
+  {% endblock %}
 </div>
-{% endblock %}

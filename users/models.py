@@ -87,7 +87,9 @@ class UserVerification(models.Model):
         ("cancelled", "Cancelled"),
         ("verified", "Verified"),
     ]
-    username = models.ForeignKey(User, on_delete=models.CASCADE)
+    username = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="verification"
+    )
     business_name = models.CharField(max_length=200)
     business_type = models.CharField(max_length=200)
     business_address = models.CharField(max_length=200)
@@ -104,3 +106,12 @@ class UserVerification(models.Model):
     class Meta:
         # Set the default ordering to be the descending order of submission time
         ordering = ["-submitted_at"]
+
+
+class UserWatchedParkingSpace(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    parking_space = models.ForeignKey(
+        ParkingSpace,
+        on_delete=models.CASCADE,
+    )
+    threshold = models.IntegerField(default=80)

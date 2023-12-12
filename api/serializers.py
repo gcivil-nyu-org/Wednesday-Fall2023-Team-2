@@ -1,14 +1,33 @@
 from rest_framework import serializers
 
-from users.models import Post, Comment
-from users.models import ParkingSpace, User
+from users.models import (
+    UserVerification,
+    User,
+    UserWatchedParkingSpace,
+    ParkingSpace,
+    Comment,
+    Post,
+)
+
 from map.models import OccupancyHistory
 
 
+class UserVerificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserVerification
+        fields = [
+            "username",
+            "business_type",
+            "status",
+        ]
+
+
 class UserSerializer(serializers.ModelSerializer):
+    verification = UserVerificationSerializer(many=True, read_only=True)
+
     class Meta:
         model = User
-        fields = ["username"]
+        fields = ["username", "verification"]
 
 
 class OccupancyHistorySerializer(serializers.ModelSerializer):
@@ -41,6 +60,8 @@ class ParkingSpaceSerializer(serializers.ModelSerializer):
             "occupancy_percent",
             "user",
             "occupancy_history",
+            "vehicle_spaces_capacity",
+            "available_vehicle_spaces",
         ]
 
 
@@ -67,3 +88,9 @@ class PostSerializer(serializers.ModelSerializer):
             "parking_space",
             "comments",
         ]
+
+
+class UserWatchedParkingSpaceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserWatchedParkingSpace
+        fields = ["user", "parking_space", "threshold"]
