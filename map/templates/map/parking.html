@@ -625,7 +625,7 @@
       getOccupancyPercentHTML(spot) +
       getOwner(spot) +
       getTypeHTML(spot) +
-      getBoroughHTML(spot) +
+      // getBoroughHTML(spot) +
       getDetailsHTML(spot) +
       getOperationalHoursHTML(spot) +
       '<div class="mb-3" id="peak-time"></div>' +
@@ -693,12 +693,12 @@
     return "";
   }
 
-  function getBoroughHTML(spot) {
-    if (spot.borough) {
-      return '<div class="mb-3">Borough: ' + spot.borough + "</div>";
-    }
-    return "";
-  }
+  // function getBoroughHTML(spot) {
+  //   if (spot.borough) {
+  //     return '<div class="mb-3">Borough: ' + spot.borough + "</div>";
+  //   }
+  //   return "";
+  // }
 
   function getDetailsHTML(spot) {
     if (spot.detail) {
@@ -743,7 +743,7 @@
       ${getTypeHTML(spot)}
       ${getVehicleSpacesCapacityHTML(spot)}
       ${getDetailsHTML(spot)}
-      ${getBoroughHTML(spot)}
+      // ${getBoroughHTML(spot)}
       ${getOperationalHoursHTML(spot)}
       <div class="mb-3" id="peak-time"></div>
       ${getMakePostHTML(spotId)}
@@ -758,7 +758,7 @@
       ${getOwner(spot)}
       ${getTypeHTML(spot)}
       ${getDetailsHTML(spot)}
-      ${getBoroughHTML(spot)}
+      // ${getBoroughHTML(spot)}
       ${getOperationalHoursHTML(spot)}
       <div class="mb-3" id="peak-time"></div>
       ${getMakePostHTML(spotId)}
