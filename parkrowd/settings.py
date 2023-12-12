@@ -179,12 +179,18 @@ MIDDLEWARE = [
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {
     "default": {
-        "PORT": os.getenv("RDS_PORT"),
-        "USER": os.getenv("RDS_USERNAME"),
-        "HOST": os.getenv("RDS_HOSTNAME"),
-        "NAME": os.getenv("RDS_DB_NAME"),
-        "PASSWORD": os.getenv("RDS_PASSWORD"),
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
     }
 }
+# DATABASES = {
+#     "default": {
+#         "PORT": os.getenv("RDS_PORT"),
+#         "USER": os.getenv("RDS_USERNAME"),
+#         "HOST": os.getenv("RDS_HOSTNAME"),
+#         "NAME": os.getenv("RDS_DB_NAME"),
+#         "PASSWORD": os.getenv("RDS_PASSWORD"),
+#         "ENGINE": "django.db.backends.postgresql",
+#     }
+# }
 # endregion: production related (likely to be changed)
