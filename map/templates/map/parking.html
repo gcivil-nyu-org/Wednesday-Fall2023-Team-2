@@ -40,13 +40,13 @@
 </style>
 {% endblock %} {% block navbarEnd %} {% if request.user.is_authenticated %}
 <button
-          type="button"
-          class="btn btn-dark btn-sm"
-          data-bs-toggle="modal"
-          data-bs-target="#helpModal"
-          style="margin-right: 15px"
-        >
-          Help
+  type="button"
+  class="btn btn-dark btn-sm"
+  data-bs-toggle="modal"
+  data-bs-target="#helpModal"
+  style="margin-right: 15px"
+>
+  Help
 </button>
 
 <button id="add-spot-btn" class="btn btn-dark btn-sm" style="margin-right: 15px">Add Spot</button>
@@ -213,64 +213,75 @@
 </div>
 <!-- Help Modal Start -->
 <div
-        class="modal fade"
-        id="helpModal"
-        tabindex="-1"
-        role="dialog"
-        aria-labelledby="helpModal"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog modal-xl" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="helpTitle">How to use Parkrowd:</h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <h2>Here are some helpful instructions to get you started:</h2>
-              <b2>
-                When looking for a place to park: <br /> 
-                Click and drag with your mouse or finger to move the map. Once you find where you want to be, click the "Load Parking Spots" button in the top right to 
-                see all currently existing spots in that area. To specify the types of spots you want to see as well, see only those with enough occupancy, and even filter for 
-                spots by name, press "Adjust Filter" also on the top right of the screen.
-                <br /><br />
-                When you park somewhere: <br />
-                Please find the spot where you parked on the map by moving and filtering as discussed above. When you click it, an informational window will open, 
-                allowing you to write a post detailing how long you will be parking for. In addition, please take an estimate of the availability of parking nearby with 0%
-                being entirely avaialable spots and 100% being no open spots. Do this by adjusting the Occupancy bar with the arrows and then pressing submit. 
-                <br /><br />
-                If there is not a nearby spot: <br />
-                Feel free to make one! Click the "Add Spot" button and then click on the map where you would like the new spot. You will then be directed to a short form 
-                to provide details about the spot. And that's it! Your new spot is ready for all to park nearby.
-                <br /><br />
-                User Profile: <br />
-                Clicking the "Profile" button on the top left of the screen will bring you to your profile page. There, you can edit your personal info, upload an avatar for 
-                visotors of your profile to see, check on the spots and posts you've made, and submit for verification as a business or parking owner. There are three 
-                categories:<br />
-                1. Business Parking Lot Owner: <br />
-                We've already included many public business lots on our map, but if you do not see your business or would like to claim one that is present, submit for this verification<br />
-                2. Private Parking Lot Owner: <br />
-                If you'd like to rent out your privately owned parking, like a driveway, you can rent it to Parkrowd users! Submit for this verification if you're interested<br />
-                3. Retail Business Owner: <br />
-                Wouldn't it be great if people customers could see that your business has parking space open and available nearby? Submit for this verification and your occupancy updates will have a Verified User badge, giving them more validity! We ask that you add a spot right on top of your business location(s) and update the occupancy throughout the day to help users find the best time to visit you. <br />
-                For all these verifications, expect an admin user to contact you through the information provided and gather proof of ownership, as well as an on-site visit before confirmation.
-                <br /><br />
-                We at Parkrowd hope you enjoy using our site. Good luck, and happy parking!
-              </b2>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+  class="modal fade"
+  id="helpModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="helpModal"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="helpTitle">How to use Parkrowd:</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+      <div class="modal-body">
+        <h2>Here are some helpful instructions to get you started:</h2>
+        <b2>
+          When looking for a place to park: <br />
+          Click and drag with your mouse or finger to move the map. Once you find where you want to
+          be, click the "Load Parking Spots" button in the top right to see all currently existing
+          spots in that area. To specify the types of spots you want to see as well, see only those
+          with enough occupancy, and even filter for spots by name, press "Adjust Filter" also on
+          the top right of the screen.
+          <br /><br />
+          If all the spots in your area are full: <br />
+          Click the bookmark icon at the top of each spot to place a "watch" on that spot. You will
+          recieve an email through the email address you used to sign up once the spot opens up!
+          <br /><br />
+          When you park somewhere: <br />
+          Please find the spot where you parked on the map by moving and filtering as discussed
+          above. When you click it, an informational window will open, allowing you to write a post
+          detailing how long you will be parking for. In addition, please take an estimate of the
+          availability of parking nearby with 0% being entirely avaialable spots and 100% being no
+          open spots. Do this by adjusting the Occupancy bar with the arrows and then pressing
+          submit.
+          <br /><br />
+          If there is not a nearby spot: <br />
+          Feel free to make one! Click the "Add Spot" button and then click on the map where you
+          would like the new spot. You will then be directed to a short form to provide details
+          about the spot. And that's it! Your new spot is ready for all to park nearby.
+          <br /><br />
+          User Profile: <br />
+          Clicking the "Profile" button on the top left of the screen will bring you to your profile
+          page. There, you can edit your personal info, upload an avatar for visotors of your
+          profile to see, check on the spots and posts you've made, and submit for verification as a
+          business or parking owner. There are three categories:<br />
+          1. Business Parking Lot Owner: <br />
+          We've already included many public business lots on our map, but if you do not see your
+          business or would like to claim one that is present, submit for this verification<br />
+          2. Private Parking Lot Owner: <br />
+          If you'd like to rent out your privately owned parking, like a driveway, you can rent it
+          to Parkrowd users! Submit for this verification if you're interested<br />
+          3. Retail Business Owner: <br />
+          Wouldn't it be great if people customers could see that your business has parking space
+          open and available nearby? Submit for this verification and your occupancy updates will
+          have a Verified User badge, giving them more validity! We ask that you add a spot right on
+          top of your business location(s) and update the occupancy throughout the day to help users
+          find the best time to visit you. <br />
+          For all these verifications, expect an admin user to contact you through the information
+          provided and gather proof of ownership, as well as an on-site visit before confirmation.
+          <br /><br />
+          We at Parkrowd hope you enjoy using our site. Good luck, and happy parking!
+        </b2>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- Help Modal End -->
 <!-- Add Spot Modal Confirmation -->
 <div
@@ -1263,7 +1274,7 @@
   setup();
 
   if ("{{recenter_after_post}}" === "True" ? true : false) {
-    window.history.pushState({}, '', '/map/parking/');
+    window.history.pushState({}, "", "/map/parking/");
     fetchParkingSpotAroundOneParkingSpot();
   }
 
